@@ -1,9 +1,16 @@
 #' Merge \code{inla} objects for partition models
 #'
 #' @description The function takes local models fitted for each subregion of the whole spatial domain and unifies them into a single \code{inla} object.
-#' This function is valid for both disjoint and k-order neighbourhood models.
+#' This function is valid for both disjoint and \emph{k}-order neighbourhood models.
 #'
-#' @details Details.
+#' @details If the disjoint model has been fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
+#' However, to obtain a single estimate of the overall log-risk \eqn{\alpha}, we extract samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function or R-INLA.
+#' After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{n}\sum_{i=1}^n \log r_i, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernes density estimate of \eqn{\alpha}.
+#' \cr \cr
+#' If the \emph{k}-order neighbourhood model has been fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_n)^{'}} is no longer the union of the posterior estimates obtained from each submodel.
+#' To obtain a unique posterior distribution of \eqn{r_i} for each areal unit \eqn{i}, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights.
+#' \cr \cr
+#' See the vignette accompanying this package for more details.
 #'
 #' @param inla.models list of multiple objects of class \code{inla}.
 #' @param k numeric value with the neighbourhood order used for the partition model. If k=0 the \emph{Disjoint model} is considered.

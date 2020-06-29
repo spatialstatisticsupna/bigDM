@@ -1,8 +1,27 @@
-#' CAR_INLA function
+#' Fit a (scalable) spatial generalised linear mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.
 #'
-#' @description Description.
+#' @description Fit a spatial generalized linear mixed model to areal count data where the response variable is assumed to be Poisson distributed.
+#' The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
+#' For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
+#' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM}.
+#' Three main modeling approaches can be considered: the usual model with a global spatial random effect whose correlation structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument),
+#' a disjoint model based on a partition of the whole spatial domain where independent local CAR random effects are simultaneously fitted (\code{model="partition"} and \code{k=0} arguments),
+#' or a modeling approach where \emph{k}-order neighbours are added to each subregion of the spatial domain to avoid border effects in the disease risk estimates (\code{model="partition"} and \code{k>0} arguments).
+#' Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{http://www.r-inla.org/}).
+#' For the scalable model proposals \insertCite{orozco2020}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can be also computed.
 #'
-#' @details Details.
+#' @details For a full model specification and further details see the vignette accompanying this package.
+#'
+#' @references
+#' \insertRef{besag1991}{bigDM}
+#'
+#' \insertRef{dean2001detecting}{bigDM}
+#'
+#' \insertRef{leroux1999estimation}{bigDM}
+#'
+#' \insertRef{rue2009approximate}{bigDM}
+#'
+#' \insertRef{orozco2020}{bigDM}
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf} which, at least,
 #' must contain the target variables of interest specified in the arguments \code{ID.area}, \code{O} and \code{E}.
@@ -11,13 +30,13 @@
 #' Only required if \code{model="partition"}.
 #' @param O character; name of the variable which contains the observed number of disease cases for each areal units.
 #' @param E character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit.
-#' @param prior one of either "Leroux" (default), "intrinsic", "BYM" or "BYM2",
+#' @param prior one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"},
 #' which specifies the prior distribution considered for the spatial random effect.
-#' @param model one of either "global" or "partition" (default), which respectively specify the \emph{Global model}
+#' @param model one of either \code{"global"} or \code{"partition"} (default), which respectively specify the \emph{Global model}
 #' or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}).
 #' @param k numeric value with the neighbourhood order used for the partition model.
 #' If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
-#' @param strategy one of either "gaussian", "simplified.laplace" (default), "laplace" or "adaptive",
+#' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"},
 #' which specifies the approximation strategy considered in the \code{inla} function.
 #' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors area used for the precision parameter of the spatial random effect.
 #' Only works if \code{prior="intrinsic"} or \code{prior="BYM2"} arguments are specified.
