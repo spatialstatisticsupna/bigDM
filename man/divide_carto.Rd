@@ -4,12 +4,10 @@
 \alias{divide_carto}
 \title{Divide the spatial domain into subregions}
 \usage{
-divide_carto(carto, ID.area = NULL, ID.group = NULL, k = 0, plot = FALSE)
+divide_carto(carto, ID.group = NULL, k = 0, plot = FALSE)
 }
 \arguments{
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.}
-
-\item{ID.area}{character vector of geographic identifiers.}
 
 \item{ID.group}{character vector of grouping identifiers.}
 
@@ -37,13 +35,13 @@ tm_shape(Carto_SpainMUN) +
   tm_layout(legend.outside=TRUE)
 
 ## disjoint partition ##
-carto.k0 <- divide_carto(carto=Carto_SpainMUN, ID.area=ID, ID.group="region", k=0)
+carto.k0 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=0)
 
 ## partition + 1st order neighbours ##
-carto.k1 <- divide_carto(carto=Carto_SpainMUN, ID.area=ID, ID.group="region", k=1)
+carto.k1 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=1)
 
 ## partition + 2nd order neighbours ##
-carto.k2 <- divide_carto(carto=Carto_SpainMUN, ID.area=ID, ID.group="region", k=2)
+carto.k2 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=2)
 
 ## Plot the spatial polygons for the autonomous region of Castilla y Leon ##
 plot(carto.k2$`Castilla y Leon`$geometry, col="dodgerblue4", main="Castilla y Leon")

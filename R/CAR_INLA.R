@@ -120,7 +120,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
         if(!E %in% colnames(data))
                 stop(paste("no",E,"variable found in carto object"))
 
-        invisible(utils::capture.output(aux <- connect_subgraphs(carto)))
+        invisible(utils::capture.output(aux <- connect_subgraphs(carto, ID.area)))
         carto.nb <- aux$nb
 
         ## Define hyperprior distributions ##
@@ -183,10 +183,10 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
 
                 cat("STEP 2:",sprintf("Fitting partition (k=%d) model with INLA",k),"\n")
 
-                carto.d <- divide_carto(carto, ID.area, ID.group, k)
+                carto.d <- divide_carto(carto, ID.group, k)
                 data.d <- lapply(carto.d, function(x) sf::st_set_geometry(x, NULL))
 
-                invisible(utils::capture.output(aux <- lapply(carto.d, function(x) connect_subgraphs(x))))
+                invisible(utils::capture.output(aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area))))
                 Wd <- lapply(aux, function(x) x$W)
                 nd <- lapply(Wd, function(x) nrow(x))
                 Rd <- mapply(function(x,y){Diagonal(x,colSums(y))-y}, x=nd, y=Wd)

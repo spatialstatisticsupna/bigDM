@@ -6,6 +6,7 @@
 #' @details This function first calls the \code{\link{add_neighbour}} function to search for isolated areas.
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
+#' @param ID.area character vector of geographic identifiers.
 #' @param nb optional argument with the neighbours list of class \code{nb}.
 #' If \code{NULL} (default), this object is computed from the \code{carto} argument.
 #' @param plot logical value (default \code{FALSE}), if \code{TRUE} then the computed neighbourhood graph is ploted.
@@ -17,7 +18,7 @@
 #' }
 #'
 #' @importFrom methods as
-#' @importFrom sf st_as_sf st_centroid st_geometry st_distance
+#' @importFrom sf st_as_sf st_centroid st_distance st_drop_geometry st_geometry
 #' @importFrom spdep card n.comp.nb poly2nb
 #'
 #' @examples
@@ -40,13 +41,13 @@
 #'      pch=19, cex=0.5, col="red", add=TRUE)
 #'
 #' ## use the 'connect_subgraphs' function ##
-#' carto.mod <- connect_subgraphs(carto=carto, nb=carto.nb, plot=TRUE)
+#' carto.mod <- connect_subgraphs(carto=carto, ID.area="ID", nb=carto.nb, plot=TRUE)
 #' title(main="Modified neighbourhood graph")
 #'
 #' n.comp.nb(carto.mod$nb)$nc==1
 #'
 #' @export
-connect_subgraphs <- function(carto, nb=NULL, plot=FALSE){
+connect_subgraphs <- function(carto, ID.area=NULL, nb=NULL, plot=FALSE){
 
   ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
   carto <- sf::st_as_sf(carto)
@@ -73,8 +74,8 @@ connect_subgraphs <- function(carto, nb=NULL, plot=FALSE){
     ## Compute distance matrix between centroids ##
     dist.matrix <- sf::st_distance(sf::st_centroid(sf::st_geometry(carto), of_largest_polygon=TRUE))
 
-    rownames(dist.matrix) <- carto$ID
-    colnames(dist.matrix) <- carto$ID
+    rownames(dist.matrix) <- st_drop_geometry(carto)[,ID.area]
+    colnames(dist.matrix) <- st_drop_geometry(carto)[,ID.area]
 
     smallest.subgraph <- which.min(table(spdep::n.comp.nb(nb)$comp.id))
     smallest.loc <- which(spdep::n.comp.nb(nb)$comp.id==smallest.subgraph)

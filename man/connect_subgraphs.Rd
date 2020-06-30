@@ -4,10 +4,12 @@
 \alias{connect_subgraphs}
 \title{Merge disjoint connected subgraphs}
 \usage{
-connect_subgraphs(carto, nb = NULL, plot = FALSE)
+connect_subgraphs(carto, ID.area = NULL, nb = NULL, plot = FALSE)
 }
 \arguments{
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.}
+
+\item{ID.area}{character vector of geographic identifiers.}
 
 \item{nb}{optional argument with the neighbours list of class \code{nb}.
 If \code{NULL} (default), this object is computed from the \code{carto} argument.}
@@ -48,7 +50,7 @@ plot(carto.nb, st_centroid(st_geometry(carto), of_largest_polygon=TRUE),
      pch=19, cex=0.5, col="red", add=TRUE)
 
 ## use the 'connect_subgraphs' function ##
-carto.mod <- connect_subgraphs(carto=carto, nb=carto.nb, plot=TRUE)
+carto.mod <- connect_subgraphs(carto=carto, ID.area="ID", nb=carto.nb, plot=TRUE)
 title(main="Modified neighbourhood graph")
 
 n.comp.nb(carto.mod$nb)$nc==1
