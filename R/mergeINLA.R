@@ -438,8 +438,8 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
     result$.args$debug <- all(unlist(lapply(inla.models, function(x) x$.args$debug)))
 
-    parent.frame <- unique(lapply(inla.models, function(x) x$.args$.parent.frame))
-    if(length(parent.frame)==1) result$.args$.parent.frame <- parent.frame[[1]]
+    # parent.frame <- unique(lapply(inla.models, function(x) x$.args$.parent.frame))
+    # if(length(parent.frame)==1) result$.args$.parent.frame <- parent.frame[[1]]
 
 
     ## Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) ##
