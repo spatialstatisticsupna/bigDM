@@ -45,6 +45,7 @@
 #' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
 #' Only works if \code{k=0} argument (\emph{disjoint model}) is specified.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
+#' @param save.models logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
@@ -83,7 +84,8 @@
 #' @export
 CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                      prior="Leroux", model="partition", k=0, strategy="simplified.laplace",
-                     PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE){
+                     PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
+                     save.models=FALSE){
 
         ## Check for errors ##
         if(is.null(carto))
@@ -206,6 +208,13 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                                             control.predictor=list(compute=TRUE, cdf=c(log(1))),
                                             control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE),
                                             control.inla=list(strategy=strategy))
+                }
+                if(save.models){
+                        cat("+ Saving all the inla submodels in '/temp/' folder\n")
+                        if(!file.exists("temp")) {
+                                dir.create(file.path(getwd(), "temp"))
+                        }
+                        save("Models", file=paste("temp/INLAsubmodels_",format(Sys.time(),"%Y%m%d%H%M"),".Rdata",sep=""))
                 }
 
                 cat("STEP 3: Merging the results\n")

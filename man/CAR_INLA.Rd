@@ -18,7 +18,8 @@ CAR_INLA(
   seed = NULL,
   n.sample = 1000,
   compute.fixed = FALSE,
-  compute.DIC = TRUE
+  compute.DIC = TRUE,
+  save.models = FALSE
 )
 }
 \arguments{
@@ -57,6 +58,8 @@ Only works if \code{prior="intrinsic"} or \code{prior="BYM2"} arguments are spec
 Only works if \code{k=0} argument (\emph{disjoint model}) is specified.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
+
+\item{save.models}{logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.}
 }
 \value{
 This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
