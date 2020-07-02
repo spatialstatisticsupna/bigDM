@@ -49,7 +49,8 @@
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
-#' @import INLA Matrix parallel
+#' @import Matrix parallel
+#' @importFrom INLA inla
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
 #' @importFrom utils capture.output

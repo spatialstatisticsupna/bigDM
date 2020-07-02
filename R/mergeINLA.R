@@ -36,7 +36,8 @@
 #' \item{\code{version}}{A list containing information about the R-INLA version.}
 #' \item{\code{cpu.used}}{The sum of cpu times used by the \code{inla} function for each submodel (\code{Pre}, \code{Running} and \code{Post}), and the cpu time of the merging process \code{Merging}.}
 #'
-#' @import INLA parallel
+#' @import parallel
+#' @importFrom INLA inla.dmarginal inla.mmarginal inla.posterior.sample inla.qmarginal inla.rmarginal
 #' @importFrom stats runif density sd quantile dpois var
 #'
 #' @examples
