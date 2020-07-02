@@ -2,7 +2,7 @@
 title: "bigDM"
 author: "Erick Orozco-Acosta, Aritz Adin and María Dolores Ugarte"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: pdf_document
 bibliography: library.bib
 vignette: >
   %\VignetteIndexEntry{bigDM}
