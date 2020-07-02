@@ -307,7 +307,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
       }
 
       suppressWarnings({
-        cl <- makeCluster(detectCores()-1)
+        cl <- makeCluster(detectCores())
         clusterExport(cl,varlist = c("inla.models","ID","ID.list"),envir = environment())
         clusterEvalQ(cl,{
           INLA::inla.dmarginal
