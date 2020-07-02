@@ -105,7 +105,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
           inla.seed <- as.integer(runif(1)*.Machine$integer.max)
 
           suppressWarnings({
-            cl <- makeCluster(detectCores()-1)
+            cl <- makeCluster(detectCores())
             clusterExport(cl, varlist=c("n.sample","inla.seed"), envir=environment())
             clusterEvalQ(cl, INLA::inla.posterior.sample)
             model.sample <- parLapply(cl, inla.models, function (x) inla.posterior.sample(n.sample, x, seed=inla.seed))
