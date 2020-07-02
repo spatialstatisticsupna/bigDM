@@ -198,14 +198,14 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                 data.INLA <- mapply(function(x,y){data.frame(O=x[,O], E=x[,E], Area=x[,ID.area], ID.area=seq(1,y))}, x=data.d, y=nd, SIMPLIFY=FALSE)
                 D <- length(data.INLA)
 
-                Models <- vector("list",D)
+                inla.models <- vector("list",D)
                 for(i in 1:D){
                         cat(sprintf("+ Model %d of %d",i,D),"\n")
 
                         Rs <- Rd[[i]]
                         Rs.Leroux <- Rd.Leroux[[i]]
 
-                        Models[[i]] <- inla(formula, family="poisson", data=data.INLA[[i]], E=E,
+                        inla.models[[i]] <- inla(formula, family="poisson", data=data.INLA[[i]], E=E,
                                             control.predictor=list(compute=TRUE, cdf=c(log(1))),
                                             control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE),
                                             control.inla=list(strategy=strategy))
@@ -215,11 +215,14 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                         if(!file.exists("temp")) {
                                 dir.create(file.path(getwd(), "temp"))
                         }
-                        save("Models", file=paste("temp/INLAsubmodels_",format(Sys.time(),"%Y%m%d%H%M"),".Rdata",sep=""))
+                        models.dir <- paste("temp/INLAsubmodels_",format(Sys.time(),"%Y%m%d%H%M"),".Rdata",sep="")
+                        suppressWarnings(save("inla.models", file=models.dir))
+                }else{
+                        models.dir <- NULL
                 }
 
                 cat("STEP 3: Merging the results\n")
-                Model <- mergeINLA(inla.models=Models, k=k, seed=seed, n.sample=n.sample, compute.fixed=compute.fixed, compute.DIC=compute.DIC)
+                Model <- mergeINLA(inla.models=inla.models, k=k, seed=seed, n.sample=n.sample, compute.fixed=compute.fixed, compute.DIC=compute.DIC, models.dir=models.dir)
         }
 
         return(Model)
