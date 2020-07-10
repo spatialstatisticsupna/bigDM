@@ -155,9 +155,9 @@ lunif = "expression: a = 1; b = 1; beta = exp(theta)/(1+exp(theta));
         return(logdens+log_jacobian)"
 ```
 
-Fitting the models with the model selection criteria
+We fit the model selection criteria in a classic way,
 
-```{r Fit models disjoint partitions, message=FALSE}
+```{r Fit models disjoint partitions, include=FALSE}
 #### Fit of the models ####
 library(INLA)
 Models <- vector("list",D)
@@ -195,9 +195,12 @@ for(i in 1:D) {
 ```
 
 ### Stage 4: Merging disjoint models
+
 The merging of disjoint models is carried out with the function `mergeINLA`. We have merge the models in three ways:
 
 #### Computing only the models selection criteria
+
+By default, the function extracts the model selection criteria with `compute.DIC = TRUE`.
 
 ```{r Fit disjoint MI no alpha}
 #### Merge models ####
@@ -208,7 +211,9 @@ disjoint <-
     ID.area = "Area",
     O = "O",
     E = "E",
-    seed=1234
+    seed=1234,
+    compute.fixed = FALSE,
+    compute.DIC = TRUE
   )
 
 #### Computational times ####
@@ -223,37 +228,45 @@ disjoint$waic$waic
 
 #### Aditionaly computing the overall fixed effect.
 
+To compute the overall fixed effect `compute.fixed=TRUE`.
+
 ```{r Fit disjoint MI alpha, eval=FALSE, echo=TRUE}
 #### Merge models with \alpha ####
-disjoint <-
-  mergeINLA(
-    inla.models = Models,
-    k=0,
-    ID.area = "muni",
-    O = "O",
-    E = "E",
-    seed = 1234,
-    n.sample = 1000,
-    compute.fixed = TRUE,
-    compute.DIC = TRUE
-  )
+disjoint <- mergeINLA(
+  inla.models = Models,
+  k = 0,
+  ID.area = "muni",
+  O = "O",
+  E = "E",
+  seed = 1234,
+  n.sample = 1000,
+  compute.fixed = TRUE,
+  compute.DIC = TRUE
+)
 summary(disjoint)
 ```
 
 #### Immediately without steps by steps with `Car_INLA`.
 
+The `Car_INLA` function allows without the previous steps to obtain a merged model with several variants in the parameters. It is possible to retrieve elements from the previous steps such as save the sub-models with `save.models = TRUE`. The `prior = "Leroux"` specifies the prior distribution considered for the spatial random effect in this case Leroux et. al.[-@Leroux2000], but we can choose another: "intrinsic", "BYM" or "BYM2". The `PCpriors` is a functionality is developed in Simpson et. al. [-@simpson2017] for scaling intrinsic Gaussian Markov Random Fields (GMRFs). If PC priors are used for the precision of a Gaussian random effect, the parameters $U$ and $\alpha$ must be specified so that $P(\sigma > U) = \alpha$ or $P(\lambda_{\xi} > U) = \alpha$, as appropriate. If `PCpriors = TRUE`, the spatial random effects must be "intrinsic" or "BYM2", with values $(U,\alpha)=(1,0.01)$ and $(U,\alpha)=(0.5,0.5)$.
+
 ```{r Fit disjoint CI}
-disjoint_1<-CAR_INLA(
-carto = Carto_SpainMUN,
-ID.area = "ID",
-ID.group = "region",
-O = "obs",
-E = "exp",
-prior = "Leroux",
-model = "partition",
-k = 0,
-seed = 1234,
-strategy = "gaussian")
+disjoint_1 <- CAR_INLA(
+  carto = Carto_SpainMUN,
+  ID.area = "ID",
+  ID.group = "region",
+  O = "obs",
+  E = "exp",
+  prior = "Leroux",
+  model = "partition",
+  k = 0,
+  seed = 1234,
+  strategy = "gaussian",
+  PCpriors = FALSE,
+  compute.fixed = FALSE,
+  compute.DIC = TRUE,
+  save.models = FALSE
+)
 
 #### Computational times ####
 disjoint_1$cpu.used
@@ -264,8 +277,11 @@ disjoint_1$dic$dic
 #### WAIC ####
 disjoint_1$waic$waic
 ```
+
 ## K-order neighbours model
+
 This model is characterized by the area of interest $D$ is formed by a partition of sub-areas $d_i$ such that $\bigcup_{i=1}^{n}d_i=D$ and $\bigcap_{i=1}^{n}d_i\neq\emptyset$. This implies that there are regions with multiple estimates. Below is how to extract the cartography list.
+
 ```{r Carto korder, fig.align='center', fig.height=5, fig.retina=2, fig.width=7}
 #### 1st order neighbours ####
 a <-
