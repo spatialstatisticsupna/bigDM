@@ -1,0 +1,374 @@
+---
+title: "bigDM"
+author: "Erick Orozco-Acosta, Aritz Adin and María Dolores Ugarte"
+date: "`r Sys.Date()`"
+output: pdf_document
+bibliography: library.bib
+vignette: >
+  %\VignetteIndexEntry{bigDM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+Disease mapping is the field of spatial epidemiology that studies the link between geographic locations and the occurrence of diseases, focusing on the estimation of the spatial and/or spatio-temporal distribution of disease incidence or mortality patterns. The great variability inherent to classical risk estimation measures, such as standardized mortality/incidence ratios or crude rates, makes necessary the use of statistical models to estimate smooth spatial risk surfaces borrowing information from neighbouring regions. The information adquired from these analyses is invaluable for health researchers and policy-makers as it helps to formulate hypothesis about the etiology of a disease, to look for risk factors and and also to allocate funds efficiently in hot spot areas.
+
+## Spatial models in disease mapping
+Let us assume that the spatial domain of interest is divided into $n$ contiguous small areas labeled as $i=1,\ldots,n$. For a given area $i$, let $O_i$ and $E_i$ denote the observed and expected number of disease cases, respectively. Using these quantities, the \textit{standardized mortality/incidence ratio} (SMR or SIR) is defined as the ratio of observed and expected cases for the corresponding areal unit. Although its interpretation is very simple, these measures are extremely variable when analyzing rare diseases or low-populated areas, as it is the case of high-dimensional data. To cope with this situation, it is necessary to use statistical models that stabilize the risks (rates) borrowing information from neighbouring regions.
+
+Generalized linear mixed models (GLMM) are typically used for the analysis of count data within a hierarchical Bayesian framework. Conditional to the relative risk $r_i$, the number of observed cases in the $i$th area is assumed to be Poisson distributed with mean $\mu_{i}=E_{i}r_{i}$. That is,
+\begin{eqnarray*}
+\label{eq:Model_Poisson}
+\begin{array}{rcl}
+O_{i}|r_{i} & \sim & Poisson(\mu_{i}=E_{i}r_{i}), \ i=1,\ldots,n\\
+\log \mu_{i} & = & \log E_{i}+\log r_{i},
+\end{array}
+\end{eqnarray*}
+%
+where $\log E_{i}$ is an offset. Depending on the specification of the log-risks different models are defined. Here we assume that
+%
+\begin{equation}
+\label{eq:Model1}
+\log r_{i}=\alpha+\xi_{i},
+\end{equation}
+%
+where $\alpha$ is an intercept representing the overall log-risk and $\xi=(\xi_1,\ldots,\xi_n)^{'}$ is a spatial random effect for which a conditional autoregressive (CAR) prior is usually assumed. The spatial correlation between CAR random effects is determined by the neighbouring structure (represented as an undirected graph) of the areal units. Let $\textbf{W}=(w_{ij})$ be a binary $n \times n$ adjacency matrix, whose $ij$th element is equal to one if areas $j$ and $k$ are defined as neighbours (usually if they share a common border), and it is zero otherwise. Here, the prior distribution proposed by Leroux et. al.[-@Leroux2000] has been considered, which is given by
+\begin{equation*}
+\label{eq:LCAR}
+\xi \sim N(0,Q^{-1}_{\xi}), \quad \mbox{where} \quad Q_{\xi}=\tau_{\xi}[\lambda_{\xi}(D_W-W)+(1-\lambda_{\xi})I_n]
+\end{equation*}
+%
+and $\tau_{\xi}=1/\sigma_{\xi}^{2}$ is the precision parameter, $\lambda_{\xi} \in [0,1)$ is a spatial smoothing parameter, $D_{W} = diag(w_{1+},\ldots,w_{n+})$ and $w_{i+}=\sum_j w_{ij}$ is the $i$th row sum of $W$, and $I_n$ is the $n \times n$ identity matrix.
+%
+We will refer to this model as the \textit{Global model}. 
+
+## A initial step: Merge cartography file with datasets
+This package has as input files of the class `sf` or `spatialpolygonsdataframe`, but not always the user has this type of file. For example: in the case of Spain, we have the following cartography files:
+
+* MGN_MPIO_POLITICO.shp
+* MGN_MPIO_POLITICO.shx
+* MGN_MPIO_POLITICO.prj
+* MGN_MPIO_POLITICO.dbf
+
+To convert this cartography in `SpatialPolygonsDataFrame` the following is required:
+
+```{r}
+#### import to spatialpolygonsdataframe ####
+library(rgdal)
+zones_spdf <-
+  readOGR(system.file("shape/Carto_SpainMUN.shp", package = "bigDM"),
+          layer = "Carto_SpainMUN")
+```
+
+Alternatively, an `sf` can be used:
+
+```{r}
+#### import to sf####
+library(sf)
+zones_sf <-
+  st_read(system.file("shape/Carto_SpainMUN.shp", package = "bigDM"))
+```
+
+To merge the observed and expected data with the imported cartography it is necessary to have the data organized by a common identifier. Using function as `merge()` or logical relations it is possible to have in a unique file cartography and data.
+
+```{r Merge data and polygons}
+#### data with expected and observed cases in csv file ####
+library(readr)
+data <- read_csv(system.file("csv/data.csv", package = "bigDM"), 
+                 col_types = cols(ID = col_character(),
+                                  exp = col_number(), 
+                                  obs = col_number()))
+zones_sf<- merge (zones_sf, data, by.x="ID", by.y="ID")
+head(zones_sf)
+```
+
+## Disjoint model
+This model is characterized by the area of interest $D$ is formed by a partition of sub-areas $d_i$ such that $\bigcup_{i=1}^{n}d_i=D$ and $\bigcap_{i=1}^{n}d_i=\emptyset$. This partition can be determined by an administrative or natural region (provinces, municipalities,...), although it can also be determined randomly.  $\textbf{E}_d$ and $\textbf{O}_d$ are expected and observed cases, respectively in each sub-area $d_i \in D$. Then we wil have the log-risk vector $\log \textbf{r}_d$, overall log-risk vector $\alpha_d$ and spatial random effect vector $\xi_d$. The steps for fitting a model whose small area is large are illustrated below, for colorectal cancer in Spain with simulated data.
+
+### Stage 1: Build disjoint partition.
+The disjointed partition is carried out taking as a reference the autonomous regions of Spain.
+```{r Data and partition}
+#### libraries and data####
+library(bigDM)
+data("Carto_SpainMUN")
+head(Carto_SpainMUN)
+
+#### disjoint partition ####
+carto.d <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=0)
+data.d <- lapply(carto.d, function(x) sf::st_set_geometry(x, NULL))
+```
+
+The returned object is list with 15 elements composed with the autonomus regions except insular zone, Ceuta and Melilla. Plotting Navarre region:
+
+```{r fig.align='center', fig.width=7,fig.height=5,fig.retina=2}
+plot(carto.d[[14]]$geometry, main = "Navarre")
+```
+
+### Stage 2: Object’s neighbours and spatial neighbourhood matrix
+In this step, we obtain a neighbours list of class `nb` and its associated spatial adjacency matrix computed by adding to isolated areas its nearest neighbour for each region. LCAR prior has been considered, $\xi_a \sim N(\textbf{0},\textbf{Q}_{\xi_d}^{-1})$, with $\textbf{Q}_{\xi_d}=\tau_{\xi_d}[\lambda_{\xi_d}(D_W-W)+(1-\lambda_{\xi_d})I_{n_d}]$. The matrix $\textbf{Q}_{\xi_d}$ is computed as follows:
+```{r Q matrix, message=FALSE}
+#### list of object’s neighbours and spatial neighbourhood matrix ####
+library(Matrix)
+aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area = "ID"))
+Wd <- lapply(aux, function(x) x$W)
+nd <- lapply(Wd, function(x) nrow(x))
+Rd <- mapply(function(x,y){Diagonal(x,colSums(y))-y}, x=nd, y=Wd)
+Rd.Leroux <- mapply(function(x,y){Diagonal(x)-y}, x=nd, y=Rd)
+```
+
+### Stage 3: Fit of the models
+
+The datasets for fit the models are as follows:
+
+```{r Data Partition}
+#### List of datasets for INLA ####
+data.INLA <-
+  mapply(function(x, y) {
+    data.frame(
+      O = x[, "obs"],
+      E = x[, "exp"],
+      Area = x[, "ID"],
+      ID.area = seq(1, y)
+    )
+  },
+  x = data.d,
+  y = nd,
+  SIMPLIFY = FALSE)
+D <- length(data.INLA)
+```
+
+The hyperparameter prior assumed:
+
+```{r Priors }
+#### Priors distributions of hiperparameters ####
+sdunif = "expression: logdens=-log_precision/2; return(logdens)"
+lunif = "expression: a = 1; b = 1; beta = exp(theta)/(1+exp(theta));
+        logdens = lgamma(a+b)-lgamma(a)-lgamma(b)+(a-1)*log(beta)+(b-1)*log(1-beta);
+        log_jacobian = log(beta*(1-beta));
+        return(logdens+log_jacobian)"
+```
+
+We fit the model selection criteria in a classic way,
+
+```{r Fit models disjoint partitions, include=FALSE}
+#### Fit of the models ####
+library(INLA)
+Models <- vector("list",D)
+for(i in 1:D) {
+  cat(sprintf("+ Model %d of %d", i, D), "\n")
+  Rs <- Rd[[i]]
+  Rs.Leroux <- Rd.Leroux[[i]]
+  formula <- O ~ f(
+    ID.area,
+    model = "generic1",
+    Cmatrix = Rs.Leroux,
+    constr = TRUE,
+    hyper = list(
+      prec = list(prior = sdunif),
+      beta = list(prior = lunif, initial = 0)
+    )
+  )
+  Models[[i]] <-
+    inla(
+      formula,
+      family = "poisson",
+      data = data.INLA[[i]],
+      E = E,
+      control.predictor = list(compute = TRUE,
+                               cdf = c(log(1))),
+      control.compute = list(
+        dic = TRUE,
+        cpo = TRUE,
+        waic = TRUE,
+        config = TRUE
+      ),
+      control.inla = list(strategy = "gaussian")
+    )
+}
+```
+
+### Stage 4: Merging disjoint models
+
+The merging of disjoint models is carried out with the function `mergeINLA`. We have merge the models in three ways:
+
+#### Computing only the models selection criteria
+
+By default, the function extracts the model selection criteria with `compute.DIC = TRUE`.
+
+```{r Fit disjoint MI no alpha}
+#### Merge models ####
+disjoint <-
+  mergeINLA(
+    inla.models = Models,
+    k=0,
+    ID.area = "Area",
+    O = "O",
+    E = "E",
+    seed=1234,
+    compute.fixed = FALSE,
+    compute.DIC = TRUE
+  )
+
+#### Computational times ####
+disjoint$cpu.used
+
+#### DIC ####
+disjoint$dic$dic
+
+#### WAIC ####
+disjoint$waic$waic
+```
+
+#### Aditionaly computing the overall fixed effect.
+
+To compute the overall fixed effect `compute.fixed=TRUE`.
+
+```{r Fit disjoint MI alpha, eval=FALSE, echo=TRUE}
+#### Merge models with \alpha ####
+disjoint <- mergeINLA(
+  inla.models = Models,
+  k = 0,
+  ID.area = "muni",
+  O = "O",
+  E = "E",
+  seed = 1234,
+  n.sample = 1000,
+  compute.fixed = TRUE,
+  compute.DIC = TRUE
+)
+summary(disjoint)
+```
+
+#### Immediately without steps by steps with `Car_INLA`.
+
+The `Car_INLA` function allows without the previous steps to obtain a merged model with several variants in the parameters. It is possible to retrieve elements from the previous steps such as save the sub-models with `save.models = TRUE`. The `prior = "Leroux"` specifies the prior distribution considered for the spatial random effect in this case Leroux et. al.[-@Leroux2000], but we can choose another: "intrinsic", "BYM" or "BYM2". The `PCpriors` is a functionality is developed in Simpson et. al. [-@simpson2017] for scaling intrinsic Gaussian Markov Random Fields (GMRFs). If PC priors are used for the precision of a Gaussian random effect, the parameters $U$ and $\alpha$ must be specified so that $P(\sigma > U) = \alpha$ or $P(\lambda_{\xi} > U) = \alpha$, as appropriate. If `PCpriors = TRUE`, the spatial random effects must be "intrinsic" or "BYM2", with values $(U,\alpha)=(1,0.01)$ and $(U,\alpha)=(0.5,0.5)$.
+
+```{r Fit disjoint CI}
+disjoint_1 <- CAR_INLA(
+  carto = Carto_SpainMUN,
+  ID.area = "ID",
+  ID.group = "region",
+  O = "obs",
+  E = "exp",
+  prior = "Leroux",
+  model = "partition",
+  k = 0,
+  seed = 1234,
+  strategy = "gaussian",
+  PCpriors = FALSE,
+  compute.fixed = FALSE,
+  compute.DIC = TRUE,
+  save.models = FALSE
+)
+
+#### Computational times ####
+disjoint_1$cpu.used
+
+#### DIC ####
+disjoint_1$dic$dic
+
+#### WAIC ####
+disjoint_1$waic$waic
+```
+
+## K-order neighbours model
+
+This model is characterized by the area of interest $D$ is formed by a partition of sub-areas $d_i$ such that $\bigcup_{i=1}^{n}d_i=D$ and $\bigcap_{i=1}^{n}d_i\neq\emptyset$. This implies that there are regions with multiple estimates. Below is how to extract the cartography list.
+
+```{r Carto korder, fig.align='center', fig.height=5, fig.retina=2, fig.width=7}
+#### 1st order neighbours ####
+a <-
+  divide_carto(
+    carto = Carto_SpainMUN,
+    ID.group = "region",
+    k = 1,
+    plot = FALSE
+  )
+
+#### 2nd order neighbours ####
+b <-
+  divide_carto(
+    carto = Carto_SpainMUN,
+    ID.group = "region",
+    k = 2,
+    plot = FALSE
+  )
+
+#### 3rd order neighbours ####
+c <-
+  divide_carto(
+    carto = Carto_SpainMUN,
+    ID.group = "region",
+    k = 3,
+    plot = FALSE
+  )
+
+#### Navarre with 1st, 2nd and 3rd order neighbours ####
+plot(c[[14]]$geometry, border = "blue",main="Navarre with 1st, 2nd and 3rd order neighbours")
+plot(b[[14]]$geometry, border = "red", add = TRUE)
+plot(a[[14]]$geometry, border = "green", add = TRUE)
+plot(carto.d[[14]]$geometry, add = TRUE)
+```
+
+To fit the models, we have the following:
+
+```{r Fit korder models, eval=FALSE, echo=TRUE}
+#### 1st order neighbours model ####
+order1<-CAR_INLA(
+carto = Carto_SpainMUN,
+ID.area = "ID",
+ID.group = "region",
+O = "obs",
+E = "exp",
+prior = "Leroux",
+model = "partition",
+k = 1,
+strategy = "gaussian")
+
+#### 2nd order neighbours model ####
+order2<-CAR_INLA(
+carto = Carto_SpainMUN,
+ID.area = "ID",
+ID.group = "region",
+O = "obs",
+E = "exp",
+prior = "Leroux",
+model = "partition",
+k = 2,
+strategy = "gaussian")
+
+#### 3rd order neighbours model ####
+order3<-CAR_INLA(
+carto = Carto_SpainMUN,
+ID.area = "ID",
+ID.group = "region",
+O = "obs",
+E = "exp",
+prior = "Leroux",
+model = "partition",
+k = 3,
+strategy = "gaussian")
+```
+
+## Random partition
+Many times, it is not possible to divide by a natural or administrative region. In this case, a random grid partition could be generated by specifying the desired rows and columns.
+```{r Random Partition, fig.align='center', fig.height=5, fig.retina=2, fig.width=7}
+library(tmap)
+
+## define a random partition based on a 2x2 regular grid ##
+carto_random <- random_partition(carto=Carto_SpainMUN, rows=2, columns=2)
+
+## plot of the grouping variable 'ID.group' ## 
+tm_shape(carto_random) +
+tm_polygons(col="ID.group") + 
+  tm_layout(legend.outside=TRUE)
+```
+
+## References
