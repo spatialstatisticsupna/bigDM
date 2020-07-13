@@ -108,8 +108,8 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
             cl <- makeCluster(detectCores())
             clusterExport(cl, varlist=c("n.sample","inla.seed"), envir=environment())
             clusterEvalQ(cl, INLA::inla.posterior.sample)
-            model.sample <- parLapply(cl, inla.models, function (x) inla.posterior.sample(n.sample, x, seed=inla.seed))
-            linear.predictor.sample <- do.call(rbind, parLapply(cl, model.sample, function(x) matrix(unlist(lapply(x, function(x) x$latent[substr(row.names(x$latent),1,2)=="Pr"])), ncol=n.sample)))
+            model.sample <- parLapply(cl, inla.models, modelSampling)
+            linear.predictor.sample <- do.call(rbind, parLapply(cl, model.sample, linearCompPred))
             stopCluster(cl)
           })
 
@@ -406,7 +406,14 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
     ## Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) ##
     if(compute.DIC){
-      risk.sample <- matrix(unlist(lapply(result$marginals.fitted.values, function(x) inla.rmarginal(n.sample, x))), nrow=length(result$marginals.fitted.values), ncol=n.sample, byrow=T)
+      suppressWarnings({
+        cl<-makeCluster(detectCores())
+        clusterExport(cl,varlist = c("n.sample"),envir = environment())
+        clusterEvalQ(cl, INLA::inla.rmarginal)
+        risk.sample <- matrix(unlist(parLapply(cl, result$marginals.fitted.values, computeRS)), nrow=length(result$marginals.fitted.values), ncol=n.sample, byrow=T)
+        stopCluster(cl)
+      })
+
       mu.sample <- apply(risk.sample, 2, function(x) result$.args$data[,E]*x)
 
       result$dic$mean.deviance <- mean(apply(mu.sample, 2, function(x) -2*sum(log(dpois(result$.args$data[,O],x)))))
@@ -522,4 +529,20 @@ computeFittedValues <- function(q){
     names(marginals.fitted.values) <- q
   }
   return(list(summary.fitted.values,marginals.fitted.values))
+}
+
+computeRS <- function(x) {
+  INLA::inla.rmarginal(n.sample, x)
+}
+
+modelSampling<- function(x) {
+  inla.posterior.sample(n.sample, x, seed=inla.seed)
+}
+
+linearcompute<- function(x){
+  x$latent[substr(row.names(x$latent),1,2)=="Pr"]
+}
+
+linearCompPred<- function(x){
+  matrix(unlist(lapply(x, linearcompute)), ncol=n.sample)
 }
