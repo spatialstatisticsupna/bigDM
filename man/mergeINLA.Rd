@@ -13,8 +13,7 @@ mergeINLA(
   seed = NULL,
   n.sample = 1000,
   compute.fixed = FALSE,
-  compute.DIC = TRUE,
-  models.dir = NULL
+  compute.DIC = TRUE
 )
 }
 \arguments{
@@ -36,8 +35,6 @@ mergeINLA(
 Only works if \code{k=0} argument (\emph{disjoint model}) is specified.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
-
-\item{models.dir}{character (default \code{NULL}); path name of the previously saved list of \code{inla} submodels.}
 }
 \value{
 This function returns an object of class \code{inla} containing the following elements:

@@ -22,7 +22,6 @@
 #' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
 #' Only works if \code{k=0} argument (\emph{disjoint model}) is specified.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
-#' @param models.dir character (default \code{NULL}); path name of the previously saved list of \code{inla} submodels.
 #'
 #' @return This function returns an object of class \code{inla} containing the following elements:
 #' \item{\code{summary.fixed}}{If \code{compute.fixed=TRUE} a data.frame containing the mean, standard deviation, quantiles and mode of the model's intercept.}
@@ -45,7 +44,7 @@
 #' ## See the vignette accompanying this package for an example of its use.
 #'
 #' @export
-mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE, models.dir=NULL){
+mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE){
 
   D <- length(inla.models)
 
@@ -268,63 +267,6 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
       models.marginals.fitted.values <- lapply(inla.models, function(x) x$marginals.fitted.values)
       models.cpo <- lapply(inla.models, function(x) x$cpo)
 
-      if(is.null(models.dir)){
-        if(!file.exists("temp")) {
-          dir.create(file.path(getwd(), "temp"))
-        }
-        models.dir <- paste("temp/INLAsubmodels_",format(Sys.time(),"%Y%m%d%H%M"),".Rdata",sep="")
-        suppressWarnings(save("inla.models", file=models.dir))
-        delete <- TRUE
-      }else{
-        delete <- FALSE
-      }
-
-      rm("inla.models")
-
-      fitted <- function(q){
-
-        pos <- lapply(ID.list, function(x) which(x==q))
-        i <- which(unlist(lapply(pos, function(x) length(x)))>0)
-
-        if(length(i)==1){
-          summary.fitted.values <- models.summary.fitted.values[[i]][pos[[i]],1:7]
-          rownames(summary.fitted.values) <- q
-
-          marginals.fitted.values <- models.marginals.fitted.values[[i]][pos[[i]]]
-          names(marginals.fitted.values) <- q
-        }else{
-          post.mean <- mapply(function(x,y){x$mean[y]}, x=models.summary.fitted.values[i], y=pos[i])
-          post.sd <- mapply(function(x,y){x$sd[y]}, x=models.summary.fitted.values[i], y=pos[i])
-          post.cdf <- mapply(function(x,y){x$'1 cdf'[y]}, x=models.summary.fitted.values[i], y=pos[i])
-          marginals <- mapply(function(x,y){x[[y]]}, x=models.marginals.fitted.values[i], y=pos[i], SIMPLIFY=FALSE)
-
-          cpo <- mapply(function(x,y){x$cpo[y]}, x=models.cpo[i], y=pos[i])
-          w <- cpo/sum(cpo)
-
-          xx <- sort(unlist(lapply(marginals, function(x) x[,"x"])))
-          at <- round(seq(1,length(xx),length.out=100))
-          marginals.fitted.values <- matrix(0, nrow=0, ncol=2, dimnames=list(NULL, c("x","y")))
-          for(j in xx[at]){
-            aux <- unlist(lapply(marginals, function(x) inla.dmarginal(j,x)))
-            marginals.fitted.values <- rbind(marginals.fitted.values,c(j,sum(aux*w)))
-          }
-
-          summary.fitted.values <- data.frame(sum(post.mean*w),
-                                              sqrt(sum((post.sd^2+post.mean^2-sum(post.mean*w)^2)*w)),
-                                              inla.qmarginal(0.025,marginals.fitted.values),
-                                              inla.qmarginal(0.5,marginals.fitted.values),
-                                              inla.qmarginal(0.975,marginals.fitted.values),
-                                              inla.mmarginal(marginals.fitted.values),
-                                              sum(post.cdf*w))
-          colnames(summary.fitted.values) <- c("mean","sd","0.025quant","0.5quant","0.975quant","mode","1 cdf")
-          rownames(summary.fitted.values) <- q
-
-          marginals.fitted.values <- list(marginals.fitted.values)
-          names(marginals.fitted.values) <- q
-        }
-        return(list(summary.fitted.values,marginals.fitted.values))
-      }
-
       suppressWarnings({
         cl <- makeCluster(detectCores())
         clusterExport(cl, varlist=c("models.summary.fitted.values","models.marginals.fitted.values","models.cpo","ID","ID.list"), envir=environment())
@@ -335,7 +277,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
           INLA::inla.mmarginal
         }
         )
-        fitted.values.summary.marginal <- parLapply(cl,ID,fitted)
+        fitted.values.summary.marginal <- parLapply(cl,ID,computeFittedValues)
         stopCluster(cl)
       })
 
@@ -349,9 +291,6 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
       names(result$marginals.fitted.values) <-  rownames(result$summary.fitted.values)
       result$marginals.fitted.values <- result$marginals.fitted.values[order(names(result$marginals.fitted.values))]
-
-      load(models.dir)
-      if(delete) file.remove(models.dir)
     }
 
 
@@ -538,4 +477,49 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
   result$cpu.used <- c(result$cpu.used[1:3], Merging=as.numeric(tt[3]), Total=as.numeric(result$cpu.used[4]+tt[3]))
 
   return(result)
+}
+
+
+computeFittedValues <- function(q){
+
+  pos <- lapply(ID.list, function(x) which(x==q))
+  i <- which(unlist(lapply(pos, function(x) length(x)))>0)
+
+  if(length(i)==1){
+    summary.fitted.values <- models.summary.fitted.values[[i]][pos[[i]],1:7]
+    rownames(summary.fitted.values) <- q
+
+    marginals.fitted.values <- models.marginals.fitted.values[[i]][pos[[i]]]
+    names(marginals.fitted.values) <- q
+  }else{
+    post.mean <- mapply(function(x,y){x$mean[y]}, x=models.summary.fitted.values[i], y=pos[i])
+    post.sd <- mapply(function(x,y){x$sd[y]}, x=models.summary.fitted.values[i], y=pos[i])
+    post.cdf <- mapply(function(x,y){x$'1 cdf'[y]}, x=models.summary.fitted.values[i], y=pos[i])
+    marginals <- mapply(function(x,y){x[[y]]}, x=models.marginals.fitted.values[i], y=pos[i], SIMPLIFY=FALSE)
+
+    cpo <- mapply(function(x,y){x$cpo[y]}, x=models.cpo[i], y=pos[i])
+    w <- cpo/sum(cpo)
+
+    xx <- sort(unlist(lapply(marginals, function(x) x[,"x"])))
+    at <- round(seq(1,length(xx),length.out=100))
+    marginals.fitted.values <- matrix(0, nrow=0, ncol=2, dimnames=list(NULL, c("x","y")))
+    for(j in xx[at]){
+      aux <- unlist(lapply(marginals, function(x) inla.dmarginal(j,x)))
+      marginals.fitted.values <- rbind(marginals.fitted.values,c(j,sum(aux*w)))
+    }
+
+    summary.fitted.values <- data.frame(sum(post.mean*w),
+                                        sqrt(sum((post.sd^2+post.mean^2-sum(post.mean*w)^2)*w)),
+                                        inla.qmarginal(0.025,marginals.fitted.values),
+                                        inla.qmarginal(0.5,marginals.fitted.values),
+                                        inla.qmarginal(0.975,marginals.fitted.values),
+                                        inla.mmarginal(marginals.fitted.values),
+                                        sum(post.cdf*w))
+    colnames(summary.fitted.values) <- c("mean","sd","0.025quant","0.5quant","0.975quant","mode","1 cdf")
+    rownames(summary.fitted.values) <- q
+
+    marginals.fitted.values <- list(marginals.fitted.values)
+    names(marginals.fitted.values) <- q
+  }
+  return(list(summary.fitted.values,marginals.fitted.values))
 }
