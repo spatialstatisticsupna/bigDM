@@ -40,7 +40,7 @@
 #' which specifies the approximation strategy considered in the \code{inla} function.
 #' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors area used for the precision parameter of the spatial random effect.
 #' Only works if \code{prior="intrinsic"} or \code{prior="BYM2"} arguments are specified.
-#' @param seed numeric; control the RNG of \code{inla.qsample} (see \code{help(inla.qsample)} for further information). Defaults to \code{NULL}.
+#' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
 #' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
 #' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
 #' Only works if \code{k=0} argument (\emph{disjoint model}) is specified.

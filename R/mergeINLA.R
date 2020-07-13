@@ -84,8 +84,8 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
                        "mode","neffp","joint.hyper","nhyper","version","Q","graph","ok","cpu.used","all.hyper",".args",
                        "call","model.matrix")
 
-    ID.list <<- lapply(inla.models, function(x) x$.args$data[,ID.area])
-    ID <<- sort(as.character(unique(unlist(ID.list))))
+    ID.list <- lapply(inla.models, function(x) x$.args$data[,ID.area])
+    ID <- sort(as.character(unique(unlist(ID.list))))
 
 
     ## Fixed effects ##
@@ -264,9 +264,9 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
       result$marginals.fitted.values <- result$marginals.fitted.values[order(names(result$marginals.fitted.values))]
       names(result$marginals.fitted.values) <- rownames(result$summary.fitted.values)
     }else{
-      models.summary.fitted.values <<- lapply(inla.models, function(x) x$summary.fitted.values)
-      models.marginals.fitted.values <<- lapply(inla.models, function(x) x$marginals.fitted.values)
-      models.cpo <<- lapply(inla.models, function(x) x$cpo)
+      models.summary.fitted.values <- lapply(inla.models, function(x) x$summary.fitted.values)
+      models.marginals.fitted.values <- lapply(inla.models, function(x) x$marginals.fitted.values)
+      models.cpo <- lapply(inla.models, function(x) x$cpo)
 
       if(is.null(models.dir)){
         if(!file.exists("temp")) {
@@ -327,7 +327,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
       suppressWarnings({
         cl <- makeCluster(detectCores())
-        clusterExport(cl, varlist=c("models.summary.fitted.values","models.marginals.fitted.values","models.cpo","ID","ID.list"))
+        clusterExport(cl, varlist=c("models.summary.fitted.values","models.marginals.fitted.values","models.cpo","ID","ID.list"), envir=environment())
         clusterEvalQ(cl,{
           INLA::inla.dmarginal
           INLA::inla.qmarginal
