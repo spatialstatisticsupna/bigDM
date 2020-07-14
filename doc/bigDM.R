@@ -4,14 +4,14 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## -----------------------------------------------------------------------------
+## ----message=FALSE, warning=FALSE---------------------------------------------
 #### import to spatialpolygonsdataframe ####
 library(rgdal)
 zones_spdf <-
   readOGR(system.file("shape/Carto_SpainMUN.shp", package = "bigDM"),
           layer = "Carto_SpainMUN")
 
-## -----------------------------------------------------------------------------
+## ----message=FALSE, warning=FALSE---------------------------------------------
 #### import to sf####
 library(sf)
 zones_sf <-
@@ -40,7 +40,7 @@ data.d <- lapply(carto.d, function(x) sf::st_set_geometry(x, NULL))
 ## ----fig.align='center', fig.width=7,fig.height=5,fig.retina=2----------------
 plot(carto.d[[14]]$geometry, main = "Navarre")
 
-## ----Q matrix, message=FALSE--------------------------------------------------
+## ----Q matrix, message=FALSE, results=FALSE-----------------------------------
 #### list of object’s neighbours and spatial neighbourhood matrix ####
 library(Matrix)
 aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area = "ID"))
@@ -73,7 +73,7 @@ lunif = "expression: a = 1; b = 1; beta = exp(theta)/(1+exp(theta));
         log_jacobian = log(beta*(1-beta));
         return(logdens+log_jacobian)"
 
-## ----Fit models disjoint partitions, include=FALSE----------------------------
+## ----Fit models disjoint partitions, message=FALSE, results=FALSE-------------
 #### Fit of the models ####
 library(INLA)
 Models <- vector("list",D)
@@ -123,9 +123,6 @@ disjoint <-
     compute.DIC = TRUE
   )
 
-#### Computational times ####
-disjoint$cpu.used
-
 #### DIC ####
 disjoint$dic$dic
 
@@ -164,9 +161,6 @@ disjoint_1 <- CAR_INLA(
   compute.DIC = TRUE,
   save.models = FALSE
 )
-
-#### Computational times ####
-disjoint_1$cpu.used
 
 #### DIC ####
 disjoint_1$dic$dic

@@ -59,7 +59,7 @@ This package has as input files of the class `sf` or `spatialpolygonsdataframe`,
 
 To convert this cartography in `SpatialPolygonsDataFrame` the following is required:
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #### import to spatialpolygonsdataframe ####
 library(rgdal)
 zones_spdf <-
@@ -69,7 +69,7 @@ zones_spdf <-
 
 Alternatively, an `sf` can be used:
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 #### import to sf####
 library(sf)
 zones_sf <-
@@ -93,7 +93,7 @@ head(zones_sf)
 This model is characterized by the area of interest $D$ is formed by a partition of sub-areas $d_i$ such that $\bigcup_{i=1}^{n}d_i=D$ and $\bigcap_{i=1}^{n}d_i=\emptyset$. This partition can be determined by an administrative or natural region (provinces, municipalities,...), although it can also be determined randomly.  $\textbf{E}_d$ and $\textbf{O}_d$ are expected and observed cases, respectively in each sub-area $d_i \in D$. Then we wil have the log-risk vector $\log \textbf{r}_d$, overall log-risk vector $\alpha_d$ and spatial random effect vector $\xi_d$. The steps for fitting a model whose small area is large are illustrated below, for colorectal cancer in Spain with simulated data.
 
 ### Stage 1: Build disjoint partition.
-The disjointed partition is carried out taking as a reference the autonomous regions of Spain.
+The disjointed partition is carried out taking as a reference the autonomous regions of Spain. However, a random partition is possible and is explained below.
 ```{r Data and partition}
 #### libraries and data####
 library(bigDM)
@@ -113,7 +113,7 @@ plot(carto.d[[14]]$geometry, main = "Navarre")
 
 ### Stage 2: Object’s neighbours and spatial neighbourhood matrix
 In this step, we obtain a neighbours list of class `nb` and its associated spatial adjacency matrix computed by adding to isolated areas its nearest neighbour for each region. LCAR prior has been considered, $\xi_a \sim N(\textbf{0},\textbf{Q}_{\xi_d}^{-1})$, with $\textbf{Q}_{\xi_d}=\tau_{\xi_d}[\lambda_{\xi_d}(D_W-W)+(1-\lambda_{\xi_d})I_{n_d}]$. The matrix $\textbf{Q}_{\xi_d}$ is computed as follows:
-```{r Q matrix, message=FALSE}
+```{r Q matrix, message=FALSE, results=FALSE}
 #### list of object’s neighbours and spatial neighbourhood matrix ####
 library(Matrix)
 aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area = "ID"))
@@ -144,7 +144,7 @@ data.INLA <-
 D <- length(data.INLA)
 ```
 
-The hyperparameter prior assumed:
+The hyperparameter prior assumed `sdunif` and `lunif`, but, you can select others using the `CAR_INLA` function explained below.
 
 ```{r Priors }
 #### Priors distributions of hiperparameters ####
@@ -157,7 +157,7 @@ lunif = "expression: a = 1; b = 1; beta = exp(theta)/(1+exp(theta));
 
 We fit the model selection criteria in a classic way,
 
-```{r Fit models disjoint partitions, include=FALSE}
+```{r Fit models disjoint partitions, message=FALSE, results=FALSE}
 #### Fit of the models ####
 library(INLA)
 Models <- vector("list",D)
@@ -216,9 +216,6 @@ disjoint <-
     compute.DIC = TRUE
   )
 
-#### Computational times ####
-disjoint$cpu.used
-
 #### DIC ####
 disjoint$dic$dic
 
@@ -267,9 +264,6 @@ disjoint_1 <- CAR_INLA(
   compute.DIC = TRUE,
   save.models = FALSE
 )
-
-#### Computational times ####
-disjoint_1$cpu.used
 
 #### DIC ####
 disjoint_1$dic$dic
