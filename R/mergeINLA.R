@@ -406,13 +406,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
     ## Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) ##
     if(compute.DIC){
-      suppressWarnings({
-        cl<-makeCluster(detectCores())
-        clusterExport(cl,varlist = c("n.sample","seed"),envir = environment())
-        clusterEvalQ(cl, INLA::inla.rmarginal)
-        risk.sample <- matrix(unlist(parLapply(cl, result$marginals.fitted.values, computeRS)), nrow=length(result$marginals.fitted.values), ncol=n.sample, byrow=T)
-        stopCluster(cl)
-      })
+      risk.sample <- matrix(unlist(lapply(result$marginals.fitted.values, function(x) inla.rmarginal(n.sample, x))), nrow=length(result$marginals.fitted.values), ncol=n.sample, byrow=T)
       mu.sample <- apply(risk.sample, 2, function(x) result$.args$data[,E]*x)
 
       result$dic$mean.deviance <- mean(apply(mu.sample, 2, function(x) -2*sum(log(dpois(result$.args$data[,O],x)))))
@@ -539,9 +533,4 @@ computeFittedValues <- function(q){
     names(marginals.fitted.values) <- q
   }
   return(list(summary.fitted.values,marginals.fitted.values))
-}
-
-computeRS <- function(x){
-  set.seed(seed)
-  inla.rmarginal(n.sample, x)
 }
