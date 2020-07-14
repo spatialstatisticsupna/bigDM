@@ -30,10 +30,10 @@ Not in CRAN
 
 ## Install from GitHub
 ```
-# Install devtools package from cran repository
+# Install devtools package from CRAN repository
 install.packages("devtools")
 
-# load devtools library
+# Load devtools library
 library(devtools)
 
 # Install rsat from GitHub repositoy
