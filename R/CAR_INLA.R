@@ -4,9 +4,13 @@
 #' The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
 #' For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 #' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM}.
-#' Three main modeling approaches can be considered: the usual model with a global spatial random effect whose correlation structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument),
-#' a disjoint model based on a partition of the whole spatial domain where independent local CAR random effects are simultaneously fitted (\code{model="partition"} and \code{k=0} arguments),
-#' or a modeling approach where \emph{k}-order neighbours are added to each subregion of the spatial domain to avoid border effects in the disease risk estimates (\code{model="partition"} and \code{k>0} arguments).
+#' \cr\cr
+#' Three main modeling approaches can be considered:
+#' \itemize{
+#' \item the usual model with a global spatial random effect whose correlation structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument)
+#' \item a disjoint model based on a partition of the whole spatial domain where independent local CAR random effects are simultaneously fitted (\code{model="partition"} and \code{k=0} arguments)
+#' \item a modeling approach where \emph{k}-order neighbours are added to each subregion of the spatial domain to avoid border effects in the disease risk estimates (\code{model="partition"} and \code{k>0} arguments).
+#' }
 #' Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{http://www.r-inla.org/}).
 #' For the scalable model proposals \insertCite{orozco2020}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can be also computed.
 #'

@@ -408,12 +408,11 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
     if(compute.DIC){
       suppressWarnings({
         cl<-makeCluster(detectCores())
-        clusterExport(cl,varlist = c("n.sample"),envir = environment())
+        clusterExport(cl,varlist = c("n.sample","seed"),envir = environment())
         clusterEvalQ(cl, INLA::inla.rmarginal)
         risk.sample <- matrix(unlist(parLapply(cl, result$marginals.fitted.values, computeRS)), nrow=length(result$marginals.fitted.values), ncol=n.sample, byrow=T)
         stopCluster(cl)
       })
-
       mu.sample <- apply(risk.sample, 2, function(x) result$.args$data[,E]*x)
 
       result$dic$mean.deviance <- mean(apply(mu.sample, 2, function(x) -2*sum(log(dpois(result$.args$data[,O],x)))))
@@ -487,6 +486,17 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 }
 
 
+#########################
+## Auxiliary functions ##
+#########################
+modelSampling <- function(x){
+  inla.posterior.sample(n.sample, x, seed=inla.seed)
+}
+
+linearCompPred <- function(x){
+  matrix(unlist(lapply(x, function(y) y$latent[substr(row.names(y$latent),1,2)=="Pr"])), ncol=n.sample)
+}
+
 computeFittedValues <- function(q){
 
   pos <- lapply(ID.list, function(x) which(x==q))
@@ -531,18 +541,7 @@ computeFittedValues <- function(q){
   return(list(summary.fitted.values,marginals.fitted.values))
 }
 
-computeRS <- function(x) {
-  INLA::inla.rmarginal(n.sample, x)
-}
-
-modelSampling<- function(x) {
-  inla.posterior.sample(n.sample, x, seed=inla.seed)
-}
-
-linearcompute<- function(x){
-  x$latent[substr(row.names(x$latent),1,2)=="Pr"]
-}
-
-linearCompPred<- function(x){
-  matrix(unlist(lapply(x, linearcompute)), ncol=n.sample)
+computeRS <- function(x){
+  set.seed(seed)
+  inla.rmarginal(n.sample, x)
 }
