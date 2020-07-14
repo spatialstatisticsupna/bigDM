@@ -41,7 +41,7 @@ install_github("spatialstatisticsupna/bigDM")
 ```
 
 ## Basic Use
-See the [vignette](/) for further details and examples using this package.
+See the [vignette](doc/bigDM.pdf) for further details and examples using this package.
 
 
 ## Copyright and license
