@@ -10,7 +10,7 @@ Scalable Bayesian disease mapping models for high-dimensional data.
 
 
 # The package
-This package implements several (scalable) spatial generalised linear mixed models to areal count
+This package implements several (scalable) spatial generalised linear mixed models for high-dimensional areal count
 data, with inference in a fully Bayesian setting using the integrated nested Laplace approximation
 (INLA) technique.
 
