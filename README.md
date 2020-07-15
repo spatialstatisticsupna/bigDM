@@ -26,7 +26,7 @@ Below, there is a list with a brief overview of all package functions:
 
 # Installation
 
-R version 4.0.0 (released April 2020) and newer for Windows requires the new Rtools40 to build R packages with C/C++/Fortran code from source.
+R version 4.0.0 and newer for Windows requires the new Rtools40 to build R packages with C/C++/Fortran code from source.
 
 [Installing Rtools40 for Windows](https://cran.r-project.org/bin/windows/Rtools/)
 
