@@ -26,9 +26,9 @@ Below, there is a list with a brief overview of all package functions:
 
 # Installation
 
-- [Installing Rtools40 for Windows](https://cran.r-project.org/bin/windows/Rtools/)
+[Installing Rtools40 for Windows](https://cran.r-project.org/bin/windows/Rtools/)
 
-  R version 4.0.0 and newer for Windows requires the new Rtools40 to build R packages with C/C++/Fortran code from source.
+R version 4.0.0 and newer for Windows requires the new Rtools40 to build R packages with C/C++/Fortran code from source.
 
 - [Installing the R-INLA package](http://www.r-inla.org/download)
 
@@ -48,7 +48,10 @@ install.packages("devtools")
 # Load devtools library
 library(devtools)
 
-# Install rsat from GitHub repositoy
+# Install the R-INLA package
+install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
+
+# Install bigDM from GitHub repositoy
 install_github("spatialstatisticsupna/bigDM")
 ```
 
