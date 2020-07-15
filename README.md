@@ -30,12 +30,6 @@ Below, there is a list with a brief overview of all package functions:
 
 R version 4.0.0 and newer for Windows requires the new Rtools40 to build R packages with C/C++/Fortran code from source.
 
-- [Installing the R-INLA package](http://www.r-inla.org/download)
-
-  It is necessary to install the R-INLA package by running the following commands in R:
-  ```
-  install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
-  ```
 
 ## Install from CRAN
 Not in CRAN
