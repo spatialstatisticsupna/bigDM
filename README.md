@@ -10,7 +10,7 @@ Scalable Bayesian disease mapping models for high-dimensional data.
 
 
 # The package
-This package implements several (scalable) spatial generalised linear mixed models to areal count
+This package implements several (scalable) spatial generalised linear mixed models for high-dimensional areal count
 data, with inference in a fully Bayesian setting using the integrated nested Laplace approximation
 (INLA) technique.
 
@@ -48,6 +48,8 @@ install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-d
 # Install bigDM from GitHub repositoy
 install_github("spatialstatisticsupna/bigDM")
 ```
+
+_*Important note:_ The __bigDM__ package uses the `parallel:makeCluster()` function to speed up computations when fitting scalable models. It seems that some unresolved issues have been detected when running this function in RStudio on macOS with R 4.0.x (https://github.com/rstudio/rstudio/issues/6692)
 
 ## Basic Use
 See the [vignette](doc/bigDM.pdf) for further details and examples using this package.
