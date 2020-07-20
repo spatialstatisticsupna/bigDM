@@ -47,7 +47,7 @@ If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code
 \item{strategy}{one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"},
 which specifies the approximation strategy considered in the \code{inla} function.}
 
-\item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors area used for the precision parameter of the spatial random effect.
+\item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
 Only works if \code{prior="intrinsic"} or \code{prior="BYM2"} arguments are specified.}
 
 \item{seed}{numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.}
