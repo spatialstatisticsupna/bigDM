@@ -29,7 +29,7 @@ Below, there is a list with a brief overview of all package functions:
 \insertRef{orozco2020}{bigDM}
 }
 \seealso{
-See \href{https://github.com/spatialstatisticsupna/bigDM/doc/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spain colorectal cancer mortality data.
+See \href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spain colorectal cancer mortality data.
 }
 \author{
 Mantainer: Aritz Adin <aritz.adin@unavarra.es>

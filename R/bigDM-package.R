@@ -22,7 +22,7 @@
 #'
 #' @references \insertRef{orozco2020}{bigDM}
 #'
-#' @seealso See \href{https://github.com/spatialstatisticsupna/bigDM/doc/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spain colorectal cancer mortality data.
+#' @seealso See \href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spain colorectal cancer mortality data.
 #'
 #' @examples
 #' ## See the examples for CAR_INLA
