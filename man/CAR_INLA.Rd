@@ -2,7 +2,7 @@
 % Please edit documentation in R/CAR_INLA.R
 \name{CAR_INLA}
 \alias{CAR_INLA}
-\title{Fit a (scalable) spatial generalised linear mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.}
+\title{Fit a (scalable) spatial Poisson mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.}
 \usage{
 CAR_INLA(
   carto = NULL,
@@ -65,7 +65,7 @@ Only works if \code{k=0} argument (\emph{disjoint model}) is specified.}
 This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 }
 \description{
-Fit a spatial Poisson mixed model. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
+Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
 For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM}.
 \cr\cr

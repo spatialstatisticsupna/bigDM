@@ -1,6 +1,6 @@
-#' Fit a (scalable) spatial generalised linear mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.
+#' Fit a (scalable) spatial Poisson mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.
 #'
-#' @description Fit a spatial Poisson mixed model. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
+#' @description Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
 #' For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 #' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM}.
 #' \cr\cr
