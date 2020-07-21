@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 ```
 
 ## Introduction {-#introduction}
-__bigDM__ is a package that implements several (scalable) spatial generalised linear mixed models for high-dimensional areal count data, with inference in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique [@rue2009approximate]. This vignette focuses on how to use the __bigDM__ package to fit the scalable model's proposals described in [@orozco2020] using Spain colorectal cancer mortality data.
+__bigDM__ is a package that implements several (scalable) spatial Poisson mixed models for high-dimensional areal count data, with inference in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique [@rue2009approximate]. This vignette focuses on how to use the __bigDM__ package to fit the scalable model's proposals described in [@orozco2020] using Spanish colorectal cancer mortality data.
 
 The development version is hosted on [GitHub](https://github.com/spatialstatisticsupna/bigDM) and can be installed as follows:
 ```{r eval=FALSE, include=TRUE}
@@ -50,7 +50,7 @@ install_github("spatialstatisticsupna/bigDM")
 ## Spatial models in disease mapping {-#spatial-models-in-disease-mapping}
 Let us assume that the spatial domain of interest is divided into $n$ contiguous small areas labeled as $i=1,\ldots,n$. For a given area $i$, let $O_i$ and $E_i$ denote the observed and expected number of disease cases, respectively. Using these quantities, the \textit{standardized mortality/incidence ratio} (SMR or SIR) is defined as the ratio of observed and expected cases for the corresponding areal unit. Although its interpretation is very simple, these measures are extremely variable when analyzing rare diseases or low-populated areas, as it is the case of high-dimensional data. To cope with this situation, it is necessary to use statistical models that stabilize the risks (rates) borrowing information from neighbouring regions.
 
-Generalized linear mixed models (GLMM) are typically used for the analysis of count data within a hierarchical Bayesian framework. Conditional to the relative risk $r_i$, the number of observed cases in the $i$th area is assumed to be Poisson distributed with mean $\mu_{i}=E_{i}r_{i}$.
+Poisson mixed models are typically used for the analysis of count data within a hierarchical Bayesian framework. Conditional to the relative risk $r_i$, the number of observed cases in the $i$th area is assumed to be Poisson distributed with mean $\mu_{i}=E_{i}r_{i}$.
 
 That is,
 \begin{eqnarray*}
@@ -95,12 +95,12 @@ The following prior distributions are implemented in the `CAR_INLA()` function f
 
 * __LCAR prior__
 
-  Leroux et al. [-@leroux1999estimation] propose an alternative proper CAR prior (named as LCAR prior) to model both spatially structured and unstructured variation in a single set of random effects. It is given by
+  Leroux et al. [-@leroux1999estimation] propose an alternative CAR prior (named as LCAR prior) to model both spatially structured and unstructured variation in a single set of random effects. It is given by
   \begin{equation*}
   \label{eq:LCAR}
   \boldsymbol{\xi} \sim N(\textbf{0},\textbf{Q}^{-1}_{\xi}), \quad \mbox{with} \quad \textbf{Q}_{\xi}=\tau_{\xi}[\lambda_{\xi}(\textbf{D}_W-{\textbf{W}})+(1-\lambda_{\xi})\textbf{I}_n]
   \end{equation*}
-  where $\tau_{\xi}$ is the precision parameter and $\lambda_{\xi} \in [0,1)$ is a spatial smoothing parameter. Even the precision matrix $\textbf{Q}_{\xi}$ is of full rank whenever $0 \leq \lambda_{\xi} < 1$, a confounding problem still remains and consequently, a sum-to-zero constraint $\sum_{i=1}^n \xi_i = 0$ has to be considered (see Goicoa et al. [-@goicoa2018spatio]).
+  where $\tau_{\xi}$ is the precision parameter and $\lambda_{\xi} \in [0,1]$ is a spatial smoothing parameter. Even the precision matrix $\textbf{Q}_{\xi}$ is of full rank whenever $0 \leq \lambda_{\xi} < 1$, a confounding problem still remains and consequently, a sum-to-zero constraint $\sum_{i=1}^n \xi_i = 0$ has to be considered (see Goicoa et al. [-@goicoa2018spatio]).
 
 
 * __BYM2 prior__
@@ -111,14 +111,14 @@ Here, the spatial random effect is reparameterized as
   \label{eq:BYM2}
   \boldsymbol{\xi} = \frac{1}{\sqrt{\tau_{\xi}}}(\sqrt{\lambda_{\xi}}\textbf{u}_{\star} + \sqrt{1-\lambda_{\xi}}\textbf{v}),
   \end{equation}
-  where $\textbf{u}_{\star}$ is the scaled intrinsic CAR model with generalized variance equal to one and $\textbf{v}$ is the unstructured random effect. The variance of the random effect is expressed as a weighted average of the covariance matrices of the structured and unstructured spatial components (unlike the LCAR model which considers a weighted combination of the precision matrices), i.e.,
+  where $\textbf{u}_{\star}$ is the scaled intrinsic CAR model with generalized variance equal to one and $\textbf{v}$ is the vector of unstructured random effects. The variance of \boldsymbol{\xi} is expressed as a weighted average of the covariance matrices of the structured and unstructured spatial components (unlike the LCAR model which considers a weighted combination of the precision matrices), i.e.,
 \begin{equation*}
 \mbox{Var}(\boldsymbol{\xi}|\tau_{\xi})=\frac{1}{\tau_{\xi}}(\lambda_{\xi}\textbf{R}_{\star}^{-} + (1-\lambda_{\xi})\textbf{I}_n),
 \end{equation*}
   where $\textbf{R}_{\star}^{-}$ indicates the generalised inverse of the scaled spatial precision matrix [@sorbye2014scaling]. As in the previous models, a sum-to-zero constraint $\sum_{i=1}^n \xi_i =0$ must be imposed to avoid identifiability problems.
 
 By default (`PCpriors=FALSE` argument), improper uniform prior distributions on the positive real line
-are considered for the standard deviations, i.e., $\sigma_{\xi} = 1/\sqrt{\tau_{\xi}} \sim U(0,\infty)$. In addition, a standard uniform distribution is given to the spatial smoothing parameter $\lambda_{\xi}$ when fitting the LCAR or BYM2 model for the spatial random effect. See Ugarte et al. [-@ugarte2016two] for details about how to implement these prior distributions in R-INLA.
+are considered for the standard deviations, i.e., $\sigma_{\xi} = 1/\sqrt{\tau_{\xi}} \sim U(0,\infty)$. In addition, a standard uniform distribution is given to the spatial smoothing parameter $\lambda_{\xi}$ when fitting the LCAR or BYM2 model for the spatial random effect. See Ugarte et al. [-@ugarte2016two] for details about how to implement these hyperprior distributions in R-INLA.
 
 If setting `PCpriors=TRUE` argument, then penalised complexity (PC) priors [@simpson2017penalising] are used for the precision parameter of the spatial random effect $\boldsymbol{\xi}$. This option only works if iCAR (`prior="intrinsic"` argument) or BYM2 (`prior="BYM2"` argument) spatial prior distributions are selected. In both cases, the default values in R-INLA $(U,\alpha)=(1,0.1)$ are considered for the standard deviation of the random effect, which means that $P(\sigma_{\xi}>1)=0.1$. If the BYM2 model is selected, the values $(U,\alpha)=(0.5,0.5)$ are also given to the spatial smoothing parameter $\lambda_{\xi}$, that is, $P(\lambda_{\xi}>0.5)=0.5$.
 
@@ -130,7 +130,7 @@ The following approximation strategies are implemented in R-INLA: Gaussian (`str
 
 ## Initial step: input argument for the `CAR_INLA` function {-#initial-step:-input-argument-for-the-CAR_INLA-function}
 
-The input argument of the `CAR_INLA()` function must be an object of class `sf` or `SpatialPolygonsDataFrame` which contains the data of analysis and its associated cartography file. Note that __bigDM__ includes the `Carto_SpainMUN` sf (simple feature) object containing the polygons of Spain continental municipalities and simulated colorectal cancer mortality data (modified in order to preserve the confidentiality of the original data).
+The input argument of the `CAR_INLA()` function must be an object of class `sf` or `SpatialPolygonsDataFrame` which contains the data of analysis and its associated cartography file. Note that __bigDM__ includes the `Carto_SpainMUN` sf (simple feature) object containing the polygons of Spanish municipalities and simulated colorectal cancer mortality data (modified in order to preserve the confidentiality of the original data).
 
 ```{r}
 library(bigDM)
@@ -179,7 +179,7 @@ Global <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", O="obs", E="exp", model="
 ```
 where `ID` is a character vector of geographic identifiers of the Spanish municipalities, while `obs` and `exp` are the variables with the observed and expected number of colorrectal cancer mortality cases in each municipality, respectively.
 
-By default, the LCAR prior distribution is considered for the spatial random effect $\boldsymbol{\xi}$, and the simplified Laplace approximation strategy is used to fit the model (`prior="Leroux"` and `strategy="simplified.laplace` arguments, respectively).
+By default, the LCAR prior distribution is considered for the spatial random effect $\boldsymbol{\xi}$, and the simplified Laplace approximation strategy is used to fit the model (arguments `prior="Leroux"` and `strategy="simplified.laplace`, respectively).
 
 
 ## Disjoint model {-#disjoint-model}
@@ -187,7 +187,7 @@ By default, the LCAR prior distribution is considered for the spatial random eff
 The key idea of the _Disjoint model_ is to define a partition of the whole spatial domain $\mathscr{D}$ into $D$ subregions, that is $\mathscr{D} = \bigcup_{d=1}^D \mathscr{D}_d$ where $\mathscr{D}_i \cap \mathscr{D}_j = \emptyset$ for all $i \neq j$. In our disease mapping context, this
 means that each geographical unit belongs to a single subregion. A natural choice for this partition could be the administrative subdivisions of the area of interest (such as for example, provinces or states). For our example data in `Carto_SpainMUN` the $D=15$ Autonomous Regions of Spain are used as a partition of the $n=7907$ municipalites (`region` variable of the `sf` object).
 
-If the user has no idea on how to define this initial partition, the `random_partition()` function can be used to define a regular grid over the associated cartography with a certain number of rows and columns. For example, let define a random partition for the Spanish municipalities based on a 3x3 regular grid
+If the user has no idea on how to define this initial partition, the `random_partition()` function can be used to define a regular grid over the associated cartography with a certain number of rows and columns. For example, let us define a random partition for the Spanish municipalities based on a 3x3 regular grid
 ```{r}
 carto.new <- random_partition(carto=Carto_SpainMUN, rows=3, columns=3)
 ```
@@ -253,7 +253,7 @@ where the output of the `divide_carto()` function is a list of `sf` objects of l
 
 ```{r fig.cap=paste("Spatial polygons for the autonomous region of Castilla y León with 1st and 2nd order neighbours in the border."), fig.height=4.5, label="korderPartition", echo=FALSE}
 par(mai=c(0,0.1,0.3,0.1))
-plot(carto.k2$`Castilla y Leon`$geometry, col="dodgerblue4", main="Castilla y Leon")
+plot(carto.k2$`Castilla y Leon`$geometry, col="dodgerblue4", main="Castilla-León")
 plot(carto.k1$`Castilla y Leon`$geometry, col="dodgerblue", add=TRUE)
 plot(carto.k0$`Castilla y Leon`$geometry, col="lightgrey", add=TRUE)
 ```
@@ -274,7 +274,7 @@ This function takes local models fitted for each subregion of the whole spatial 
 
 * __Computation of the mixture distribution of $r_i$__
 
-  If the _k-order neighbourhood model_ is fitted, note that the final risk surface $\textbf{r} = (r_1,\ldots,r_n)$ is no longer the union of the posterior estimates obtained from each submodel. To obtain a unique posterior distribution of $r_i$ for each areal unit $i$, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights. See Orozco et al. [-@orozco2020] for full details about how these mixture distributions are computed.
+  If the _k-order neighbourhood model_ is fitted, note that the final risk surface $\textbf{r} = (r_1,\ldots,r_n)^{'}$ is no longer the union of the posterior estimates obtained from each submodel. To obtain a unique posterior distribution of $r_i$ for each areal unit $i$, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights. See Orozco et al. [-@orozco2020] for full details about how these mixture distributions are computed.
 
 In what follows, we show how to use the `mergeINLA()` function to reproduce the results obtained with the main `CAR_INLA()` function using the previously saved models for each spatial subdomain. The corresponding .Rdata objects have been renamed as `INLAsubmodels_Disjoint.Rdata`, `INLAsubmodels_order1.Rdata` and `INLAsubmodels_order2.Rdata`.
 

@@ -88,7 +88,7 @@ carto.k2 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=2)
 
 ## ----fig.cap=paste("Spatial polygons for the autonomous region of Castilla y León with 1st and 2nd order neighbours in the border."), fig.height=4.5, label="korderPartition", echo=FALSE----
 par(mai=c(0,0.1,0.3,0.1))
-plot(carto.k2$`Castilla y Leon`$geometry, col="dodgerblue4", main="Castilla y Leon")
+plot(carto.k2$`Castilla y Leon`$geometry, col="dodgerblue4", main="Castilla-León")
 plot(carto.k1$`Castilla y Leon`$geometry, col="dodgerblue", add=TRUE)
 plot(carto.k0$`Castilla y Leon`$geometry, col="lightgrey", add=TRUE)
 
