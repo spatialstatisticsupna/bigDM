@@ -1,6 +1,6 @@
 #' Merge disjoint connected subgraphs
 #'
-#' @description The function returns a neighbours list of class \code{nb} and its associated spatial adjacency matrix
+#' @description The function returns a neighbour list of class \code{nb} and its associated spatial adjacency matrix
 #' computed by merging disjoint connected subgraphs through its nearest polygon centroids.
 #'
 #' @details This function first calls the \code{\link{add_neighbour}} function to search for isolated areas.

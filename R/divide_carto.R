@@ -1,7 +1,7 @@
 #' Divide the spatial domain into subregions
 #'
 #' @description The function takes an object of class \code{SpatialPolygonsDataFrame} or \code{sf}
-#' and divide it into subregions according to some grouping variable.
+#' and divides it into subregions according to some grouping variable.
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
 #' @param ID.group character vector of grouping identifiers.

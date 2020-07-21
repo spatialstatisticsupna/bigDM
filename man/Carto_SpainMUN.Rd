@@ -3,7 +3,7 @@
 \docType{data}
 \name{Carto_SpainMUN}
 \alias{Carto_SpainMUN}
-\title{Spain colorectal cancer mortality data}
+\title{Spanish colorectal cancer mortality data}
 \format{
 Formal class \code{sf}; the data contains a data.frame with 7907 rows and 10 variables.
 \itemize{
@@ -23,7 +23,7 @@ Formal class \code{sf}; the data contains a data.frame with 7907 rows and 10 var
 Carto_SpainMUN
 }
 \description{
-\code{sf} object containing the polygons of Spain continental municipalities
+\code{sf} object containing the polygons of the municipalities of continental Spain
 and simulated colorectal cancer mortality data.
 }
 \keyword{data}

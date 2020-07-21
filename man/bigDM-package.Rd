@@ -6,7 +6,7 @@
 \alias{bigDM}
 \title{Scalable Bayesian Disease Mapping Models for High-Dimensional Data}
 \description{
-This package implements several (scalable) spatial generalised linear mixed models for high-dimensional areal count data,
+This package implements several (scalable) spatial Poisson mixed models for high-dimensional areal count data,
 with inference in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique.
 }
 \details{
@@ -29,10 +29,10 @@ Below, there is a list with a brief overview of all package functions:
 \insertRef{orozco2020}{bigDM}
 }
 \seealso{
-See \href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spain colorectal cancer mortality data.
+See \href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spanish colorectal cancer mortality data.
 }
 \author{
-Mantainer: Aritz Adin <aritz.adin@unavarra.es>
+Maintainer: Aritz Adin <aritz.adin@unavarra.es>
 \cr \cr
 This work has been supported by the Spanish Ministry of Science and Innovation (project MTM 2017-82553-R (AEI/FEDER, UE)).
 It has also been partially funded by la Caixa Foundation (ID 1000010434), Caja Navarra Foundation, and UNED Pamplona, under agreement LCF/PR/PR15/51100007 (project REF P/13/20).

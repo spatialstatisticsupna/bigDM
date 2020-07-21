@@ -24,7 +24,7 @@ This function returns a list with the following two elements:
 }
 }
 \description{
-The function returns a neighbours list of class \code{nb} and its associated spatial adjacency matrix
+The function returns a neighbour list of class \code{nb} and its associated spatial adjacency matrix
 computed by merging disjoint connected subgraphs through its nearest polygon centroids.
 }
 \details{

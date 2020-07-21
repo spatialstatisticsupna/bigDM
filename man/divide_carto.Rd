@@ -21,7 +21,7 @@ List of \code{sf} objects with the spatial polygons of each subdomain.
 }
 \description{
 The function takes an object of class \code{SpatialPolygonsDataFrame} or \code{sf}
-and divide it into subregions according to some grouping variable.
+and divides it into subregions according to some grouping variable.
 }
 \examples{
 library(tmap)

@@ -9,10 +9,10 @@ add_neighbour(carto, nb = NULL, plot = FALSE)
 \arguments{
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.}
 
-\item{nb}{optional argument with the neighbours list of class \code{nb}.
+\item{nb}{optional argument with the neighbour list of class \code{nb}.
 If \code{NULL} (default), this object is computed from the \code{carto} argument.}
 
-\item{plot}{logical value (default \code{FALSE}), if \code{TRUE} then the computed neighbourhood graph is ploted.}
+\item{plot}{logical value (default \code{FALSE}), if \code{TRUE} then the computed neighbourhood graph is plotted.}
 }
 \value{
 This function returns a list with the following two elements:
@@ -22,16 +22,16 @@ This function returns a list with the following two elements:
 }
 }
 \description{
-The function returns a neighbours list of class \code{nb} and its associated spatial adjacency matrix
-computed by adding to isolated areas its nearest neighbour using the \code{knearneigh} function of 'spdep' package.
+The function returns a neighbour list of class \code{nb} and its associated spatial adjacency matrix
+computed by adding isolated areas to its nearest neighbour using the \code{knearneigh} function of 'spdep' package.
 }
 \examples{
 library(spdep)
 
-## load the Spain colorectal cancer mortality data ##
+## load the Spanish colorectal cancer mortality data ##
 data(Carto_SpainMUN)
 
-## compute the neighbours list from spatial polygons ##
+## compute the neighbour list from spatial polygons ##
 nb_SpainMUN <- poly2nb(Carto_SpainMUN)
 summary(nb_SpainMUN) # 1 region with no links
 

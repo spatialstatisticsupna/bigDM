@@ -1,6 +1,6 @@
-#' Spain colorectal cancer mortality data
+#' Spanish colorectal cancer mortality data
 #'
-#' @description \code{sf} object containing the polygons of Spain continental municipalities
+#' @description \code{sf} object containing the polygons of the municipalities of continental Spain
 #' and simulated colorectal cancer mortality data.
 #'
 #' @usage Carto_SpainMUN

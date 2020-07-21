@@ -2,7 +2,7 @@ Package: bigDM
 Type: Package
 Title: Scalable Bayesian Disease Mapping Models for High-Dimensional Data
 Version: 0.1
-Date: 2020-07-20
+Date: 2020-07-21
 Author: Aritz Adin [aut, cre] <aritz.adin@unavarra.es>,
         Erick Orozco-Acosta [aut] <erick.orozco@unavarra.es>,
         Maria Dolores Ugarte [aut] <lola@unavarra.es>

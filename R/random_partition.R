@@ -5,8 +5,8 @@
 #' using the \code{st_make_grid} function of 'sf' package.
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
-#' @param rows numeric; number of rows to define the regular grid. Defaults to 3.
-#' @param columns numeric; number of columns to define the regular grid. Defaults to 3.
+#' @param rows numeric; number of rows to define the regular grid. Default to 3.
+#' @param columns numeric; number of columns to define the regular grid. Default to 3.
 #'
 #' @return \code{sf} object with the original data and a grouping variable named 'ID.group'
 #'

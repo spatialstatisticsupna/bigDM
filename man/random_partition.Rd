@@ -9,9 +9,9 @@ random_partition(carto, rows = 3, columns = 3)
 \arguments{
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.}
 
-\item{rows}{numeric; number of rows to define the regular grid. Defaults to 3.}
+\item{rows}{numeric; number of rows to define the regular grid. Default to 3.}
 
-\item{columns}{numeric; number of columns to define the regular grid. Defaults to 3.}
+\item{columns}{numeric; number of columns to define the regular grid. Default to 3.}
 }
 \value{
 \code{sf} object with the original data and a grouping variable named 'ID.group'

@@ -1,7 +1,6 @@
 #' Fit a (scalable) spatial generalised linear mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.
 #'
-#' @description Fit a spatial generalized linear mixed model to areal count data where the response variable is assumed to be Poisson distributed.
-#' The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
+#' @description Fit a spatial Poisson mixed model. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
 #' For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 #' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM}.
 #' \cr\cr
@@ -27,8 +26,8 @@
 #'
 #' \insertRef{orozco2020}{bigDM}
 #'
-#' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf} which, at least,
-#' must contain the target variables of interest specified in the arguments \code{ID.area}, \code{O} and \code{E}.
+#' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
+#' This object must contain at least the target variables of interest specified in the arguments \code{ID.area}, \code{O} and \code{E}.
 #' @param ID.area character; name of the variable which contains the IDs of spatial areal units.
 #' @param ID.group character; name of the variable which contains the IDs of the spatial partition (grouping variable).
 #' Only required if \code{model="partition"}.
@@ -36,14 +35,14 @@
 #' @param E character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit.
 #' @param prior one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"},
 #' which specifies the prior distribution considered for the spatial random effect.
-#' @param model one of either \code{"global"} or \code{"partition"} (default), which respectively specify the \emph{Global model}
-#' or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}).
+#' @param model one of either \code{"global"} or \code{"partition"} (default), which specifies the \emph{Global model}
+#' or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}, respectively).
 #' @param k numeric value with the neighbourhood order used for the partition model.
 #' If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"},
 #' which specifies the approximation strategy considered in the \code{inla} function.
 #' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
-#' Only works if \code{prior="intrinsic"} or \code{prior="BYM2"} arguments are specified.
+#' Only works if arguments \code{prior="intrinsic"} or \code{prior="BYM2"} are specified.
 #' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
 #' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
 #' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
