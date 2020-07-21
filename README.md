@@ -52,7 +52,7 @@ install_github("spatialstatisticsupna/bigDM")
 _*Important note:_ The __bigDM__ package uses the `parallel:makeCluster()` function to speed up computations when fitting scalable models. It seems that some unresolved issues have been detected when running this function in RStudio on macOS with R 4.0.x (https://github.com/rstudio/rstudio/issues/6692)
 
 ## Basic Use
-See the [vignette](doc/bigDM.pdf) for further details and examples using this package.
+See the [vignette](https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html) for further details and examples using this package.
 
 
 ## Copyright and license
