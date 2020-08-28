@@ -125,7 +125,7 @@ If setting `PCpriors=TRUE` argument, then penalised complexity (PC) priors [@sim
 
 ### INLA approximation strategy {-#inla-approximation-strategy}
 
-The following approximation strategies are implemented in R-INLA: Gaussian (`strategy="gaussian"`), simplified Laplace (`strategy="simplifed.laplace"`) or full Laplace (`strategy="laplace"`). The Gaussian approximation is the fastest option and often gives reasonable results, but it may be inaccurate. The full Laplace approximation is very accurate, but it can be computationally expensive. The simplified Laplace approximation (default option in `CAR_INLA()`  function) offers a tradeoff between accuracy and computing time. See Rue et al. [-@rue2009approximate] for details about the approximation strategies in INLA.
+The following approximation strategies are implemented in R-INLA: Gaussian (`strategy="gaussian"`), simplified Laplace (`strategy="simplified.laplace"`) or full Laplace (`strategy="laplace"`). The Gaussian approximation is the fastest option and often gives reasonable results, but it may be inaccurate. The full Laplace approximation is very accurate, but it can be computationally expensive. The simplified Laplace approximation (default option in `CAR_INLA()`  function) offers a tradeoff between accuracy and computing time. See Rue et al. [-@rue2009approximate] for details about the approximation strategies in INLA.
 
 
 ## Initial step: input argument for the `CAR_INLA` function {-#initial-step:-input-argument-for-the-CAR_INLA-function}
