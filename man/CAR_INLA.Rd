@@ -4,23 +4,11 @@
 \alias{CAR_INLA}
 \title{Fit a (scalable) spatial Poisson mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.}
 \usage{
-CAR_INLA(
-  carto = NULL,
-  ID.area = NULL,
-  ID.group = NULL,
-  O = NULL,
-  E = NULL,
-  prior = "Leroux",
-  model = "partition",
-  k = 0,
-  strategy = "simplified.laplace",
-  PCpriors = FALSE,
-  seed = NULL,
-  n.sample = 1000,
-  compute.fixed = FALSE,
-  compute.DIC = TRUE,
-  save.models = FALSE
-)
+CAR_INLA(carto = NULL, ID.area = NULL, ID.group = NULL, O = NULL,
+  E = NULL, prior = "Leroux", model = "partition", k = 0,
+  strategy = "simplified.laplace", PCpriors = FALSE, seed = NULL,
+  n.sample = 1000, compute.fixed = FALSE, compute.DIC = TRUE,
+  save.models = FALSE)
 }
 \arguments{
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.

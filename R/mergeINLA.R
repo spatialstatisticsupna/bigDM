@@ -39,6 +39,7 @@
 #' @import parallel
 #' @importFrom INLA inla.dmarginal inla.mmarginal inla.posterior.sample inla.qmarginal inla.rmarginal
 #' @importFrom stats runif density sd quantile dpois var
+#' @importFrom rlist list.flatten
 #'
 #' @examples
 #' ## See the vignette accompanying this package for an example of its use.
@@ -164,35 +165,25 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
           # result$marginals.random <- NULL
           # result$size.random <- NULL
         }else{
+          
           result$model.random <- unlist(model.random)
-
           result$summary.random <- vector("list",length(unique(model.random)))
           names(result$summary.random) <- names(inla.models[[1]]$summary.random)
-
-          for(i in names(result$summary.random)){
-            for(d in 1:D){
-              summary.random <- inla.models[[d]]$summary.random[[i]]
-              summary.random$ID <- as.character(inla.models[[d]]$.args$data[,ID.area])
-              result$summary.random[[i]] <- rbind(result$summary.random[[i]],summary.random)
-            }
-            result$summary.random[[i]] <- result$summary.random[[i]][order(result$summary.random[[i]]$ID),]
-            result$summary.random[[i]]$ID <- as.numeric(seq(1:nrow(result$summary.random[[i]])))
-            rownames(result$summary.random[[i]]) <- seq(1,nrow(result$summary.random[[i]]))
-          }
-
+          
+          result$summary.random[[1]] <- do.call(rbind,lapply(inla.models, function(x) x$summary.random$ID.area))
+          result$summary.random[[1]]$ID <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+          result$summary.random[[1]] <- result$summary.random[[1]][order(result$summary.random[[1]]$ID),]
+          result$summary.random[[1]]$ID <- seq(1,nrow(result$summary.random[[1]]))
+          rownames(result$summary.random[[1]]) <- seq(1,nrow(result$summary.random[[1]]))
+          
           result$marginals.random <- vector("list",length(unique(model.random)))
           names(result$marginals.random) <- names(inla.models[[1]]$summary.random)
-
-          for(i in names(result$marginals.random)){
-            for(d in 1:D){
-              marginals.random <- inla.models[[d]]$marginals.random[[i]]
-              names(marginals.random) <- as.character(inla.models[[d]]$.args$data[,ID.area])
-              result$marginals.random[[i]] <- append(result$marginals.random[[i]],marginals.random)
-            }
-            result$marginals.random[[i]] <- result$marginals.random[[i]][order(names(result$marginals.random[[i]]))]
-            names(result$marginals.random[[i]]) <- paste("index",seq(1:length(result$marginals.random[[i]])),sep=".")
-          }
-
+          
+          result$marginals.random[[1]] <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.random$ID.area))
+          names(result$marginals.random[[1]]) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+          result$marginals.random[[1]] <- result$marginals.random[[1]][order(names(result$marginals.random[[1]]))]
+          names(result$marginals.random[[1]]) <- paste("index",seq(1:length(result$marginals.random[[1]])),sep=".")
+          
           result$size.random <- vector("list",length(unique(model.random)))
           for(i in 1:length(result$size.random)){
             result$size.random[[i]] <- list(n=nrow(result$summary.random[[i]]), N=nrow(result$summary.random[[i]]), Ntotal=nrow(result$summary.random[[i]]), ngroup=1, nrep=1)
@@ -209,29 +200,20 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
     ## Linear predictor ##
     if(k==0){
-      result$summary.linear.predictor <- data.frame()
-      for(d in 1:D){
-        summary.linear.predictor <- inla.models[[d]]$summary.linear.predictor
-        rownames(summary.linear.predictor) <- as.character(inla.models[[d]]$.args$data[,ID.area])
-        result$summary.linear.predictor <- rbind(result$summary.linear.predictor,summary.linear.predictor)
-      }
-      result$summary.linear.predictor <- result$summary.linear.predictor[order(rownames(result$summary.linear.predictor)),]
+      summary.linear.predictor <- do.call(rbind,lapply(inla.models, function(x) x$summary.linear.predictor))
+      rownames(summary.linear.predictor) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      result$summary.linear.predictor <- summary.linear.predictor[order(rownames(summary.linear.predictor)),]
       aux <- as.character(1:nrow(result$summary.linear.predictor))
       l <- max(nchar(aux))
       while(min(nchar(aux))<l) aux[nchar(aux)==min(nchar(aux))] <- paste("0",aux[nchar(aux)==min(nchar(aux))],sep="")
       rownames(result$summary.linear.predictor) <- paste("Predictor",aux,sep=".")
-
-      result$marginals.linear.predictor <- vector("list",0)
-      for(d in 1:D){
-        marginals.linear.predictor <- inla.models[[d]]$marginals.linear.predictor
-        names(marginals.linear.predictor) <- as.character(inla.models[[d]]$.args$data[,ID.area])
-        result$marginals.linear.predictor <- append(result$marginals.linear.predictor,marginals.linear.predictor)
-      }
-      result$marginals.linear.predictor <- result$marginals.linear.predictor[order(names(result$marginals.linear.predictor))]
+      
+      marginals.linear.predictor <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.linear.predictor))
+      names(marginals.linear.predictor) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      result$marginals.linear.predictor <- marginals.linear.predictor[order(names(marginals.linear.predictor))]
       names(result$marginals.linear.predictor) <- paste("Predictor",1:length(result$marginals.linear.predictor),sep=".")
 
       result$size.linear.predictor <- list(n=nrow(result$summary.linear.predictor), N=nrow(result$summary.linear.predictor), Ntotal=nrow(result$summary.linear.predictor), ngroup=1, nrep=1)
-
       result$offset.linear.predictor <- rep(0,nrow(result$summary.linear.predictor))
     }else{
       result$summary.linear.predictor <- data.frame()
@@ -244,24 +226,18 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
     result$marginals.fitted.values <- vector("list",0)
 
     if(k==0){
-      for(d in 1:D){
-        summary.fitted.values <- inla.models[[d]]$summary.fitted.values
-        rownames(summary.fitted.values) <- as.character(inla.models[[d]]$.args$data[,ID.area])
-        result$summary.fitted.values <- rbind(result$summary.fitted.values,summary.fitted.values)
-      }
-      result$summary.fitted.values <- result$summary.fitted.values[order(rownames(result$summary.fitted.values)),]
+      summary.fitted.values <- do.call(rbind,lapply(inla.models, function(x) x$summary.fitted.values))
+      rownames(summary.fitted.values) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      result$summary.fitted.values <- summary.fitted.values[order(rownames(summary.fitted.values)),]
       aux <- as.character(1:nrow(result$summary.fitted.values))
       l <- max(nchar(aux))
       while(min(nchar(aux))<l) aux[nchar(aux)==min(nchar(aux))] <- paste("0",aux[nchar(aux)==min(nchar(aux))],sep="")
       rownames(result$summary.fitted.values) <- paste("fitted.Predictor",aux,sep=".")
 
-      for(d in 1:D){
-        marginals.fitted.values <- inla.models[[d]]$marginals.fitted.values
-        names(marginals.fitted.values) <- as.character(inla.models[[d]]$.args$data[,ID.area])
-        result$marginals.fitted.values <- append(result$marginals.fitted.values,marginals.fitted.values)
-      }
-      result$marginals.fitted.values <- result$marginals.fitted.values[order(names(result$marginals.fitted.values))]
-      names(result$marginals.fitted.values) <- rownames(result$summary.fitted.values)
+      marginals.fitted.values <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.fitted.values))
+      names(marginals.fitted.values) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      result$marginals.fitted.values <- marginals.fitted.values[order(names(marginals.fitted.values))]
+      names(result$marginals.fitted.values) <- paste("fitted.Predictor",aux,sep=".")
     }else{
       models.summary.fitted.values <- lapply(inla.models, function(x) x$summary.fitted.values)
       models.marginals.fitted.values <- lapply(inla.models, function(x) x$marginals.fitted.values)
@@ -333,11 +309,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
     family <- unique(lapply(inla.models, function(x) x$.args$family))
     if(length(family)==1) result$.args$family <- family[[1]]
 
-    result$.args$data <- data.frame()
-    for(d in 1:D){
-      args.data <- inla.models[[d]]$.args$data
-      result$.args$data <- rbind(result$.args$data,args.data)
-    }
+    result$.args$data <-do.call(rbind,lapply(inla.models, function(x) x$.args$data))
     result$.args$data <- result$.args$data[!duplicated(result$.args$data[,ID.area]),]
     result$.args$data[,ID.area] <- as.character(result$.args$data[,ID.area])
     result$.args$data <- result$.args$data[order(result$.args$data[,ID.area]),]
@@ -406,9 +378,18 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
     ## Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) ##
     if(compute.DIC){
-      risk.sample <- matrix(unlist(lapply(result$marginals.fitted.values, function(x) inla.rmarginal(n.sample, x))), nrow=length(result$marginals.fitted.values), ncol=n.sample, byrow=T)
+      marginals.fitted.values<- result$marginals.fitted.values
+      
+      suppressWarnings({
+        cl <- makeCluster(detectCores())
+        clusterExport(cl, varlist=c("n.sample","marginals.fitted.values"), envir=environment())
+        clusterEvalQ(cl, {
+          INLA::inla.rmarginal
+        })
+        risk.sample <- do.call(rbind,parLapply(cl,marginals.fitted.values,riskSampleDeviance))
+        stopCluster(cl)
+      })
       mu.sample <- apply(risk.sample, 2, function(x) result$.args$data[,E]*x)
-
       result$dic$mean.deviance <- mean(apply(mu.sample, 2, function(x) -2*sum(log(dpois(result$.args$data[,O],x)))))
       result$dic$deviance.mean <- -2*sum(log(dpois(result$.args$data[,O],apply(mu.sample,1,mean))))
       result$dic$dic <- 2*result$dic$mean.deviance-result$dic$deviance.mean
@@ -533,4 +514,8 @@ computeFittedValues <- function(q){
     names(marginals.fitted.values) <- q
   }
   return(list(summary.fitted.values,marginals.fitted.values))
+}
+
+riskSampleDeviance <- function(x){
+  inla.rmarginal(n.sample,x)
 }
