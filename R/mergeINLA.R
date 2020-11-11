@@ -493,7 +493,7 @@ computeFittedValues <- function(q){
     w <- cpo/sum(cpo)
 
     xx <- sort(unlist(lapply(marginals, function(x) x[,"x"])))
-    at <- round(seq(1,length(xx),length.out=100))
+    at <- round(seq(1,length(xx),length.out=75))
     marginals.fitted.values <- matrix(0, nrow=0, ncol=2, dimnames=list(NULL, c("x","y")))
     for(j in xx[at]){
       aux <- unlist(lapply(marginals, function(x) inla.dmarginal(j,x)))
