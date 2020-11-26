@@ -116,9 +116,6 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
         data <- sf::st_set_geometry(carto, NULL)
 
         ## Order the data ##
-        carto <- carto[order(data[,ID.area]),]
-        data <- sf::st_set_geometry(carto, NULL)
-
         if(!ID.area %in% colnames(data))
                 stop(paste("no",ID.area,"variable found in carto object"))
         if(!O %in% colnames(data))
@@ -126,6 +123,10 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
         if(!E %in% colnames(data))
                 stop(paste("no",E,"variable found in carto object"))
 
+        carto <- carto[order(data[,ID.area]),]
+        data <- sf::st_set_geometry(carto, NULL)
+
+        ## Merge disjoint connected subgraphs ##
         invisible(utils::capture.output(aux <- connect_subgraphs(carto, ID.area)))
         carto.nb <- aux$nb
 
