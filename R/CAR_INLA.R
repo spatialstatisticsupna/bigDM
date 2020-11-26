@@ -117,11 +117,11 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
 
         ## Order the data ##
         if(!ID.area %in% colnames(data))
-                stop(paste("no",ID.area,"variable found in carto object"))
+                stop(paste("no '",ID.area,"' variable found in carto object",sep=""))
         if(!O %in% colnames(data))
-                stop(paste("no",O,"variable found in carto object"))
+                stop(paste("no '",O,"' variable found in carto object",sep=""))
         if(!E %in% colnames(data))
-                stop(paste("no",E,"variable found in carto object"))
+                stop(paste("no '",E,"' variable found in carto object",sep=""))
 
         carto <- carto[order(data[,ID.area]),]
         data <- sf::st_set_geometry(carto, NULL)
