@@ -17,6 +17,7 @@
 #'   \item \code{W}: associated spatial adjacency matrix of class \code{CsparseMatrix}
 #' }
 #'
+#' @import spatialreg
 #' @importFrom methods as
 #' @importFrom sf st_as_sf st_centroid st_distance st_drop_geometry st_geometry
 #' @importFrom spdep card n.comp.nb poly2nb
