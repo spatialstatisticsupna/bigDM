@@ -4,11 +4,11 @@ citEntry(entry = "Manual",
                    as.person("E Orozco-Acosta"),
                    as.person("M D Ugarte")),
   year         = "2020",
-  note = "R package version 0.1.0",
+  note = "R package version 0.2",
   url = "https://github.com/spatialstatisticsupna/bigDM",
   textVersion  =
   paste("Adin, A., Orozco-Acosta, E., Ugarte, M.D. (2020).",
-        "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.1.0.",
+        "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.2.",
         "https://github.com/spatialstatisticsupna/bigDM."),
   header = "To cite the package:"
 )
