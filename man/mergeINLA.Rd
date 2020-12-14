@@ -4,9 +4,17 @@
 \alias{mergeINLA}
 \title{Merge \code{inla} objects for partition models}
 \usage{
-mergeINLA(inla.models = list(), k = NULL, ID.area = "Area",
-  O = "O", E = "E", seed = NULL, n.sample = 1000,
-  compute.fixed = FALSE, compute.DIC = TRUE)
+mergeINLA(
+  inla.models = list(),
+  k = NULL,
+  ID.area = "Area",
+  O = "O",
+  E = "E",
+  seed = NULL,
+  n.sample = 1000,
+  compute.fixed = FALSE,
+  compute.DIC = TRUE
+)
 }
 \arguments{
 \item{inla.models}{list of multiple objects of class \code{inla}.}

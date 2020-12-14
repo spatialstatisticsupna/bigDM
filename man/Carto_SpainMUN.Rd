@@ -4,7 +4,8 @@
 \name{Carto_SpainMUN}
 \alias{Carto_SpainMUN}
 \title{Spanish colorectal cancer mortality data}
-\format{Formal class \code{sf}; the data contains a data.frame with 7907 rows and 10 variables.
+\format{
+Formal class \code{sf}; the data contains a data.frame with 7907 rows and 10 variables.
 \itemize{
   \item ID: character vector of geographic identifiers
   \item name: character vector of municipality names
@@ -16,7 +17,8 @@
   \item exp: expected number of cases
   \item region: character vector of autonomous region
   \item geometry: sfc_MULTIPOLYGON
-}}
+}
+}
 \usage{
 Carto_SpainMUN
 }

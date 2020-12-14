@@ -1,0 +1,3 @@
+version 0.2
+- speedup improvements in mergeINLA function
+- small bugs fixed
