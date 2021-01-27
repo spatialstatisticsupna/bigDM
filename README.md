@@ -54,6 +54,10 @@ _*Important note:_ The __bigDM__ package uses the `parallel:makeCluster()` funct
 ## Basic Use
 See the [vignette](https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html) for further details and examples using this package.
 
+When using this package, please cite the following paper:
+
+Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021). Scalable Bayesian modeling for smoothing disease risks in large spatial data sets using INLA. _Spatial Statistics (accepted for publication)._ https://arxiv.org/abs/2007.07724
+
 
 ## Copyright and license
 Licensed under the GPL-3 License. [Full license here](/LICENSE.md).
