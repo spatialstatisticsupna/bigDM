@@ -14,18 +14,16 @@ citEntry(entry = "Manual",
 )
 
 
-citEntry(entry = "Misc",
-  title        = "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial datasets",
+citEntry(entry = "article",
+  title        = "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial data sets using INLA",
   author       = personList(as.person("E Orozco-Acosta"),
                    as.person("A Adin"),
                    as.person("M D Ugarte")),
-  year         = "2020",
-  eprint       = "2007.07724",
-  archivePrefix = "arXiv",
-  url          = "https://arxiv.org/abs/2007.07724",
+  year         = "2021",
+  journal      = "Spatial Statistics",
+  doi          = "10.1016/j.spasta.2021.100496",
   textVersion  =
-  paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2020).",
-        "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial datasets.",
-         "arXiv preprint."),
+  paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021).",
+        "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial data sets using INLA. Spatial Statistics (available online). https://doi.org/10.1016/j.spasta.2021.100496"),
   header = "To cite the scalable Bayesian models implemented in the function CAR_INLA:"
 )
