@@ -6,6 +6,7 @@ Scalable Bayesian disease mapping models for high-dimensional data.
 - [The package](#the-package)
 - [Installation](#installation)
 - [Basic Use](#basic-use)
+- [Updates](#updates)
 - [Copyright and license](#copyright-and-license)
 
 
