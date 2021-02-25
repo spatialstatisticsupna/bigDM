@@ -42,7 +42,7 @@ library(devtools)
 # Install the R-INLA package
 install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 
-# Install bigDM from GitHub repositoy
+# Install bigDM (version 0.2.1) from GitHub repositoy
 install_github("spatialstatisticsupna/bigDM")
 ```
 
@@ -156,7 +156,7 @@ library(sf)
 carto_sf <- st_read(system.file("shape/Carto_SpainMUN.shp", package="bigDM"))
 ```
 
-2. Read the csv file with the simulated colorectal cancer mortality data and merge with the cartography file. Note that both files must contain a common identifier variable for the areas (polygons).
+2. If necessary, read the csv file with the simulated colorectal cancer mortality data and merge with the cartography file. Note that both files must contain a common identifier variable for the areas (polygons).
 
 ```{r, class.source="indent"}
 library(readr)

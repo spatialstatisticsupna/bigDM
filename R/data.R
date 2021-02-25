@@ -15,6 +15,7 @@
 #'   \item perimeter: municipality polygon perimeters in degree units
 #'   \item obs: observed number of cases
 #'   \item exp: expected number of cases
+#'   \item SMR: standardized mortality ratio
 #'   \item region: character vector of autonomous region
 #'   \item geometry: sfc_MULTIPOLYGON
 #' }
