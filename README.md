@@ -51,7 +51,7 @@ install_github("spatialstatisticsupna/bigDM")
 
 _*Important note:_ The __bigDM__ package uses the `parallel:makeCluster()` function to speed up computations when fitting scalable models. It seems that some unresolved issues have been detected when running this function in RStudio on macOS with R 4.0.x (https://github.com/rstudio/rstudio/issues/6692)
 
-## Basic Use
+# Basic Use
 See the [vignette](https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html) for further details and examples using this package.
 
 When using this package, please cite the following paper:
@@ -59,5 +59,19 @@ When using this package, please cite the following paper:
 [Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021). Scalable Bayesian modeling for smoothing disease risks in large spatial data sets using INLA. _Spatial Statistics_, __41__, 100496.](https://doi.org/10.1016/j.spasta.2021.100496)
 
 
-## Copyright and license
+# Updates
+
+```
+news(package="bigDM")
+```
+
+__Changes in version 0.2.1__ (2021 Feb 25)
+* `Carto_SpainMUN` data changed
+
+__Changes in version 0.2__ (2020 Oct 01)
+* speedup improvements in `mergeINLA()` function
+* small bugs fixed
+
+
+# Copyright and license
 Licensed under the GPL-3 License. [Full license here](/LICENSE.md).
