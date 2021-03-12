@@ -4,7 +4,15 @@
 \alias{random_partition}
 \title{Define a random partition of the spatial domain based on a regular grid}
 \usage{
-random_partition(carto, rows = 3, columns = 3)
+random_partition(
+  carto,
+  rows = 3,
+  columns = 3,
+  min.size = 50,
+  max.size = 1000,
+  prop.zero = NULL,
+  O = NULL
+)
 }
 \arguments{
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.}
@@ -12,6 +20,14 @@ random_partition(carto, rows = 3, columns = 3)
 \item{rows}{numeric; number of rows to define the regular grid. Default to 3.}
 
 \item{columns}{numeric; number of columns to define the regular grid. Default to 3.}
+
+\item{min.size}{numeric; value to fix the minimum number of areas in each spatial partition (if \code{NULL}, this step is skipped). Default to 50.}
+
+\item{max.size}{numeric; value to fix the maximum number of areas in each spatial partition (if \code{NULL}, this step is skipped). Default to 600.}
+
+\item{prop.zero}{numeric; value between 0 and 1 that indicates the maximum proportion of areas with no cases for each spatial partition.}
+
+\item{O}{character; name of the variable which contains the observed number of disease cases for each areal units. Only required if \code{prop.zero} argument is set.}
 }
 \value{
 \code{sf} object with the original data and a grouping variable named 'ID.group'
@@ -21,18 +37,59 @@ The function takes an object of class \code{SpatialPolygonsDataFrame} or \code{s
 defines a random partition of the spatial polygons based on a regular grid over the whole domain
 using the \code{st_make_grid} function of 'sf' package.
 }
+\details{
+After defining a random partition of the spatial polygons based on a regular grid, the subregions with lower number of areas than the value given by the \code{min.size} are merged the subregions with lower number of areas than the value given by the \code{min.size} argument are merged to its nearest neighbour.
+Then, the subregions with greater number of areas than the value given by the \code{max.size} argument are divided.
+Finally, if \code{prop.zero} argument is set, the subregions with proportion of areas with zero cases below that threshold are merged to its smallest neighbour.
+}
 \examples{
 library(tmap)
 
 ## load the Spain colorectal cancer mortality data ##
 data(Carto_SpainMUN)
 
-## define a random partition based on a 3x3 regular grid ##
-carto.new <- random_partition(carto=Carto_SpainMUN, rows=3, columns=3)
+## random partition based on a 3x3 regular grid (with no size restrictions) ##
+carto.r1 <- random_partition(carto=Carto_SpainMUN, rows=3, columns=3,
+                             min.size=NULL, max.size=NULL)
+table(carto.r1$ID.group)
 
-## plot of the grouping variable 'ID.group' ##
-tm_shape(carto.new) +
+part1 <- aggregate(carto.r1[,"geometry"], by=list(ID.group=carto.r1$ID.group), head)
+
+tm_shape(carto.r1) +
   tm_polygons(col="ID.group") +
-  tm_layout(legend.outside=TRUE)
+  tm_shape(part1) + tm_borders(col="black", lwd=2) +
+  tm_layout(main.title="3x3 regular grid (with no size restrictions)",
+            main.title.position="center", main.title.size=1,
+            legend.outside=TRUE)
+
+
+## random partition based on a 6x4 regular grid (with size restrictions) ##
+carto.r2 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
+                             min.size=50, max.size=600)
+table(carto.r2$ID.group)
+
+part2 <- aggregate(carto.r2[,"geometry"], by=list(ID.group=carto.r2$ID.group), head)
+
+tm_shape(carto.r2) +
+  tm_polygons(col="ID.group") +
+  tm_shape(part2) + tm_borders(col="black", lwd=2) +
+  tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600)",
+            main.title.position="center", main.title.size=1,
+            legend.outside=TRUE)
+
+
+## random partition based on a 6x4 regular grid (with size and proportion of zero restrictions) ##
+carto.r3 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
+                             min.size=50, max.size=600, prop.zero=0.5, O="obs")
+table(carto.r3$ID.group)
+
+part3 <- aggregate(carto.r3[,"geometry"], by=list(ID.group=carto.r3$ID.group), head)
+
+tm_shape(carto.r3) +
+  tm_polygons(col="ID.group") +
+  tm_shape(part3) + tm_borders(col="black", lwd=2) +
+  tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)",
+            main.title.position="center", main.title.size=1,
+            legend.outside=TRUE)
 
 }

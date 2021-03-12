@@ -5,7 +5,7 @@
 #'
 #' @usage Carto_SpainMUN
 #'
-#' @format Formal class \code{sf}; the data contains a data.frame with 7907 rows and 10 variables.
+#' @format Formal class \code{sf}; the data contains a data.frame with 7907 rows and 11 variables.
 #' \itemize{
 #'   \item ID: character vector of geographic identifiers
 #'   \item name: character vector of municipality names

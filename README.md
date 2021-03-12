@@ -66,6 +66,9 @@ When using this package, please cite the following paper:
 news(package="bigDM")
 ```
 
+__Changes in version 0.2.2__ (2021 Mar 12)
+* new arguments included to `random_partition()` function
+
 __Changes in version 0.2.1__ (2021 Feb 25)
 * `Carto_SpainMUN` data changed
 
