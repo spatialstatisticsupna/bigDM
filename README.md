@@ -69,13 +69,16 @@ When using this package, please cite the following paper:
 news(package="bigDM")
 ```
 
+__Changes in version 0.3.0__ (2021 Apr 19)
+* parallel and distributed computation strategies when fitting inla models with the `CAR_INLA()` function
+
 __Changes in version 0.2.2__ (2021 Mar 12)
 * new arguments included to `random_partition()` function
 
 __Changes in version 0.2.1__ (2021 Feb 25)
 * `Carto_SpainMUN` data changed
 
-__Changes in version 0.2__ (2020 Oct 01)
+__Changes in version 0.2.0__ (2020 Oct 01)
 * speedup improvements in `mergeINLA()` function
 * small bugs fixed
 

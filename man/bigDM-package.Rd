@@ -29,7 +29,11 @@ Below, there is a list with a brief overview of all package functions:
 \insertRef{orozco2020}{bigDM}
 }
 \seealso{
-See \href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spanish colorectal cancer mortality data.
+See the following vignettes for further details and examples using this package:
+\enumerate{
+   \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-1-fitting-spatial-models.html}{\code{bigDM: fitting spatial models}}}
+   \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-2-parallel-and-distributed-modelling.html}{\code{bigDM: parallel and distributed modelling}}}
+}
 }
 \author{
 Maintainer: Aritz Adin <aritz.adin@unavarra.es>

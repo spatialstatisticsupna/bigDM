@@ -19,7 +19,9 @@ CAR_INLA(
   n.sample = 1000,
   compute.fixed = FALSE,
   compute.DIC = TRUE,
-  save.models = FALSE
+  save.models = FALSE,
+  plan = "sequential",
+  workers = NULL
 )
 }
 \arguments{
@@ -60,6 +62,11 @@ Only works if \code{k=0} argument (\emph{disjoint model}) is specified.}
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
 
 \item{save.models}{logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.}
+
+\item{plan}{one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
+If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote compute nodes.}
+
+\item{workers}{character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.}
 }
 \value{
 This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
@@ -75,11 +82,13 @@ Three main modeling approaches can be considered:
 \item a disjoint model based on a partition of the whole spatial domain where independent local CAR random effects are simultaneously fitted (\code{model="partition"} and \code{k=0} arguments)
 \item a modeling approach where \emph{k}-order neighbours are added to each subregion of the spatial domain to avoid border effects in the disease risk estimates (\code{model="partition"} and \code{k>0} arguments).
 }
+For both the disjoint and k-order neighbour models, parallel or distributed computation strategies can be performed to speed up computations by using the 'future' package \insertCite{bengtsson2020unifying}{bigDM}.
+
 Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{http://www.r-inla.org/}).
 For the scalable model proposals \insertCite{orozco2020}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can be also computed.
 }
 \details{
-For a full model specification and further details see the vignette accompanying this package.
+For a full model specification and further details see the vignettes accompanying this package.
 }
 \examples{
 ## load the Spain colorectal cancer mortality data ##
@@ -110,6 +119,8 @@ summary(order2)
 
 }
 \references{
+\insertRef{bengtsson2020unifying}{bigDM}
+
 \insertRef{besag1991}{bigDM}
 
 \insertRef{dean2001detecting}{bigDM}

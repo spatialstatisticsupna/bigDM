@@ -1,5 +1,5 @@
 ---
-title: "Introducing bigDM package"
+title: "bigDM: fitting spatial models"
 author: "A. Adin, E. Orozco-Acosta, M.D. Ugarte"
 date: "`r Sys.Date()`"
 output:
@@ -42,7 +42,7 @@ library(devtools)
 # Install the R-INLA package
 install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 
-# Install bigDM (version 0.2.1) from GitHub repositoy
+# Install bigDM (version 0.3.0) from GitHub repositoy
 install_github("spatialstatisticsupna/bigDM")
 ```
 
@@ -132,6 +132,10 @@ The following approximation strategies are implemented in R-INLA: Gaussian (`str
 
 The input argument of the `CAR_INLA()` function must be an object of class `sf` or `SpatialPolygonsDataFrame` which contains the data of analysis and its associated cartography file. Note that __bigDM__ includes the `Carto_SpainMUN` sf (simple feature) object containing the polygons of Spanish municipalities and simulated colorectal cancer mortality data (modified in order to preserve the confidentiality of the original data).
 
+```{r include=FALSE}
+library(bigDM)
+```
+
 ```{r}
 library(bigDM)
 
@@ -189,7 +193,7 @@ means that each geographical unit belongs to a single subregion. A natural choic
 
 If the user has no idea on how to define this initial partition, the `random_partition()` function can be used to define a regular grid over the associated cartography with a certain number of rows and columns. For example, let us define a random partition for the Spanish municipalities based on a 3x3 regular grid
 ```{r}
-carto.new <- random_partition(carto=Carto_SpainMUN, rows=3, columns=3)
+carto.new <- random_partition(carto=Carto_SpainMUN, rows=3, columns=3, max.size=NULL)
 ```
 
 The result is an object of class `sf` with the original data and a grouping variable named `ID.group`. We can use this variable to plot the spatial partition using the __tmap__ library as

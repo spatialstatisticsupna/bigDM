@@ -1,9 +1,12 @@
+version 0.3.0
+- parallel and distributed computation strategies when fitting inla models with the CAR_INLA function
+
 version 0.2.2
 - new arguments included to random_partition function
 
 version 0.2.1
 - Carto_SpainMUN data changed
 
-version 0.2
+version 0.2.0
 - speedup improvements in mergeINLA function
 - small bugs fixed

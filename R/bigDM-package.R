@@ -22,7 +22,11 @@
 #'
 #' @references \insertRef{orozco2020}{bigDM}
 #'
-#' @seealso See \href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM.html}{\code{vignette("bigDM")}} for a detailed analysis using Spanish colorectal cancer mortality data.
+#' @seealso See the following vignettes for further details and examples using this package:
+#' \enumerate{
+#'    \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-1-fitting-spatial-models.html}{\code{bigDM: fitting spatial models}}}
+#'    \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-2-parallel-and-distributed-modelling.html}{\code{bigDM: parallel and distributed modelling}}}
+#' }
 #'
 #' @examples
 #' ## See the examples for CAR_INLA
