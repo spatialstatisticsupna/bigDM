@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 ```
 
 ## Introduction {-#introduction}
-When fitting both the disjoint and k-order neighbour models with the __bigDM__ package (see Orozco et al. [-@orozco2020] and the vignette [bigDM: fitting spatial models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-1-fitting-spatial-models.html) for more details) parallel or distributed computation strategies can be performed to speed up computations by using the __future__ package [@bengtsson2020unifying]. 
+When fitting both the disjoint and k-order neighbour models with the __bigDM__ package [@orozco2020] parallel or distributed computation strategies can be performed to speed up computations by using the __future__ package [@bengtsson2020unifying]. 
 
 Different computation strategies can be specified through the `plan` argument of the `CAR_INLA()` function (available for __bigDM__ version 0.3 and higher). For further details about these strategies see the [documentation of the __future__ package](https://cran.r-project.org/web/packages/future/index.html)  and its corresponding vignettes.
 
@@ -80,7 +80,7 @@ Different computation strategies can be specified through the `plan` argument of
 
 ## Example: Spanish colorectal cancer mortality data {-#example}
 
-In what follows, we show how to fit the _Disjoint model_ for the Spanish colorectal cancer mortality data using different computation strategies.
+In what follows, we show how to fit the _Disjoint model_ for the Spanish colorectal cancer mortality data using different computation strategies. A full description of the data and usage of the `CAR_INLA()` function is given in the vignette [__bigDM: fitting spatial models__](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-1-fitting-spatial-models.html).
 
 ```{r message=FALSE}
 library(bigDM)
@@ -88,6 +88,9 @@ data(Carto_SpainMUN)
 
 head(Carto_SpainMUN)
 ```
+For our example data in `Carto_SpainMUN` the $D=15$ Autonomous Regions of Spain are used as a partition of the $n=7907$ municipalites (`region` variable of the `sf` object).
+
+<br>
  
 __1. Run the models sequentially in the current R session (default option)__
 ```{r}

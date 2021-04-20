@@ -2,18 +2,18 @@
 #'
 #' @description Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
 #' For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
-#' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM}.
+#' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2.
 #' \cr\cr
 #' Three main modeling approaches can be considered:
 #' \itemize{
-#' \item the usual model with a global spatial random effect whose correlation structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument)
-#' \item a disjoint model based on a partition of the whole spatial domain where independent local CAR random effects are simultaneously fitted (\code{model="partition"} and \code{k=0} arguments)
-#' \item a modeling approach where \emph{k}-order neighbours are added to each subregion of the spatial domain to avoid border effects in the disease risk estimates (\code{model="partition"} and \code{k>0} arguments).
+#' \item the usual model with a global spatial random effect whose dependence structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument)
+#' \item a disjoint model based on a partition of the whole spatial domain where independent spatial CAR models are simultaneously fitted in each partition (\code{model="partition"} and \code{k=0} arguments)
+#' \item a modelling approach where \emph{k}-order neighbours are added to each partition to avoid border effects in the disjoint model (\code{model="partition"} and \code{k>0} arguments).
 #' }
 #' For both the disjoint and k-order neighbour models, parallel or distributed computation strategies can be performed to speed up computations by using the 'future' package \insertCite{bengtsson2020unifying}{bigDM}.
 #'
 #' Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{http://www.r-inla.org/}).
-#' For the scalable model proposals \insertCite{orozco2020}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can be also computed.
+#' For the scalable model proposals \insertCite{orozco2020}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can also be computed.
 #'
 #' @details For a full model specification and further details see the vignettes accompanying this package.
 #'
@@ -41,7 +41,7 @@
 #' which specifies the prior distribution considered for the spatial random effect.
 #' @param model one of either \code{"global"} or \code{"partition"} (default), which specifies the \emph{Global model}
 #' or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}, respectively).
-#' @param k numeric value with the neighbourhood order used for the partition model.
+#' @param k numeric value with the neighbourhood order used for the partition model. Usually k=2 or 3 is enough to get good results.
 #' If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"},
 #' which specifies the approximation strategy considered in the \code{inla} function.

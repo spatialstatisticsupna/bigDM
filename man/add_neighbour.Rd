@@ -17,13 +17,13 @@ If \code{NULL} (default), this object is computed from the \code{carto} argument
 \value{
 This function returns a list with the following two elements:
 \itemize{
-  \item \code{nb}: the modified neighbours list
+  \item \code{nb}: the modified neighbours's list
   \item \code{W}: associated spatial adjacency matrix of class \code{CsparseMatrix}
 }
 }
 \description{
 The function returns a neighbour list of class \code{nb} and its associated spatial adjacency matrix
-computed by adding isolated areas to its nearest neighbour using the \code{knearneigh} function of 'spdep' package.
+computed by adding isolated areas to its nearest neighbour (in terms of Euclidean distance between centroids) using the \code{knearneigh} function of 'spdep' package.
 }
 \examples{
 library(spdep)

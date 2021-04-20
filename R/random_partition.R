@@ -2,10 +2,10 @@
 #'
 #' @description The function takes an object of class \code{SpatialPolygonsDataFrame} or \code{sf} and
 #' defines a random partition of the spatial polygons based on a regular grid over the whole domain
-#' using the \code{st_make_grid} function of 'sf' package.
+#' using the \code{st_make_grid} function of the 'sf' package.
 #'
-#' @details After defining a random partition of the spatial polygons based on a regular grid, the subregions with lower number of areas than the value given by the \code{min.size} are merged the subregions with lower number of areas than the value given by the \code{min.size} argument are merged to its nearest neighbour.
-#' Then, the subregions with greater number of areas than the value given by the \code{max.size} argument are divided.
+#' @details After defining a random partition of the spatial polygons based on a regular grid, the subregions with number of areas smaller than the value given by the \code{min.size} are merged to its nearest neighbour.
+#' Then, the subregions with number of areas greater than the value given by the \code{max.size} argument are divided.
 #' Finally, if \code{prop.zero} argument is set, the subregions with proportion of areas with zero cases below that threshold are merged to its smallest neighbour.
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.

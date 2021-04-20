@@ -1,7 +1,7 @@
 #' Add isolated areas (polygons) to its nearest neighbour
 #'
 #' @description The function returns a neighbour list of class \code{nb} and its associated spatial adjacency matrix
-#' computed by adding isolated areas to its nearest neighbour using the \code{knearneigh} function of 'spdep' package.
+#' computed by adding isolated areas to its nearest neighbour (in terms of Euclidean distance between centroids) using the \code{knearneigh} function of 'spdep' package.
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
 #' @param nb optional argument with the neighbour list of class \code{nb}.
@@ -10,7 +10,7 @@
 #'
 #' @return This function returns a list with the following two elements:
 #' \itemize{
-#'   \item \code{nb}: the modified neighbours list
+#'   \item \code{nb}: the modified neighbours's list
 #'   \item \code{W}: associated spatial adjacency matrix of class \code{CsparseMatrix}
 #' }
 #'

@@ -6,8 +6,8 @@
 \alias{bigDM}
 \title{Scalable Bayesian Disease Mapping Models for High-Dimensional Data}
 \description{
-This package implements several (scalable) spatial Poisson mixed models for high-dimensional areal count data,
-with inference in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique.
+This package implements several (scalable) spatial Poisson mixed models for high-dimensional areal count data
+in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique.
 }
 \details{
 Below, there is a list with a brief overview of all package functions:
