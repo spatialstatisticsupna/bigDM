@@ -83,3 +83,7 @@ __Changes in version 0.2.0__ (2020 Oct 01)
 
 # Copyright and license
 Licensed under the GPL-3 License. [Full license here](/LICENSE.md).
+
+
+# Acknowledgments
+This work has been supported by the Spanish Ministry of Economy, Industry, and Competitiveness (project MTM2017-82553-R, AEI/FEDER, UE), and partially funded by la Caixa Foundation (ID 1000010434), Caja Navarra Foundation and UNED Pamplona, under agreement LCF/PR/PR15/51100007 (project REF P/13/20).
