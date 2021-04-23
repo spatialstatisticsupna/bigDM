@@ -1,5 +1,5 @@
 # bigDM
-Scalable Bayesian disease mapping models for high-dimensional data.
+Scalable Bayesian disease mapping models for high-dimensional data using a divide and conquer approach
 
 ## Table of contents
 
