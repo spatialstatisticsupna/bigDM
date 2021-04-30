@@ -179,7 +179,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
         formula <- stats::as.formula(form)
 
         ## Auxiliary functions ##
-        FitModels <- function(Rs.Leroux, data.INLA, d, D){
+        FitModels <- function(Rs, Rs.Leroux, data.INLA, d, D){
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
 
@@ -227,7 +227,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                 D <- length(data.INLA)
 
                 if(plan=="sequential"){
-                        inla.models <- mapply(FitModels, Rs.Leroux=Rs.Leroux, data.INLA=data.INLA, d=seq(1,D), D=D, SIMPLIFY=FALSE)
+                        inla.models <- mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, data.INLA=data.INLA, d=seq(1,D), D=D, SIMPLIFY=FALSE)
                 }
 
                 if(plan=="cluster"){
@@ -236,7 +236,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                         on.exit(future::plan(oplan))
 
                         cpu.time <- system.time({
-                                inla.models <- future.apply::future_mapply(FitModels, Rs.Leroux=Rs.Leroux, data.INLA=data.INLA, d=seq(1,D), D=D, SIMPLIFY=FALSE, future.seed=TRUE)
+                                inla.models <- future.apply::future_mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, data.INLA=data.INLA, d=seq(1,D), D=D, SIMPLIFY=FALSE, future.seed=TRUE)
                         })
 
                         stopCluster(cl)
