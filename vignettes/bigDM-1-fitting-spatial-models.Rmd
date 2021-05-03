@@ -42,7 +42,7 @@ library(devtools)
 # Install the R-INLA package
 install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 
-# Install bigDM (version 0.3.0) from GitHub repositoy
+# Install bigDM (version 0.3.1) from GitHub repositoy
 install_github("spatialstatisticsupna/bigDM")
 ```
 

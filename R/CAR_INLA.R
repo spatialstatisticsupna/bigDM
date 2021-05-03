@@ -37,6 +37,7 @@
 #' Only required if \code{model="partition"}.
 #' @param O character; name of the variable which contains the observed number of disease cases for each areal units.
 #' @param E character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit.
+#' @param W optional argument with the binary adjacency matrix of the spatial areal units.  If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).
 #' @param prior one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"},
 #' which specifies the prior distribution considered for the spatial random effect.
 #' @param model one of either \code{"global"} or \code{"partition"} (default), which specifies the \emph{Global model}
@@ -95,7 +96,7 @@
 #'
 #' @export
 CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
-                     prior="Leroux", model="partition", k=0, strategy="simplified.laplace",
+                     W=NULL, prior="Leroux", model="partition", k=0, strategy="simplified.laplace",
                      PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
                      save.models=FALSE, plan="sequential", workers=NULL){
 
@@ -139,8 +140,14 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
         data <- sf::st_set_geometry(carto, NULL)
 
         ## Merge disjoint connected subgraphs ##
-        invisible(utils::capture.output(aux <- connect_subgraphs(carto, ID.area)))
-        carto.nb <- aux$nb
+        if(is.null(W)){
+                invisible(utils::capture.output(aux <- connect_subgraphs(carto, ID.area)))
+                carto.nb <- aux$nb
+        }else{
+                carto.nb <- spdep::mat2listw(W, style="B")$neighbours
+                invisible(utils::capture.output(aux <- connect_subgraphs(carto, ID.area, nb=carto.nb)))
+                carto.nb <- aux$nb
+        }
 
         ## Define hyperprior distributions ##
         sdunif="expression:
@@ -158,7 +165,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
         ## Formula for INLA model ##
         form <- "O ~ "
         if(prior=="Leroux") {
-                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
+                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif)))", sep="")
         }
         if(prior=="intrinsic" & !PCpriors) {
                 form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
@@ -170,7 +177,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                 form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
         }
         if(prior=="BYM2" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
+                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif)))", sep="")
         }
         if(prior=="BYM2" & PCpriors) {
                 form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")

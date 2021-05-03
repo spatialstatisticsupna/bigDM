@@ -10,6 +10,7 @@ CAR_INLA(
   ID.group = NULL,
   O = NULL,
   E = NULL,
+  W = NULL,
   prior = "Leroux",
   model = "partition",
   k = 0,
@@ -36,6 +37,8 @@ Only required if \code{model="partition"}.}
 \item{O}{character; name of the variable which contains the observed number of disease cases for each areal units.}
 
 \item{E}{character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit.}
+
+\item{W}{optional argument with the binary adjacency matrix of the spatial areal units.  If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).}
 
 \item{prior}{one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"},
 which specifies the prior distribution considered for the spatial random effect.}
