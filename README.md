@@ -67,6 +67,9 @@ When using this package, please cite the following paper:
 news(package="bigDM")
 ```
 
+__Changes in version 0.3.1__ (2021 May 03)
+* W argument included to `CAR_INLA()` function
+
 __Changes in version 0.3.0__ (2021 Apr 19)
 * parallel and distributed computation strategies when fitting inla models with the `CAR_INLA()` function
 
