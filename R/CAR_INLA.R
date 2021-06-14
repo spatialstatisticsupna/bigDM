@@ -247,6 +247,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                         })
 
                         stopCluster(cl)
+                        future:::ClusterRegistry("stop")
                 }
 
                 if(save.models){
