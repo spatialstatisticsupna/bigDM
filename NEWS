@@ -1,5 +1,9 @@
+version 0.3.2
+- 'X' and 'confounding' arguments included to CAR_INLA function
+- new function included: clustering_partition
+
 version 0.3.1
-- W argument included to CAR_INLA function
+- 'W' argument included to CAR_INLA function
 
 version 0.3.0
 - parallel and distributed computation strategies when fitting inla models with the CAR_INLA function

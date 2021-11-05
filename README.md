@@ -17,6 +17,7 @@ Below, there is a list with a brief overview of all package functions:
 
 * ```add_neighbour``` Adds isolated areas (polygons) to its nearest neighbour.
 * ```CAR_INLA``` Fits several spatial CAR models for high-dimensional count data.
+* ```clustering_partition``` Obtain a spatial partition using the DBSC algorithm.
 * ```connect_subgraphs``` Merges disjoint connected subgraphs.
 * ```divide_carto``` Divides the spatial domain into subregions.
 * ```mergeINLA``` Merges inla objects for partition models.
@@ -66,8 +67,12 @@ When using this package, please cite the following paper:
 news(package="bigDM")
 ```
 
+__Changes in version 0.3.2__ (2021 Nov 05)
+* `X` and `confounding` arguments included to `CAR_INLA()` function
+* new function included: `clustering_partition()`
+
 __Changes in version 0.3.1__ (2021 May 03)
-* W argument included to `CAR_INLA()` function
+* `W` argument included to `CAR_INLA()` function
 
 __Changes in version 0.3.0__ (2021 Apr 19)
 * parallel and distributed computation strategies when fitting inla models with the `CAR_INLA()` function
@@ -88,4 +93,6 @@ Licensed under the GPL-3 License. [Full license here](/LICENSE.md).
 
 
 # Acknowledgments
-This work has been supported by the Spanish Ministry of Economy, Industry, and Competitiveness (project MTM2017-82553-R, AEI/FEDER, UE), and partially funded by la Caixa Foundation (ID 1000010434), Caja Navarra Foundation and UNED Pamplona, under agreement LCF/PR/PR15/51100007 (project REF P/13/20).
+This work has been supported by Project MTM2017-82553-R (AEI/FEDER, UE) and Project PID2020-113125RB-I00/MCIN/AEI/10.13039/501100011033. It has also been partially funded by the Public University of Navarra (project PJUPNA2001) and by la Caixa Foundation (ID 1000010434), Caja Navarra Foundation and UNED Pamplona, under agreement LCF/PR/PR15/51100007 (project REF P/13/20).
+
+![plot](https://github.com/spatialstatisticsupna/bigDM/blob/master/micin-aei.jpg)

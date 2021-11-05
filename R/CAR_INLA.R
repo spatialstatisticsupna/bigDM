@@ -1,8 +1,12 @@
 #' Fit a (scalable) spatial Poisson mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.
 #'
-#' @description Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
-#' For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
+#' @description Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{i}}=\eta+\mathbf{x_i}^{'}\beta + \xi_i, \quad \mbox{for} \quad i=1,\ldots,n;}
+#' where \eqn{\eta} is a global intercept, \eqn{\mathbf{x_i}^{'}=(x_{i1},\ldots,x_{ip})} is a p-vector of standardized covariates in the i-th area,
+#' \eqn{\beta=(\beta_1,\ldots,\beta_p)} is the p-vector of fixed effects coefficients, and \eqn{\xi_i} is a spatially structured random effect.
+#' Several conditional autoregressive (CAR) prior distributions can be specified for the spatial random effect, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 #' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2.
+#'
+#' If covariates are included in the model, two different approaches can be used to address the potential confounding issues between the fixed effects and the spatial random effects of the model: restricted regression and the use of orthogonality constraints. See \insertCite{adin2021alleviating;textual}{bigDM} for further details.
 #' \cr\cr
 #' Three main modeling approaches can be considered:
 #' \itemize{
@@ -18,6 +22,8 @@
 #' @details For a full model specification and further details see the vignettes accompanying this package.
 #'
 #' @references
+#' \insertRef{adin2021alleviating}{bigDM}
+#'
 #' \insertRef{bengtsson2020unifying}{bigDM}
 #'
 #' \insertRef{besag1991}{bigDM}
@@ -37,6 +43,11 @@
 #' Only required if \code{model="partition"}.
 #' @param O character; name of the variable which contains the observed number of disease cases for each areal units.
 #' @param E character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit.
+#' @param X a character vector containing the names of the covariates within the \code{carto} object to be included in the model as fixed effects,
+#' or a matrix object playing the role of the fixed effects design matrix. For the latter case, the row names must match with the IDs of the spatial units defined by the \code{ID.area} variable.
+#' If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.
+#' @param confounding one of either \code{NULL}, \code{"restricted"} (restricted regression) or \code{"constraints"} (orthogonal constraints), which specifies the estimation method used to alleviate spatial confounding between fixed and random effects.
+#' If only an intercept is considered in the model (\code{X=NULL}), the default value \code{confounding=NULL} will be set.
 #' @param W optional argument with the binary adjacency matrix of the spatial areal units.  If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).
 #' @param prior one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"},
 #' which specifies the prior distribution considered for the spatial random effect.
@@ -62,7 +73,7 @@
 #'
 #' @import Matrix parallel future
 #' @importFrom future.apply future_mapply
-#' @importFrom INLA inla
+#' @importFrom INLA inla inla.make.lincombs
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
 #' @importFrom utils capture.output
@@ -95,7 +106,7 @@
 #' }
 #'
 #' @export
-CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
+CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=NULL, confounding=NULL,
                      W=NULL, prior="Leroux", model="partition", k=0, strategy="simplified.laplace",
                      PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
                      save.models=FALSE, plan="sequential", workers=NULL){
@@ -111,6 +122,10 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                 stop("the 'O' argument is missing")
         if(is.null(E))
                 stop("the 'E' argument is missing")
+        if(!is.null(confounding)){
+                if(!(confounding %in% c("restricted","constraints")))
+                        stop("invalid 'confounding' argument")
+        }
         if(!(prior %in% c("Leroux","intrinsic","BYM","BYM2")))
                 stop("invalid 'prior' argument")
         if(!(model %in% c("global","partition")))
@@ -127,6 +142,25 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
         ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
         carto <- sf::st_as_sf(carto)
         data <- sf::st_set_geometry(carto, NULL)
+
+        ## Add the covariates defined in the X argument ##
+        if(!is.null(X)){
+                if(is.matrix(X)){
+                        if(!isTRUE(all.equal(rownames(X),as.character(data[,ID.area])))){
+                                stop(sprintf("row names of 'X' must match with the IDs of the spatial units defined by the '%s' variable",ID.area))
+                        }else{
+                                if(is.null(colnames(X))) colnames(X) <- paste("X",seq(ncol(X)),sep="")
+                                carto <- cbind(carto,X)
+                                data <- sf::st_set_geometry(carto, NULL)
+                                X <- colnames(X)
+                        }
+                }
+                if(!all(X %in% colnames(data))){
+                        stop(sprintf("'%s' variable not found in carto object",X[!X %in% colnames(data)]))
+                }else{
+                        carto[,X] <- scale(data[,X])
+                }
+        }
 
         ## Order the data ##
         if(!ID.area %in% colnames(data))
@@ -164,6 +198,9 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
 
         ## Formula for INLA model ##
         form <- "O ~ "
+        if(length(X)>0){
+                form <- paste(form,paste0(X,collapse="+"),"+")
+        }
         if(prior=="Leroux") {
                 form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif)))", sep="")
         }
@@ -206,12 +243,75 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                 Rs <- Diagonal(n,colSums(W))-W
                 Rs.Leroux <- Diagonal(n)-Rs
 
-                data.INLA <- data.frame(O=data[,O], E=data[,E], Area=data[,ID.area], ID.area=seq(1,n))
+                data.INLA <- data.frame(O=data[,O], E=data[,E], Area=data[,ID.area], ID.area=seq(1,n), data[,X])
+                names(data.INLA)[grep("^data...",names(data.INLA))] <- X
 
                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
                               control.predictor=list(compute=TRUE, cdf=c(log(1))),
                               control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE),
                               control.inla=list(strategy=strategy))
+
+                ## Alleviate spatial confounding ##
+                if(!is.null(confounding)){
+                        time <- Model$cpu.used[4]
+
+                        if(confounding=="restricted"){
+                                cat("      + Alleviating spatial confounding: restricted regression model\n")
+                                p <- length(X)
+                                W <- Diagonal(n, Model$summary.fitted.values$mode*data.INLA$E)
+                                W.sqrt <- Diagonal(n, sqrt(diag(W)))
+
+                                cat("         * Computing eigen decomposition... ")
+                                t.eigen <- system.time({
+                                        XX <- cbind(rep(1,n),as.matrix(data.INLA[,X]))
+                                        Pc <- Diagonal(n)-W.sqrt%*%XX%*%solve(t(XX)%*%W%*%XX)%*%t(XX)%*%W.sqrt
+                                        eigen.Pc <- eigen(Pc)
+                                        L <- eigen.Pc$vectors[,eigen.Pc$values>1e-12]
+                                        Z.area <- solve(W.sqrt)%*%L%*%t(L)%*%W.sqrt
+                                })
+                                cat("Elapsed time",as.numeric(t.eigen[3]),"\n")
+
+                                M0 <- solve(t(XX)%*%XX)%*%t(XX)
+                                beta.lc = INLA::inla.make.lincombs(Predictor=M0, ID.area=-M0%*%Z.area)
+                                names(beta.lc) <- paste("X",as.character(0:p),sep="")
+
+                                cat("         * Fitting INLA model... ")
+                                Model <- inla(formula, family="poisson", data=data.INLA, E=E,
+                                              control.predictor=list(compute=TRUE, cdf=c(log(1))),
+                                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE),
+                                              lincomb=beta.lc,
+                                              control.inla=list(strategy=strategy))
+                                cat("Done \n")
+
+                                names <- rownames(Model$summary.fixed)
+                                Model$summary.fixed <- Model$summary.lincomb.derived[,-1]
+                                rownames(Model$summary.fixed) <- names
+                                Model$summary.lincomb.derived <- NULL
+
+                                names <- names(Model$marginals.lincomb.derived)
+                                Model$marginals.fixed <- Model$marginals.lincomb.derived
+                                names(Model$marginals.fixed) <- names
+                                Model$marginals.lincomb.derived <- NULL
+                        }
+                        if(confounding=="constraints"){
+                                cat("      + Alleviating spatial confounding: orthogonality constraints model\n")
+                                p <- length(X)
+                                W <- Diagonal(n, Model$summary.fitted.values$mode*data.INLA$E)
+                                Bs <- rbind(matrix(1,1,n)%*%W, t(as.matrix(data.INLA[,X]))%*%W)
+
+                                formula.char <- Reduce(paste,deparse(formula))
+                                formula.char <- gsub("constr = TRUE",sprintf("constr = FALSE, rankdef=%d, extraconstr=list(A=Bs, e=rep(0,nrow(Bs)))",p+1),formula.char)
+                                formula <- as.formula(formula.char)
+
+                                Model <- inla(formula, family="poisson", data=data.INLA, E=E,
+                                              control.predictor=list(compute=TRUE, cdf=c(log(1))),
+                                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE),
+                                              control.inla=list(strategy=strategy))
+                        }
+
+                        Model$cpu.used <- c(time+Model$cpu.used[4],t.eigen+time+Model$cpu.used[4])
+                        names(Model$cpu.used) <- c("INLA.time","Total.time")
+                }
         }
 
         ## Partition model ##
@@ -230,7 +330,11 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                 Rs <- mapply(function(x,y){Diagonal(x,colSums(y))-y}, x=nd, y=Wd)
                 Rs.Leroux <- mapply(function(x,y){Diagonal(x)-y}, x=nd, y=Rs)
 
-                data.INLA <- mapply(function(x,y){data.frame(O=x[,O], E=x[,E], Area=x[,ID.area], ID.area=seq(1,y))}, x=data.d, y=nd, SIMPLIFY=FALSE)
+                data.INLA <- mapply(function(x,y){
+                        aux <- data.frame(O=x[,O], E=x[,E], Area=x[,ID.area], ID.area=seq(1,y), x[,X])
+                        names(aux)[grep("^x...",names(aux))] <- X
+                        aux
+                }, x=data.d, y=nd, SIMPLIFY=FALSE)
                 D <- length(data.INLA)
 
                 if(plan=="sequential"){
@@ -247,7 +351,6 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL,
                         })
 
                         stopCluster(cl)
-                        future:::ClusterRegistry("stop")
                 }
 
                 if(save.models){

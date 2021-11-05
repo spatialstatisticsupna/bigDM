@@ -10,6 +10,8 @@ CAR_INLA(
   ID.group = NULL,
   O = NULL,
   E = NULL,
+  X = NULL,
+  confounding = NULL,
   W = NULL,
   prior = "Leroux",
   model = "partition",
@@ -37,6 +39,13 @@ Only required if \code{model="partition"}.}
 \item{O}{character; name of the variable which contains the observed number of disease cases for each areal units.}
 
 \item{E}{character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit.}
+
+\item{X}{a character vector containing the names of the covariates within the \code{carto} object to be included in the model as fixed effects,
+or a matrix object playing the role of the fixed effects design matrix. For the latter case, the row names must match with the IDs of the spatial units defined by the \code{ID.area} variable.
+If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.}
+
+\item{confounding}{one of either \code{NULL}, \code{"restricted"} (restricted regression) or \code{"constraints"} (orthogonal constraints), which specifies the estimation method used to alleviate spatial confounding between fixed and random effects.
+If only an intercept is considered in the model (\code{X=NULL}), the default value \code{confounding=NULL} will be set.}
 
 \item{W}{optional argument with the binary adjacency matrix of the spatial areal units.  If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).}
 
@@ -75,9 +84,13 @@ If \code{plan="sequential"} (default) the models are fitted sequentially and in 
 This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 }
 \description{
-Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as the sum of a global intercept and a spatially structured random effect.
-For the latter, several conditional autoregressive (CAR) prior distributions can be specified, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
+Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{i}}=\eta+\mathbf{x_i}^{'}\beta + \xi_i, \quad \mbox{for} \quad i=1,\ldots,n;}
+where \eqn{\eta} is a global intercept, \eqn{\mathbf{x_i}^{'}=(x_{i1},\ldots,x_{ip})} is a p-vector of standardized covariates in the i-th area,
+\eqn{\beta=(\beta_1,\ldots,\beta_p)} is the p-vector of fixed effects coefficients, and \eqn{\xi_i} is a spatially structured random effect.
+Several conditional autoregressive (CAR) prior distributions can be specified for the spatial random effect, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2.
+
+If covariates are included in the model, two different approaches can be used to address the potential confounding issues between the fixed effects and the spatial random effects of the model: restricted regression and the use of orthogonality constraints. See \insertCite{adin2021alleviating;textual}{bigDM} for further details.
 \cr\cr
 Three main modeling approaches can be considered:
 \itemize{
@@ -122,6 +135,8 @@ summary(order2)
 
 }
 \references{
+\insertRef{adin2021alleviating}{bigDM}
+
 \insertRef{bengtsson2020unifying}{bigDM}
 
 \insertRef{besag1991}{bigDM}
