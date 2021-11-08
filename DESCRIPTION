@@ -16,12 +16,7 @@ Suggests:
     tmap,
     knitr,
     rmarkdown,
-    bookdown,
-    cpp11,
-    proxy,
-    progress,
-    tzdb,
-    vroom
+    bookdown
 RdMacros: Rdpack
 License: GPL-3
 Encoding: UTF-8
