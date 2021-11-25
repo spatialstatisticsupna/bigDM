@@ -53,7 +53,7 @@ add_neighbour <- function(carto, nb=NULL, plot=FALSE){
     for(i in which(card(nb)==0)){
       j <- knn.nb[[i]]
       nb[[i]] <- as.integer(j)
-      nb[[j]] <- as.integer(sort(c(i,nb[[j]])))
+      nb[[j]] <- as.integer(unique(sort(c(i,nb[[j]]))))
     }
   }
 
