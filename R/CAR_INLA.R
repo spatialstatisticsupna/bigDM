@@ -71,7 +71,7 @@
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
-#' @import Matrix parallel future
+#' @import crayon future Matrix parallel
 #' @importFrom future.apply future_mapply
 #' @importFrom INLA inla inla.make.lincombs
 #' @importFrom sf st_as_sf st_set_geometry
@@ -323,6 +323,15 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                 carto.d <- divide_carto(carto, ID.group, k)
                 data.d <- lapply(carto.d, function(x) sf::st_set_geometry(x, NULL))
+
+                fun <- function(){
+                        text <- sprintf("\nYou have %d subregion(s) with more than 70%% of areas with no observed cases.\nAre you sure that you want to continue fitting the model?\nPress any key to continue or [s] to stop: ",n.zero)
+                        answer <- readline(cat(red(text," ")))
+                        if(answer=="s") stop("Stopped by the user.", call.=FALSE)
+                }
+                prop.zero <- unlist(lapply(data.d, function(x) mean(x[,O]==0)))
+                n.zero <- sum(prop.zero>0.7)
+                if(n.zero>0) fun()
 
                 invisible(utils::capture.output(aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area))))
                 Wd <- lapply(aux, function(x) x$W)
