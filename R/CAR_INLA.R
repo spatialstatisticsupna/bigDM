@@ -228,7 +228,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
 
                 models <- inla(formula, family="poisson", data=data.INLA, E=E,
-                               control.predictor=list(compute=TRUE, cdf=c(log(1))),
+                               control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE),
                                control.inla=list(strategy=strategy))
                 return(models)
@@ -247,7 +247,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 names(data.INLA)[grep("^data...",names(data.INLA))] <- X
 
                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
-                              control.predictor=list(compute=TRUE, cdf=c(log(1))),
+                              control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                               control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE),
                               control.inla=list(strategy=strategy))
 
@@ -277,7 +277,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                                 cat("         * Fitting INLA model... ")
                                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
-                                              control.predictor=list(compute=TRUE, cdf=c(log(1))),
+                                              control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                               control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE),
                                               lincomb=beta.lc,
                                               control.inla=list(strategy=strategy))
@@ -304,7 +304,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                 formula <- as.formula(formula.char)
 
                                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
-                                              control.predictor=list(compute=TRUE, cdf=c(log(1))),
+                                              control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                               control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE),
                                               control.inla=list(strategy=strategy))
                         }
