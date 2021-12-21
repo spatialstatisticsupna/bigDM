@@ -248,7 +248,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
                               control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
-                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, return.marginals.predictor=TRUE),
+                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
                               control.inla=list(strategy=strategy))
 
                 ## Alleviate spatial confounding ##
@@ -278,7 +278,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                 cat("         * Fitting INLA model... ")
                                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
                                               control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
-                                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, return.marginals.predictor=TRUE),
+                                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
                                               lincomb=beta.lc,
                                               control.inla=list(strategy=strategy))
                                 cat("Done \n")
@@ -305,7 +305,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
                                               control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
-                                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, return.marginals.predictor=TRUE),
+                                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
                                               control.inla=list(strategy=strategy))
                         }
 
