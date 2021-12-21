@@ -10,7 +10,7 @@ bibliography: REFERENCES.bib
 link-citations: true
 csl: apa.csl
 vignette: >
-  %\VignetteIndexEntry{bigDM}
+  %\VignetteIndexEntry{bigDM1}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

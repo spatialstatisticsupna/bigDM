@@ -32,6 +32,7 @@
 #' @importFrom stats dist
 #'
 #' @examples
+#' library(foreign)
 #' library(tmap)
 #'
 #' ## load the Spain colorectal cancer mortality data ##
