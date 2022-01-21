@@ -1,10 +1,10 @@
 #' Fit a (scalable) spatial Poisson mixed model to areal count data, where several CAR prior distributions can be specified for the spatial random effect.
 #'
-#' @description Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{i}}=\eta+\mathbf{x_i}^{'}\beta + \xi_i, \quad \mbox{for} \quad i=1,\ldots,n;}
-#' where \eqn{\eta} is a global intercept, \eqn{\mathbf{x_i}^{'}=(x_{i1},\ldots,x_{ip})} is a p-vector of standardized covariates in the i-th area,
+#' @description Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{i}}=\alpha+\mathbf{x_i}^{'}\beta + \xi_i, \quad \mbox{for} \quad i=1,\ldots,n;}
+#' where \eqn{\alpha} is a global intercept, \eqn{\mathbf{x_i}^{'}=(x_{i1},\ldots,x_{ip})} is a p-vector of standardized covariates in the i-th area,
 #' \eqn{\beta=(\beta_1,\ldots,\beta_p)} is the p-vector of fixed effects coefficients, and \eqn{\xi_i} is a spatially structured random effect.
 #' Several conditional autoregressive (CAR) prior distributions can be specified for the spatial random effect, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
-#' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2.
+#' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2 \insertCite{riebler2016intuitive}{bigDM}.
 #'
 #' If covariates are included in the model, two different approaches can be used to address the potential confounding issues between the fixed effects and the spatial random effects of the model: restricted regression and the use of orthogonality constraints. See \insertCite{adin2021alleviating;textual}{bigDM} for further details.
 #' \cr\cr
@@ -31,6 +31,8 @@
 #' \insertRef{dean2001detecting}{bigDM}
 #'
 #' \insertRef{leroux1999estimation}{bigDM}
+#'
+#' \insertRef{riebler2016intuitive}{bigDM}
 #'
 #' \insertRef{rue2009approximate}{bigDM}
 #'
@@ -79,27 +81,27 @@
 #' @importFrom utils capture.output
 #'
 #' @examples
-#' ## load the Spain colorectal cancer mortality data ##
+#' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
 #'
 #' \dontrun{
-#' ## fit the global model with a Leroux CAR prior distribution ##
+#' ## Fit the global model with a Leroux CAR prior distribution ##
 #' Global <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", O="obs", E="exp",
 #'                    prior="Leroux", model="global", strategy="gaussian")
 #'
 #' summary(Global)
 #'
-#' ## fit the disjoint model with a Leroux CAR prior distribution ##
+#' ## Fit the disjoint model with a Leroux CAR prior distribution ##
 #' Disjoint <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
 #'                      prior="Leroux", model="partition", k=0, strategy="gaussian")
 #' summary(Disjoint)
 #'
-#' ## fit the 1st order neighbourhood model with a Leroux CAR prior distribution ##
+#' ## Fit the 1st order neighbourhood model with a Leroux CAR prior distribution ##
 #' order1 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
 #'                    prior="Leroux", model="partition", k=1, strategy="gaussian")
 #' summary(order1)
 #'
-#' ## fit the 2nd order neighbourhood model with a Leroux CAR prior distribution ##
+#' ## Fit the 2nd order neighbourhood model with a Leroux CAR prior distribution ##
 #' order2 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
 #'                    prior="Leroux", model="partition", k=2, strategy="gaussian")
 #' summary(order2)
@@ -325,12 +327,16 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 data.d <- lapply(carto.d, function(x) sf::st_set_geometry(x, NULL))
 
                 fun <- function(){
-                        text <- sprintf("\nYou have %d subregion(s) with more than 70%% of areas with no observed cases.\nAre you sure that you want to continue fitting the model?\nPress any key to continue or [s] to stop: ",n.zero)
+                        text <- sprintf("\n%d subdomains(s) have more than 70%% of areas with no observed cases.\nAre you sure that you want to continue fitting the model?\nPress any key to continue or [s] to stop: ",n.zero)
                         answer <- readline(cat(red(text," ")))
-                        if(answer=="s") stop("Stopped by the user.", call.=FALSE)
+                        if(answer=="s"){
+                                stop("Stopped by the user.", call.=FALSE)
+                        }else{
+                                cat(red("Running...\n"))
+                        }
                 }
                 prop.zero <- unlist(lapply(data.d, function(x) mean(x[,O]==0)))
-                n.zero <- sum(prop.zero>0.7)
+                n.zero <- sum(prop.zero>0.1)
                 if(n.zero>0) fun()
 
                 invisible(utils::capture.output(aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area))))

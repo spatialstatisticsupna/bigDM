@@ -1,13 +1,13 @@
 Package: bigDM
 Type: Package
 Title: Scalable Bayesian Disease Mapping Models for High-Dimensional Data
-Version: 0.3.2
-Date: 2021-11-05
+Version: 0.4.0
+Date: 2022-01-21
 Author: Aritz Adin [aut, cre] <aritz.adin@unavarra.es>,
         Erick Orozco-Acosta [aut] <erick.orozco@unavarra.es>,
         Maria Dolores Ugarte [aut] <lola@unavarra.es>
 Maintainer: Aritz Adin <aritz.adin@unavarra.es>
-Description: This package includes functions to fit scalable disease mapping models for high-dimensional spatial count data using the INLA technique for approximate Bayesian inference in latent Gaussian models.
+Description: This package includes functions to fit scalable disease mapping models for high-dimensional spatial and spatio-temporal count data using the INLA technique for approximate Bayesian inference in latent Gaussian models.
 URL: https://github.com/spatialstatisticsupna/bigDM
 BugReports: https://github.com/spatialstatisticsupna/bigDM/issues
 Depends: R (>= 4.0.0)
@@ -21,5 +21,5 @@ RdMacros: Rdpack
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr

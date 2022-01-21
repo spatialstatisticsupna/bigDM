@@ -5,16 +5,17 @@
 #'
 #' @details If the disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
 #' However, to obtain a single estimate of the overall log-risk \eqn{\alpha}, we extract samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
-#' After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{n}\sum_{i=1}^n \log r_i, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
+#' After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{nT}\sum_{i=1}^n\sum_{t=1}^T \log{r_{it}}, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
 #' \cr \cr
-#' If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_n)^{'}} is no longer the union of the posterior estimates obtained from each submodel.
-#' To obtain a unique posterior distribution of \eqn{r_i} for each areal unit \eqn{i}, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights.
+#' If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_{nT})^{'}} is no longer the union of the posterior estimates obtained from each submodel.
+#' To obtain a unique posterior distribution of \eqn{r_{it}} for each areal unit \eqn{i} and time point \eqn{t}, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights.
 #' \cr \cr
-#' See \insertCite{orozco2020;textual}{bigDM} for more details.
+#' See \insertCite{orozco2020;textual}{bigDM} and \insertCite{orozco2022;textual}{bigDM} for more details.
 #'
 #' @param inla.models list of multiple objects of class \code{inla}.
 #' @param k numeric value with the neighbourhood order used for the partition model. If k=0 the \emph{Disjoint model} is considered.
 #' @param ID.area character; name of the variable which contains the IDs of spatial areal units. Default to \code{"Area"}.
+#' @param ID.year character; name of the variable which contains the IDs of time points. Default to \code{"NULL"} (for spatial models).
 #' @param O character; name of the variable which contains the observed number of disease cases for each areal units. Default to \code{"O"}.
 #' @param E character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit. Default to \code{"E"}.
 #' @param seed numeric; control the RNG of \code{inla.qsample} (see \code{help(inla.qsample)} for further information). Defaults to \code{NULL}.
@@ -26,7 +27,9 @@
 #' @return This function returns an object of class \code{inla} containing the following elements:
 #' \item{\code{summary.fixed}}{If \code{compute.fixed=TRUE} a data.frame containing the mean, standard deviation, quantiles and mode of the model's intercept.}
 #' \item{\code{marginals.fixed}}{If \code{compute.fixed=TRUE} a list containing the posterior marginal density of the model's intercept.}
-#' \item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation, quantiles and mode of the model's spatial random effects.}
+#' \item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's intercept for each partition.}
+#' \item{\code{marginals.fixed.partition}}{A list containing the posterior marginal density of the model's intercept for each partition.}
+#' \item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation, quantiles and mode of the model's random effects.}
 #' \item{\code{marginals.random}}{If \code{k=0} a list containing the posterior marginal densities of the model's random effects.}
 #' \item{\code{summary.linear.predictor}}{If \code{k=0} a data.frame containing the mean, standard deviation, quantiles and mode of the log-risks (or log-rates) in the model.}
 #' \item{\code{marginals.linear.predictor}}{If \code{k=0} a list containing the posterior marginal densities of the log-risks (or log-rates) in the model.}
@@ -42,26 +45,26 @@
 #' @importFrom rlist list.flatten
 #'
 #' @examples
-#' ## See the vignette accompanying this package for an example of its use.
+#' ## See the vignettes accompanying this package for an example of its use.
 #'
 #' @export
-mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE){
+mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, O="O", E="E", seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE){
 
   D <- length(inla.models)
 
   ## Check for errors ##
   if(class(inla.models)!="list" | D==0)
-    stop("the inla.models argument must be a non-empty list")
+    stop("the 'inla.models' argument must be a non-empty list")
   if(unlist(unique(lapply(inla.models, function(x) class(x))))!="inla")
-    stop("the inla.models argument must contain 'inla' class objects")
+    stop("the 'inla.models' argument must contain 'inla' class objects")
   if(is.null(k))
-    stop("the k argument is missing")
+    stop("the 'k' argument is missing")
   if(is.null(ID.area))
-    stop("the ID.area argument is missing")
+    stop("the 'ID.area' argument is missing")
   if(is.null(O))
-    stop("the O argument is missing")
+    stop("the 'O' argument is missing")
   if(is.null(E))
-    stop("the E argument is missing")
+    stop("the 'E' argument is missing")
 
   tt <- system.time({
 
@@ -84,24 +87,35 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
                        "mode","neffp","joint.hyper","nhyper","version","Q","graph","ok","cpu.used","all.hyper",".args",
                        "call","model.matrix")
 
-    ID.list <- lapply(inla.models, function(x) x$.args$data[,ID.area])
-    ID <- sort(as.character(unique(unlist(ID.list))))
-
+    if(is.null(ID.year)){
+      ID.list <- lapply(inla.models, function(x) x$.args$data[,ID.area])
+      ID <- sort(as.character(unique(unlist(ID.list))))
+    }else{
+      ID.list <- lapply(inla.models, function(x) paste(x$.args$data[,ID.year],x$.args$data[,ID.area],sep="."))
+      ID <- sort(as.character(unique(unlist(ID.list))))
+    }
 
     ## Fixed effects ##
-    if(k==0){
-      names.fixed <- unique(lapply(inla.models, function(x) x$names.fixed))
+    names.fixed <- unique(lapply(inla.models, function(x) x$names.fixed))
 
-      if(length(names.fixed)>1){
-        stop("Different 'names.fixed' arguments for INLA models")
-      }else{
+    if(length(names.fixed)>1){
+      stop("Different 'names.fixed' arguments for INLA models")
+    }else{
+      aux <- do.call(rbind,lapply(inla.models, function(x) x$summary.fixed))
+      rownames(aux) <- paste(rep(unlist(names.fixed),D),rep(formatC(1:D, width=ceiling(log(D+1,10)), flag='0'),each=length(unlist(names.fixed))),sep=".")
+      result$summary.fixed.partition <- aux[order(rownames(aux)),]
+
+      aux <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.fixed))
+      names(aux) <- paste(rep(unlist(names.fixed),D),rep(formatC(1:D, width=ceiling(log(D+1,10)), flag='0'),each=length(unlist(names.fixed))),sep=".")
+      result$marginals.fixed.partition <- aux[order(names(aux))]
+
+      if(k==0){
         if(is.null(unlist(names.fixed)) | compute.fixed==FALSE){
           result$summary.fixed <- data.frame()
           # result$names.fixed <- NULL
           # result$marginals.fixed <- NULL
         }else{
-
-          result$names.fixed <- unlist(names.fixed)
+          result$names.fixed <- unlist(names.fixed)[1]
 
           inla.seed <- as.integer(runif(1)*.Machine$integer.max)
 
@@ -127,11 +141,11 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
           result$marginals.fixed <- list(marginals.fixed)
           names(result$marginals.fixed) <- result$names.fixed
         }
+      }else{
+        # result$names.fixed <- NULL
+        result$summary.fixed <- data.frame()
+        # result$marginals.fixed <- NULL
       }
-    }else{
-      # result$names.fixed <- NULL
-      result$summary.fixed <- data.frame()
-      # result$marginals.fixed <- NULL
     }
 
 
@@ -167,24 +181,39 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
         }else{
 
           result$model.random <- unlist(model.random)
-          result$summary.random <- vector("list",length(unique(model.random)))
+          result$summary.random <- vector("list",length(result$model.random))
           names(result$summary.random) <- names(inla.models[[1]]$summary.random)
 
-          result$summary.random[[1]] <- do.call(rbind,lapply(inla.models, function(x) x$summary.random$ID.area))
-          result$summary.random[[1]]$ID <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
-          result$summary.random[[1]] <- result$summary.random[[1]][order(result$summary.random[[1]]$ID),]
-          result$summary.random[[1]]$ID <- seq(1,nrow(result$summary.random[[1]]))
-          rownames(result$summary.random[[1]]) <- seq(1,nrow(result$summary.random[[1]]))
+          result$summary.random$ID.area <- do.call(rbind,lapply(inla.models, function(x) x$summary.random$ID.area))
+          result$summary.random$ID.area$ID <- as.character(unlist(lapply(inla.models, function(x) unique(x$.args$data[,ID.area]))))
+          result$summary.random$ID.area <- result$summary.random$ID.area[order(result$summary.random$ID.area$ID),]
+          result$summary.random$ID.area$ID <- seq(1,nrow(result$summary.random$ID.area))
+          rownames(result$summary.random$ID.area) <- seq(1,nrow(result$summary.random$ID.area))
 
-          result$marginals.random <- vector("list",length(unique(model.random)))
+          if("ID.area.year" %in% names(result$summary.random)){
+            result$summary.random$ID.area.year <- do.call(rbind,lapply(inla.models, function(x) x$summary.random$ID.area.year))
+            result$summary.random$ID.area.year$ID <- as.character(unlist(lapply(inla.models, function(x) paste(x$.args$data[,ID.year],x$.args$data[,ID.area],sep="."))))
+            result$summary.random$ID.area.year <- result$summary.random$ID.area.year[order(result$summary.random$ID.area.year$ID),]
+            result$summary.random$ID.area.year$ID <- seq(1,nrow(result$summary.random$ID.area.year))
+            rownames(result$summary.random$ID.area.year) <- seq(1,nrow(result$summary.random$ID.area.year))
+          }
+
+          result$marginals.random <- vector("list",length(unique(result$model.random)))
           names(result$marginals.random) <- names(inla.models[[1]]$summary.random)
 
-          result$marginals.random[[1]] <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.random$ID.area))
-          names(result$marginals.random[[1]]) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
-          result$marginals.random[[1]] <- result$marginals.random[[1]][order(names(result$marginals.random[[1]]))]
-          names(result$marginals.random[[1]]) <- paste("index",seq(1:length(result$marginals.random[[1]])),sep=".")
+          result$marginals.random$ID.area <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.random$ID.area))
+          names(result$marginals.random$ID.area) <- as.character(unlist(lapply(inla.models, function(x) unique(x$.args$data[,ID.area]))))
+          result$marginals.random$ID.area <- result$marginals.random$ID.area[order(names(result$marginals.random$ID.area))]
+          names(result$marginals.random$ID.area) <- paste("index",seq(1:length(result$marginals.random$ID.area)),sep=".")
 
-          result$size.random <- vector("list",length(unique(model.random)))
+          if("ID.area.year" %in% names(result$summary.random)){
+            result$marginals.random$ID.area.year <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.random$ID.area.year))
+            names(result$marginals.random$ID.area.year) <- as.character(unlist(lapply(inla.models, function(x) paste(x$.args$data[,ID.year],x$.args$data[,ID.area],sep="."))))
+            result$marginals.random$ID.area.year <- result$marginals.random$ID.area.year[order(names(result$marginals.random$ID.area.year))]
+            names(result$marginals.random$ID.area.year) <- paste("index",seq(1:length(result$marginals.random$ID.area.year)),sep=".")
+          }
+
+          result$size.random <- vector("list",length(result$model.random))
           for(i in 1:length(result$size.random)){
             result$size.random[[i]] <- list(n=nrow(result$summary.random[[i]]), N=nrow(result$summary.random[[i]]), Ntotal=nrow(result$summary.random[[i]]), ngroup=1, nrep=1)
           }
@@ -201,7 +230,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
     ## Linear predictor ##
     if(k==0){
       summary.linear.predictor <- do.call(rbind,lapply(inla.models, function(x) x$summary.linear.predictor))
-      rownames(summary.linear.predictor) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      rownames(summary.linear.predictor) <- unlist(ID.list)
       result$summary.linear.predictor <- summary.linear.predictor[order(rownames(summary.linear.predictor)),]
       aux <- as.character(1:nrow(result$summary.linear.predictor))
       l <- max(nchar(aux))
@@ -209,7 +238,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
       rownames(result$summary.linear.predictor) <- paste("Predictor",aux,sep=".")
 
       marginals.linear.predictor <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.linear.predictor))
-      names(marginals.linear.predictor) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      names(marginals.linear.predictor) <- unlist(ID.list)
       result$marginals.linear.predictor <- marginals.linear.predictor[order(names(marginals.linear.predictor))]
       names(result$marginals.linear.predictor) <- paste("Predictor",1:length(result$marginals.linear.predictor),sep=".")
 
@@ -227,7 +256,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
     if(k==0){
       summary.fitted.values <- do.call(rbind,lapply(inla.models, function(x) x$summary.fitted.values))
-      rownames(summary.fitted.values) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      rownames(summary.fitted.values) <- unlist(ID.list)
       result$summary.fitted.values <- summary.fitted.values[order(rownames(summary.fitted.values)),]
       aux <- as.character(1:nrow(result$summary.fitted.values))
       l <- max(nchar(aux))
@@ -235,7 +264,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
       rownames(result$summary.fitted.values) <- paste("fitted.Predictor",aux,sep=".")
 
       marginals.fitted.values <- rlist::list.flatten(lapply(inla.models, function(x) x$marginals.fitted.values))
-      names(marginals.fitted.values) <- as.character(unlist(lapply(inla.models, function(x) x$.args$data[,ID.area])))
+      names(marginals.fitted.values) <- unlist(ID.list)
       result$marginals.fitted.values <- marginals.fitted.values[order(names(marginals.fitted.values))]
       names(result$marginals.fitted.values) <- paste("fitted.Predictor",aux,sep=".")
     }else{
@@ -309,11 +338,20 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
     family <- unique(lapply(inla.models, function(x) x$.args$family))
     if(length(family)==1) result$.args$family <- family[[1]]
 
-    result$.args$data <-do.call(rbind,lapply(inla.models, function(x) x$.args$data))
-    result$.args$data <- result$.args$data[!duplicated(result$.args$data[,ID.area]),]
-    result$.args$data[,ID.area] <- as.character(result$.args$data[,ID.area])
-    result$.args$data <- result$.args$data[order(result$.args$data[,ID.area]),]
-    result$.args$data[,ID.area] <- as.factor(result$.args$data[,ID.area])
+    result$.args$data <- do.call(rbind,lapply(inla.models, function(x) x$.args$data))
+    if(is.null(ID.year)){
+      result$.args$data$ID <- as.character(result$.args$data[,ID.area])
+      result$.args$data <- result$.args$data[!duplicated(result$.args$data$ID),]
+      result$.args$data <- result$.args$data[order(result$.args$data$ID),]
+    }else{
+      result$.args$data$ID <- paste(result$.args$data[,ID.year],result$.args$data[,ID.area],sep=".")
+      result$.args$data <- result$.args$data[!duplicated(result$.args$data$ID),]
+      result$.args$data <- result$.args$data[order(result$.args$data$ID),]
+      result$.args$data$ID.area <- rep(1:length(unique(result$.args$data[,ID.area])), length(unique(result$.args$data[,ID.year])))
+      result$.args$data$ID.year <- rep(1:length(unique(result$.args$data[,ID.year])), each=length(unique(result$.args$data[,ID.area])))
+      result$.args$data$ID.area.year <- seq(1:nrow(result$.args$data))
+    }
+    result$.args$data$ID <- NULL
     rownames(result$.args$data) <- seq(1:nrow(result$.args$data))
 
     quantiles <- unique(lapply(inla.models, function(x) x$.args$quantiles))
@@ -378,17 +416,16 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", O="O", E="E", 
 
     ## Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) ##
     if(compute.DIC){
-      marginals.fitted.values<- result$marginals.fitted.values
+      marginals.fitted.values <- result$marginals.fitted.values
 
       suppressWarnings({
         cl <- makeCluster(detectCores())
         clusterExport(cl, varlist=c("n.sample","marginals.fitted.values"), envir=environment())
-        clusterEvalQ(cl, {
-          INLA::inla.rmarginal
-        })
+        clusterEvalQ(cl, INLA::inla.rmarginal)
         risk.sample <- do.call(rbind,parLapply(cl,marginals.fitted.values,riskSampleDeviance))
         stopCluster(cl)
       })
+
       mu.sample <- apply(risk.sample, 2, function(x) result$.args$data[,E]*x)
       result$dic$mean.deviance <- mean(apply(mu.sample, 2, function(x) -2*sum(log(dpois(result$.args$data[,O],x)))))
       result$dic$deviance.mean <- -2*sum(log(dpois(result$.args$data[,O],apply(mu.sample,1,mean))))
@@ -526,5 +563,3 @@ utils::globalVariables(c("ID.list",
                          "models.cpo",
                          "n.sample",
                          "inla.seed"))
-
-

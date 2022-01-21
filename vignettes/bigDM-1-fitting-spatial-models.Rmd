@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 ```
 
 ## Introduction {-#introduction}
-__bigDM__ is a package that implements several (scalable) spatial Poisson mixed models for high-dimensional areal count data, with inference in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique [@rue2009approximate]. This vignette focuses on how to use the __bigDM__ package to fit the scalable model's proposals described in [@orozco2020] using Spanish colorectal cancer mortality data.
+__bigDM__ is a package that implements several (scalable) spatial and spatio-temporal Poisson mixed models for high-dimensional areal count data, with inference in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique [@rue2009approximate]. This vignette focuses on how to use the __bigDM__ package to fit the __scalable spatial model's__ proposals described in [@orozco2020] using Spanish colorectal cancer mortality data.
 
 The development version is hosted on [GitHub](https://github.com/spatialstatisticsupna/bigDM) and can be installed as follows:
 ```{r eval=FALSE, include=TRUE}
@@ -42,7 +42,7 @@ library(devtools)
 # Install the R-INLA package
 install.packages("INLA", repos=c(getOption("repos"), INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
 
-# Install bigDM (version 0.3.1) from GitHub repositoy
+# Install bigDM (version 0.4.0) from GitHub repositoy
 install_github("spatialstatisticsupna/bigDM")
 ```
 

@@ -25,23 +25,23 @@
 #' @examples
 #' library(spdep)
 #'
-#' ## load the Spain colorectal cancer mortality data ##
+#' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
 #'
-#' ## select the polygons (municipalities) of the 'Comunidad Valenciana' region ##
+#' ## Select the polygons (municipalities) of the 'Comunidad Valenciana' region ##
 #' carto <- Carto_SpainMUN[Carto_SpainMUN$region=="Comunidad Valenciana",]
 #'
 #' carto.nb <- poly2nb(carto)
 #' n.comp.nb(carto.nb)$nc # 2 disjoint connected subgraphs
 #'
-#' ## plot the spatial polygons and its neighbourhood graph
+#' ## Plot the spatial polygons and its neighbourhood graph
 #' par(mfrow=c(1,2), pty="s")
 #'
 #' plot(carto$geometry, main="Original neighbourhood graph")
 #' plot(carto.nb, st_centroid(st_geometry(carto), of_largest_polygon=TRUE),
 #'      pch=19, cex=0.5, col="red", add=TRUE)
 #'
-#' ## use the 'connect_subgraphs' function ##
+#' ## Use the 'connect_subgraphs' function ##
 #' carto.mod <- connect_subgraphs(carto=carto, ID.area="ID", nb=carto.nb, plot=TRUE)
 #' title(main="Modified neighbourhood graph")
 #'

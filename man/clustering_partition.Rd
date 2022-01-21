@@ -51,19 +51,20 @@ The algorithm has its basis in the assumption that cluster centers are points wi
 See \insertCite{santafe2021;textual}{bigDM} for more details.
 }
 \examples{
+library(foreign)
 library(tmap)
 
-## load the Spain colorectal cancer mortality data ##
+## Load the Spain colorectal cancer mortality data ##
 data(Carto_SpainMUN)
 
-## define a spatial partition using the DBSC algorithm ##
+## Define a spatial partition using the DBSC algorithm ##
 Carto_SpainMUN$logSMR <- log(Carto_SpainMUN$obs/Carto_SpainMUN$exp+0.0001)
 
 carto.new <- clustering_partition(carto=Carto_SpainMUN, ID.area="ID", var="logSMR",
                                   n.cluster=20, l=2, min.size=100, verbose=TRUE)
 table(carto.new$ID.group)
 
-## plot of the grouping variable 'ID.group' ##
+## Plot of the grouping variable 'ID.group' ##
 carto.partition <- maptools::unionSpatialPolygons(as(carto.new,"Spatial"),carto.new$ID.group)
 
 tm_shape(carto.new) +

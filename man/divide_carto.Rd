@@ -26,21 +26,21 @@ and divides it into subregions according to some grouping variable.
 \examples{
 library(tmap)
 
-## load the Spain colorectal cancer mortality data ##
+## Load the Spain colorectal cancer mortality data ##
 data(Carto_SpainMUN)
 
-## plot of the grouping variable 'region' ##
+## Plot of the grouping variable 'region' ##
 tm_shape(Carto_SpainMUN) +
   tm_polygons(col="region") +
   tm_layout(legend.outside=TRUE)
 
-## disjoint partition ##
+## Disjoint partition ##
 carto.k0 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=0)
 
-## partition + 1st order neighbours ##
+## Partition + 1st order neighbours ##
 carto.k1 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=1)
 
-## partition + 2nd order neighbours ##
+## Partition + 2nd order neighbours ##
 carto.k2 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=2)
 
 ## Plot the spatial polygons for the autonomous region of Castilla y Leon ##

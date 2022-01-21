@@ -29,9 +29,9 @@ knitr::opts_chunk$set(
 ```
 
 ## Introduction {-#introduction}
-When fitting both the disjoint and k-order neighbour models with the __bigDM__ package [@orozco2020] parallel or distributed computation strategies can be performed to speed up computations by using the __future__ package [@bengtsson2020unifying]. 
+When fitting both the disjoint and k-order neighbour models with the __bigDM__ package [@orozco2020;@orozco2022] parallel or distributed computation strategies can be performed to speed up computations by using the __future__ package [@bengtsson2020unifying]. 
 
-Different computation strategies can be specified through the `plan` argument of the `CAR_INLA()` function (available for __bigDM__ version 0.3 and higher). For further details about these strategies see the [documentation of the __future__ package](https://cran.r-project.org/web/packages/future/index.html)  and its corresponding vignettes.
+Different computation strategies can be specified through the `plan` argument of the `CAR_INLA()` and `STCAR_INLA()` functions (available for __bigDM__ version 0.4 and higher). For further details about these strategies see the [documentation of the __future__ package](https://cran.r-project.org/web/packages/future/index.html)  and its corresponding vignettes.
 
 * If `plan="sequential"` (default), the models are fitted sequentially and in the current R session (local machine).
 

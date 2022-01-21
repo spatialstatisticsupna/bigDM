@@ -24,5 +24,24 @@
 #' @keywords data
 NULL
 
+#' Spanish lung cancer mortality data
+#'
+#' @description \code{data.frame} object containing simulated lung cancer mortality data in the 7907 municipalities of continental Spain during the period 1991-2015.
+#'
+#' @usage Data_LungCancer
+#'
+#' @format Formal class \code{data.frame} with 197.675 rows and 5 colunmns.
+#' \itemize{
+#'   \item ID: character vector of geographic identifiers
+#'   \item year: numeric vector of year's identifiers
+#'   \item obs: observed number of cases
+#'   \item exp: expected number of cases
+#'   \item SMR: standardized mortality ratios
+#' }
+#' @name Data_LungCancer
+#' @docType data
+#' @keywords data
+NULL
+
 #' @docType package
 #' @bibliography system.file("REFERENCES.bib", package = "bigDM")

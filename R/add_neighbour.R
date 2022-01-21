@@ -21,14 +21,14 @@
 #' @examples
 #' library(spdep)
 #'
-#' ## load the Spanish colorectal cancer mortality data ##
+#' ## Load the Spanish colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
 #'
-#' ## compute the neighbour list from spatial polygons ##
+#' ## Compute the neighbour list from spatial polygons ##
 #' nb_SpainMUN <- poly2nb(Carto_SpainMUN)
 #' summary(nb_SpainMUN) # 1 region with no links
 #'
-#' ## add isolated area to its nearest neighbour ####
+#' ## Add isolated area to its nearest neighbour ####
 #' carto.mod <- add_neighbour(carto=Carto_SpainMUN, nb=nb_SpainMUN)
 #' summary(carto.mod$nb) # 0 region with no links
 #'

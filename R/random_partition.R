@@ -2,15 +2,15 @@
 #'
 #' @description The function takes an object of class \code{SpatialPolygonsDataFrame} or \code{sf} and
 #' defines a random partition of the spatial polygons based on a regular grid over the whole domain
-#' using the \code{st_make_grid} function of the 'sf' package.
+#' using the \code{st_make_grid} function of the \code{sf} package.
 #'
 #' @details After defining a random partition of the spatial polygons based on a regular grid, the subregions with number of areas smaller than the value given by the \code{min.size} are merged to its nearest neighbour.
 #' Then, the subregions with number of areas greater than the value given by the \code{max.size} argument are divided.
 #' Finally, if \code{prop.zero} argument is set, the subregions with proportion of areas with zero cases below that threshold are merged to its smallest neighbour.
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
-#' @param rows numeric; number of rows to define the regular grid. Default to 3.
-#' @param columns numeric; number of columns to define the regular grid. Default to 3.
+#' @param rows integer; number of rows to define the regular grid. Default to 3.
+#' @param columns integer; number of columns to define the regular grid. Default to 3.
 #' @param min.size numeric; value to fix the minimum number of areas in each spatial partition (if \code{NULL}, this step is skipped). Default to 50.
 #' @param max.size numeric; value to fix the maximum number of areas in each spatial partition (if \code{NULL}, this step is skipped). Default to 600.
 #' @param prop.zero numeric; value between 0 and 1 that indicates the maximum proportion of areas with no cases for each spatial partition.
@@ -25,10 +25,10 @@
 #' @examples
 #' library(tmap)
 #'
-#' ## load the Spain colorectal cancer mortality data ##
+#' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
 #'
-#' ## random partition based on a 3x3 regular grid (with no size restrictions) ##
+#' ## Random partition based on a 3x3 regular grid (with no size restrictions) ##
 #' carto.r1 <- random_partition(carto=Carto_SpainMUN, rows=3, columns=3,
 #'                              min.size=NULL, max.size=NULL)
 #' table(carto.r1$ID.group)
@@ -43,7 +43,7 @@
 #'             legend.outside=TRUE)
 #'
 #'
-#' ## random partition based on a 6x4 regular grid (with size restrictions) ##
+#' ## Random partition based on a 6x4 regular grid (with size restrictions) ##
 #' carto.r2 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
 #'                              min.size=50, max.size=600)
 #' table(carto.r2$ID.group)
@@ -58,7 +58,7 @@
 #'             legend.outside=TRUE)
 #'
 #'
-#' ## random partition based on a 6x4 regular grid (with size and proportion of zero restrictions) ##
+#' ## Random partition based on a 6x4 regular grid (with size and proportion of zero restrictions) ##
 #' carto.r3 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
 #'                              min.size=50, max.size=600, prop.zero=0.5, O="obs")
 #' table(carto.r3$ID.group)

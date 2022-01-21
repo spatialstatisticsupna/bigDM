@@ -11,7 +11,7 @@ Scalable Bayesian disease mapping models for high-dimensional data using a divid
 
 
 # The package
-This package implements several (scalable) spatial generalised linear mixed models for high-dimensional areal count data in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique.
+This package implements several (scalable) spatial and spatio-temporal generalised linear mixed models for high-dimensional areal count data in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique.
 
 Below, there is a list with a brief overview of all package functions:
 
@@ -22,6 +22,7 @@ Below, there is a list with a brief overview of all package functions:
 * ```divide_carto``` Divides the spatial domain into subregions.
 * ```mergeINLA``` Merges inla objects for partition models.
 * ```random_partition``` Defines a random partition of the spatial domain based on a regular grid.
+* ```STCAR_INLA``` Fits several spatio-temporal CAR models for high-dimensional count data.
 
 
 # Installation
@@ -58,18 +59,22 @@ install_github("spatialstatisticsupna/bigDM")
 See the following vignettes for further details and examples using this package:
 * [bigDM: fitting spatial models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-1-fitting-spatial-models.html)
 * [bigDM: parallel and distributed modelling](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-2-parallel-and-distributed-modelling.html)
+* [bigDM: fitting spatio-temporal models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-3-fitting-spatio-temporal-models.html)
 
-
-When using this package, please cite the following paper:
+When using this package, please cite the following papers:
 
 [Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021). Scalable Bayesian modeling for smoothing disease risks in large spatial data sets using INLA. _Spatial Statistics_, __41__, 100496.](https://doi.org/10.1016/j.spasta.2021.100496)
 
+[Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022). Parallel and distributed Bayesian modelling for analysing high-dimensional spatio-temporal count data. _arXiv preprint_.](https://arxiv.org/abs/2201.08323)
 
 # Updates
 
 ```
 news(package="bigDM")
 ```
+
+__Changes in version 0.4.0__ (2022 Jan 21)
+* new `STCAR_INLA()` function to fit scalable spatio-temporal CAR models
 
 __Changes in version 0.3.2__ (2021 Nov 05)
 * `X` and `confounding` arguments included to `CAR_INLA()` function

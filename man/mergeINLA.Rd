@@ -8,6 +8,7 @@ mergeINLA(
   inla.models = list(),
   k = NULL,
   ID.area = "Area",
+  ID.year = NULL,
   O = "O",
   E = "E",
   seed = NULL,
@@ -22,6 +23,8 @@ mergeINLA(
 \item{k}{numeric value with the neighbourhood order used for the partition model. If k=0 the \emph{Disjoint model} is considered.}
 
 \item{ID.area}{character; name of the variable which contains the IDs of spatial areal units. Default to \code{"Area"}.}
+
+\item{ID.year}{character; name of the variable which contains the IDs of time points. Default to \code{"NULL"} (for spatial models).}
 
 \item{O}{character; name of the variable which contains the observed number of disease cases for each areal units. Default to \code{"O"}.}
 
@@ -40,7 +43,9 @@ Only works if \code{k=0} argument (\emph{disjoint model}) is specified.}
 This function returns an object of class \code{inla} containing the following elements:
 \item{\code{summary.fixed}}{If \code{compute.fixed=TRUE} a data.frame containing the mean, standard deviation, quantiles and mode of the model's intercept.}
 \item{\code{marginals.fixed}}{If \code{compute.fixed=TRUE} a list containing the posterior marginal density of the model's intercept.}
-\item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation, quantiles and mode of the model's spatial random effects.}
+\item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's intercept for each partition.}
+\item{\code{marginals.fixed.partition}}{A list containing the posterior marginal density of the model's intercept for each partition.}
+\item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation, quantiles and mode of the model's random effects.}
 \item{\code{marginals.random}}{If \code{k=0} a list containing the posterior marginal densities of the model's random effects.}
 \item{\code{summary.linear.predictor}}{If \code{k=0} a data.frame containing the mean, standard deviation, quantiles and mode of the log-risks (or log-rates) in the model.}
 \item{\code{marginals.linear.predictor}}{If \code{k=0} a list containing the posterior marginal densities of the log-risks (or log-rates) in the model.}
@@ -57,14 +62,14 @@ This function is valid for both disjoint and \emph{k}-order neighbourhood models
 \details{
 If the disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
 However, to obtain a single estimate of the overall log-risk \eqn{\alpha}, we extract samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
-After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{n}\sum_{i=1}^n \log r_i, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
+After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{nT}\sum_{i=1}^n\sum_{t=1}^T \log{r_{it}}, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
 \cr \cr
-If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_n)^{'}} is no longer the union of the posterior estimates obtained from each submodel.
-To obtain a unique posterior distribution of \eqn{r_i} for each areal unit \eqn{i}, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights.
+If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_{nT})^{'}} is no longer the union of the posterior estimates obtained from each submodel.
+To obtain a unique posterior distribution of \eqn{r_{it}} for each areal unit \eqn{i} and time point \eqn{t}, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights.
 \cr \cr
-See \insertCite{orozco2020;textual}{bigDM} for more details.
+See \insertCite{orozco2020;textual}{bigDM} and \insertCite{orozco2022;textual}{bigDM} for more details.
 }
 \examples{
-## See the vignette accompanying this package for an example of its use.
+## See the vignettes accompanying this package for an example of its use.
 
 }
