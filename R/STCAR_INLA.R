@@ -57,6 +57,7 @@
 #' @import crayon future Matrix parallel
 #' @importFrom future.apply future_mapply
 #' @importFrom INLA inla
+#' @importFrom MASS ginv
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
 #' @importFrom utils capture.output
@@ -214,8 +215,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
 
                 if(interaction!="TypeI" & PCpriors){
-                        sigma.ref1 <- exp(mean(log(diag(INLA:::inla.ginv(Rs)))))
-                        sigma.ref2 <- exp(mean(log(diag(INLA:::inla.ginv(Rt)))))
+                        sigma.ref1 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
+                        sigma.ref2 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
                         R <- R*sigma.ref1*sigma.ref2
                 }
 
@@ -339,7 +340,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
                 aux <- lapply(data.d, function(xx) aggregate(xx[,O], by=list(xx[,ID.area]), sum)$x)
                 prop.zero <- unlist(lapply(aux, function(x) mean(x==0)))
-                n.zero <- sum(prop.zero>0.3)
+                n.zero <- sum(prop.zero>0.5)
                 if(n.zero>0) fun()
 
                 invisible(utils::capture.output(aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area))))

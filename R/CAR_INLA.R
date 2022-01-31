@@ -336,7 +336,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                         }
                 }
                 prop.zero <- unlist(lapply(data.d, function(x) mean(x[,O]==0)))
-                n.zero <- sum(prop.zero>0.1)
+                n.zero <- sum(prop.zero>0.7)
                 if(n.zero>0) fun()
 
                 invisible(utils::capture.output(aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area))))
