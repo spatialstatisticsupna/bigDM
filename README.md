@@ -1,4 +1,10 @@
 # bigDM
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/spatialstatisticsupna/bigDM/workflows/R-CMD-check/badge.svg)](https://github.com/spatialstatisticsupna/bigDM/actions)
+<!-- badges: end -->
+
+
 Scalable Bayesian disease mapping models for high-dimensional data using a divide and conquer approach
 
 ## Table of contents
