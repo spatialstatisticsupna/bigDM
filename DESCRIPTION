@@ -11,9 +11,11 @@ Description: This package includes functions to fit scalable disease mapping mod
 URL: https://github.com/spatialstatisticsupna/bigDM
 BugReports: https://github.com/spatialstatisticsupna/bigDM/issues
 Depends: R (>= 4.0.0)
-Imports: crayon, INLA (>= 21.11.22), foreign, future, future.apply, maptools, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, readr, rgdal, sf, spatialreg, spdep, stats, utils, rlist
+Additional_repositories: https://inla.r-inla-download.org/R/stable
+Imports: crayon, foreign, future, future.apply, maptools, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, readr, rgdal, sf, spatialreg, spdep, stats, utils, rlist
 Suggests: 
     tmap,
+    INLA (>= 21.11.22),
     knitr,
     rmarkdown,
     bookdown,
