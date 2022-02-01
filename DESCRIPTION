@@ -10,7 +10,7 @@ Maintainer: Aritz Adin <aritz.adin@unavarra.es>
 Description: This package includes functions to fit scalable disease mapping models for high-dimensional spatial and spatio-temporal count data using the INLA technique for approximate Bayesian inference in latent Gaussian models.
 URL: https://github.com/spatialstatisticsupna/bigDM
 BugReports: https://github.com/spatialstatisticsupna/bigDM/issues
-Depends: R (>= 3.5)
+Depends: R (>= 4.0.0)
 Additional_repositories: https://inla.r-inla-download.org/R/stable
 Imports: crayon, foreign, INLA (>= 21.11.22), future, future.apply, maptools, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, readr, rgdal, sf, spatialreg, spdep, stats, utils, rlist
 Suggests: 
@@ -23,6 +23,7 @@ RdMacros: Rdpack
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression: xz
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 Config/testthat/edition: 3
