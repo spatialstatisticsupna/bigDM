@@ -64,6 +64,7 @@
 #' @importFrom methods as
 #'
 #' @examples
+#' \dontrun{
 #' ## Load the sf object that contains the spatial polygons of the municipalities of Spain ##
 #' data(Carto_SpainMUN)
 #' str(Carto_SpainMUN)
@@ -74,8 +75,7 @@
 #' ## Load simulated data of lung cancer mortality data during the period 1991-2015 ##
 #' data("Data_LungCancer")
 #' str(Data_LungCancer)
-#'
-#' \dontrun{
+#
 #' ## Fit the disjoint model with a BYM2 spatial random effect,
 #' ## RW1 temporal random effect and Type I interaction random effect ##
 #' Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,

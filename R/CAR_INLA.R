@@ -81,10 +81,10 @@
 #' @importFrom utils capture.output
 #'
 #' @examples
+#' \dontrun{
 #' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
 #'
-#' \dontrun{
 #' ## Fit the global model with a Leroux CAR prior distribution ##
 #' Global <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", O="obs", E="exp",
 #'                    prior="Leroux", model="global", strategy="gaussian")

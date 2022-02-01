@@ -5,7 +5,7 @@
 <!-- badges: end -->
 
 
-Scalable Bayesian disease mapping models for high-dimensional data using a divide and conquer approach
+Scalable Bayesian disease mapping models for high-dimensional data using a divide and conquer approach.
 
 ## Table of contents
 
@@ -78,6 +78,10 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
+
+__Changes in version 0.4.1__ (2022 Feb 01)
+* small bugs fixed
+* version submmited to CRAN
 
 __Changes in version 0.4.0__ (2022 Jan 21)
 * new `STCAR_INLA()` function to fit scalable spatio-temporal CAR models

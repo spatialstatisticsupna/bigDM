@@ -33,13 +33,10 @@
 #'
 #' @examples
 #'\dontrun{
-#' library(bigDM)
 #' library(foreign)
 #' library(maptools)
 #' library(rgdal)
 #' library(tmap)
-#'
-#'}
 #'
 #' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
@@ -51,8 +48,7 @@
 #'                                   n.cluster=20, l=2, min.size=100, verbose=TRUE)
 #' table(carto.new$ID.group)
 #'
-#'\dontrun{
-## Plot of the grouping variable 'ID.group' ##
+#' ## Plot of the grouping variable 'ID.group' ##
 #' carto.partition <- unionSpatialPolygons(as(carto.new,"Spatial"),carto.new$ID.group)
 #'
 #' tm_shape(carto.new) +

@@ -1,3 +1,7 @@
+version 0.4.1
+- small bugs fixed
+- version submitted to CRAN
+
 version 0.4.0
 - new STCAR_INLA() function to fit scalable spatio-temporal CAR models
 
