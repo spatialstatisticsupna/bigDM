@@ -32,8 +32,12 @@
 #' @importFrom stats dist
 #'
 #' @examples
+#' library(bigDM)
 #' library(foreign)
+#' library(maptools)
+#' library(rgdal)
 #' library(tmap)
+#'
 #'
 #' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
@@ -45,14 +49,16 @@
 #'                                   n.cluster=20, l=2, min.size=100, verbose=TRUE)
 #' table(carto.new$ID.group)
 #'
-#' ## Plot of the grouping variable 'ID.group' ##
-#' carto.partition <- maptools::unionSpatialPolygons(as(carto.new,"Spatial"),carto.new$ID.group)
+#'\dontrun{
+## Plot of the grouping variable 'ID.group' ##
+#' carto.partition <- unionSpatialPolygons(as(carto.new,"Spatial"),carto.new$ID.group)
 #'
 #' tm_shape(carto.new) +
 #'         tm_polygons(col="ID.group") +
 #'         tm_shape(carto.partition) +
 #'         tm_borders(col="black", lwd=2) +
 #'         tm_layout(legend.outside=TRUE)
+#'}
 #'
 #' @export
 clustering_partition <- function(carto, ID.area=NULL, var=NULL, n.cluster=10, min.size=NULL, W=NULL, l=1, Wk=NULL, distance="euclidean", verbose=TRUE){
