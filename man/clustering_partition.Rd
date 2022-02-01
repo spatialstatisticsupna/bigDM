@@ -51,12 +51,14 @@ The algorithm has its basis in the assumption that cluster centers are points wi
 See \insertCite{santafe2021;textual}{bigDM} for more details.
 }
 \examples{
+\dontrun{
 library(bigDM)
 library(foreign)
 library(maptools)
 library(rgdal)
 library(tmap)
 
+}
 
 ## Load the Spain colorectal cancer mortality data ##
 data(Carto_SpainMUN)

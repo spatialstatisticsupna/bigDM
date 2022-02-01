@@ -32,12 +32,14 @@
 #' @importFrom stats dist
 #'
 #' @examples
+#'\dontrun{
 #' library(bigDM)
 #' library(foreign)
 #' library(maptools)
 #' library(rgdal)
 #' library(tmap)
 #'
+#'}
 #'
 #' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)

@@ -73,7 +73,7 @@
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
-#' @import crayon future Matrix parallel
+#' @import crayon future Matrix parallel Rdpack
 #' @importFrom future.apply future_mapply
 #' @importFrom INLA inla inla.make.lincombs
 #' @importFrom sf st_as_sf st_set_geometry
