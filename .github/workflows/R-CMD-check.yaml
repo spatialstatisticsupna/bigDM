@@ -23,7 +23,7 @@ jobs:
       matrix:
         config:
           - {os: windows-latest, r: 'release'}
-          - {os: macOS-latest, r: 'release'} # qpdf deploy error
+          # - {os: macOS-latest, r: 'release'} # qpdf deploy error
           - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
           - {os: ubuntu-20.04, r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
@@ -36,11 +36,11 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Install system dependencies on MacOS
-        if: runner.os == 'macOS'
-        run: |
-          brew install pkg-config
-          brew install gdal
+      # - name: Install system dependencies on MacOS
+      #   if: runner.os == 'macOS'
+      #   run: |
+      #     brew install pkg-config
+      #     brew install gdal
 
       - uses: r-lib/actions/setup-r@v1
         with:
@@ -53,12 +53,12 @@ jobs:
         with:
           extra-packages: rcmdcheck
 
-      - name: Install dependencies
-        if: runner.os == 'macOS'
-        run: |
-          Sys.setenv("R_REMOTES_NO_ERRORS_FROM_WARNINGS" = "true")
-          remotes::install_github("rspatial/terra")
-        shell: Rscript {0}
+      # - name: Install dependencies
+      #   if: runner.os == 'macOS'
+      #   run: |
+      #     Sys.setenv("R_REMOTES_NO_ERRORS_FROM_WARNINGS" = "true")
+      #     remotes::install_github("rspatial/terra")
+      #   shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v1
 
