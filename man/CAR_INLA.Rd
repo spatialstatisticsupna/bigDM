@@ -107,10 +107,10 @@ For the scalable model proposals \insertCite{orozco2020}{bigDM}, approximate val
 For a full model specification and further details see the vignettes accompanying this package.
 }
 \examples{
+\dontrun{
 ## Load the Spain colorectal cancer mortality data ##
 data(Carto_SpainMUN)
 
-\dontrun{
 ## Fit the global model with a Leroux CAR prior distribution ##
 Global <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", O="obs", E="exp",
                    prior="Leroux", model="global", strategy="gaussian")

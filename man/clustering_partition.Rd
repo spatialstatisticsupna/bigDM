@@ -52,13 +52,10 @@ See \insertCite{santafe2021;textual}{bigDM} for more details.
 }
 \examples{
 \dontrun{
-library(bigDM)
 library(foreign)
 library(maptools)
 library(rgdal)
 library(tmap)
-
-}
 
 ## Load the Spain colorectal cancer mortality data ##
 data(Carto_SpainMUN)
@@ -69,7 +66,8 @@ Carto_SpainMUN$logSMR <- log(Carto_SpainMUN$obs/Carto_SpainMUN$exp+0.0001)
 carto.new <- clustering_partition(carto=Carto_SpainMUN, ID.area="ID", var="logSMR",
                                   n.cluster=20, l=2, min.size=100, verbose=TRUE)
 table(carto.new$ID.group)
-\dontrun{
+
+## Plot of the grouping variable 'ID.group' ##
 carto.partition <- unionSpatialPolygons(as(carto.new,"Spatial"),carto.new$ID.group)
 
 tm_shape(carto.new) +
