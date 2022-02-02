@@ -56,7 +56,6 @@
 #'
 #' @import crayon future Matrix parallel
 #' @importFrom future.apply future_mapply
-#' @importFrom INLA inla
 #' @importFrom MASS ginv
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
@@ -65,34 +64,37 @@
 #'
 #' @examples
 #' \dontrun{
-#' ## Load the sf object that contains the spatial polygons of the municipalities of Spain ##
-#' data(Carto_SpainMUN)
-#' str(Carto_SpainMUN)
+#' if(require("INLA", quietly=TRUE)){
 #'
-#' ## Create province IDs ##
-#' Carto_SpainMUN$ID.prov <- substr(Carto_SpainMUN$ID,1,2)
+#'   ## Load the sf object that contains the spatial polygons of the municipalities of Spain ##
+#'   data(Carto_SpainMUN)
+#'   str(Carto_SpainMUN)
 #'
-#' ## Load simulated data of lung cancer mortality data during the period 1991-2015 ##
-#' data("Data_LungCancer")
-#' str(Data_LungCancer)
+#'   ## Create province IDs ##
+#'   Carto_SpainMUN$ID.prov <- substr(Carto_SpainMUN$ID,1,2)
+#'
+#'   ## Load simulated data of lung cancer mortality data during the period 1991-2015 ##
+#'   data("Data_LungCancer")
+#'   str(Data_LungCancer)
 #
-#' ## Fit the disjoint model with a BYM2 spatial random effect,
-#' ## RW1 temporal random effect and Type I interaction random effect ##
-#' Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
+#'   ## Fit the disjoint model with a BYM2 spatial random effect,
+#'   ## RW1 temporal random effect and Type I interaction random effect ##
+#'   Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
+#'                          ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
+#'                          spatial="BYM2", temporal="rw1", interaction="TypeI",
+#'                          model="partition", k=0, strategy="gaussian",
+#'                          plan="cluster", workers=rep("localhost",4))
+#'   summary(Disjoint)
+#'
+#'   ## Fit the 1st order neighbourhood model with a BYM2 spatial random effect,
+#'   ## RW1 temporal random effect and Type I interaction random effect ##
+#'   order1 <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
 #'                        ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
 #'                        spatial="BYM2", temporal="rw1", interaction="TypeI",
-#'                        model="partition", k=0, strategy="gaussian",
+#'                        model="partition", k=1, strategy="gaussian",
 #'                        plan="cluster", workers=rep("localhost",4))
-#' summary(Disjoint)
-#'
-#' ## Fit the 1st order neighbourhood model with a BYM2 spatial random effect,
-#' ## RW1 temporal random effect and Type I interaction random effect ##
-#' order1 <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
-#'                      ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
-#'                      spatial="BYM2", temporal="rw1", interaction="TypeI",
-#'                      model="partition", k=1, strategy="gaussian",
-#'                      plan="cluster", workers=rep("localhost",4))
-#' summary(order1)
+#'   summary(order1)
+#' }
 #' }
 #'
 #' @export
@@ -101,6 +103,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                        model="partition", k=0, strategy="simplified.laplace",
                        PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
                        save.models=FALSE, plan="sequential", workers=NULL){
+
+  if(requireNamespace("INLA", quietly=TRUE)){
 
         ## Check for errors ##
         if(is.null(carto))
@@ -393,4 +397,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         }
 
         return(Model)
+
+  }else{
+        stop("INLA library is not installed! Please use following command to install the stable version of the R-INLA package:\n install.packages('INLA', repos=c(getOption('repos'), INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)")
+  }
 }

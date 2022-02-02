@@ -75,36 +75,38 @@
 #'
 #' @import crayon future Matrix parallel Rdpack
 #' @importFrom future.apply future_mapply
-#' @importFrom INLA inla inla.make.lincombs
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
 #' @importFrom utils capture.output
 #'
 #' @examples
 #' \dontrun{
-#' ## Load the Spain colorectal cancer mortality data ##
-#' data(Carto_SpainMUN)
+#' if(require("INLA", quietly=TRUE)){
 #'
-#' ## Fit the global model with a Leroux CAR prior distribution ##
-#' Global <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", O="obs", E="exp",
-#'                    prior="Leroux", model="global", strategy="gaussian")
+#'   ## Load the Spain colorectal cancer mortality data ##
+#'   data(Carto_SpainMUN)
 #'
-#' summary(Global)
+#'   ## Fit the global model with a Leroux CAR prior distribution ##
+#'   Global <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", O="obs", E="exp",
+#'                      prior="Leroux", model="global", strategy="gaussian")
 #'
-#' ## Fit the disjoint model with a Leroux CAR prior distribution ##
-#' Disjoint <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
-#'                      prior="Leroux", model="partition", k=0, strategy="gaussian")
-#' summary(Disjoint)
+#'   summary(Global)
 #'
-#' ## Fit the 1st order neighbourhood model with a Leroux CAR prior distribution ##
-#' order1 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
-#'                    prior="Leroux", model="partition", k=1, strategy="gaussian")
-#' summary(order1)
+#'   ## Fit the disjoint model with a Leroux CAR prior distribution ##
+#'   Disjoint <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
+#'                        prior="Leroux", model="partition", k=0, strategy="gaussian")
+#'   summary(Disjoint)
 #'
-#' ## Fit the 2nd order neighbourhood model with a Leroux CAR prior distribution ##
-#' order2 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
-#'                    prior="Leroux", model="partition", k=2, strategy="gaussian")
-#' summary(order2)
+#'   ## Fit the 1st order neighbourhood model with a Leroux CAR prior distribution ##
+#'   order1 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
+#'                      prior="Leroux", model="partition", k=1, strategy="gaussian")
+#'   summary(order1)
+#'
+#'   ## Fit the 2nd order neighbourhood model with a Leroux CAR prior distribution ##
+#'   order2 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
+#'                      prior="Leroux", model="partition", k=2, strategy="gaussian")
+#'   summary(order2)
+#' }
 #' }
 #'
 #' @export
@@ -112,6 +114,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                      W=NULL, prior="Leroux", model="partition", k=0, strategy="simplified.laplace",
                      PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
                      save.models=FALSE, plan="sequential", workers=NULL){
+
+  if(requireNamespace("INLA", quietly=TRUE)){
 
         ## Check for errors ##
         if(is.null(carto))
@@ -274,7 +278,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                 cat("Elapsed time",as.numeric(t.eigen[3]),"\n")
 
                                 M0 <- solve(t(XX)%*%XX)%*%t(XX)
-                                beta.lc = INLA::inla.make.lincombs(Predictor=M0, ID.area=-M0%*%Z.area)
+                                beta.lc = inla.make.lincombs(Predictor=M0, ID.area=-M0%*%Z.area)
                                 names(beta.lc) <- paste("X",as.character(0:p),sep="")
 
                                 cat("         * Fitting INLA model... ")
@@ -388,4 +392,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
         }
 
         return(Model)
+
+  }else{
+        stop("\nINLA library is not installed!\nPlease use following command to install the stable version of the R-INLA package:\n\ninstall.packages('INLA', repos=c(getOption('repos'), INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)")
+  }
 }

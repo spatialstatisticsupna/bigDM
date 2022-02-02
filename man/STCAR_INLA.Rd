@@ -101,33 +101,36 @@ For a full model specification and further details see the vignettes accompanyin
 }
 \examples{
 \dontrun{
-## Load the sf object that contains the spatial polygons of the municipalities of Spain ##
-data(Carto_SpainMUN)
-str(Carto_SpainMUN)
+if(require("INLA", quietly=TRUE)){
 
-## Create province IDs ##
-Carto_SpainMUN$ID.prov <- substr(Carto_SpainMUN$ID,1,2)
+  ## Load the sf object that contains the spatial polygons of the municipalities of Spain ##
+  data(Carto_SpainMUN)
+  str(Carto_SpainMUN)
 
-## Load simulated data of lung cancer mortality data during the period 1991-2015 ##
-data("Data_LungCancer")
-str(Data_LungCancer)
-## Fit the disjoint model with a BYM2 spatial random effect,
-## RW1 temporal random effect and Type I interaction random effect ##
-Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
+  ## Create province IDs ##
+  Carto_SpainMUN$ID.prov <- substr(Carto_SpainMUN$ID,1,2)
+
+  ## Load simulated data of lung cancer mortality data during the period 1991-2015 ##
+  data("Data_LungCancer")
+  str(Data_LungCancer)
+  ## Fit the disjoint model with a BYM2 spatial random effect,
+  ## RW1 temporal random effect and Type I interaction random effect ##
+  Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
+                         ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
+                         spatial="BYM2", temporal="rw1", interaction="TypeI",
+                         model="partition", k=0, strategy="gaussian",
+                         plan="cluster", workers=rep("localhost",4))
+  summary(Disjoint)
+
+  ## Fit the 1st order neighbourhood model with a BYM2 spatial random effect,
+  ## RW1 temporal random effect and Type I interaction random effect ##
+  order1 <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
                        ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
                        spatial="BYM2", temporal="rw1", interaction="TypeI",
-                       model="partition", k=0, strategy="gaussian",
+                       model="partition", k=1, strategy="gaussian",
                        plan="cluster", workers=rep("localhost",4))
-summary(Disjoint)
-
-## Fit the 1st order neighbourhood model with a BYM2 spatial random effect,
-## RW1 temporal random effect and Type I interaction random effect ##
-order1 <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
-                     ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
-                     spatial="BYM2", temporal="rw1", interaction="TypeI",
-                     model="partition", k=1, strategy="gaussian",
-                     plan="cluster", workers=rep("localhost",4))
-summary(order1)
+  summary(order1)
+}
 }
 
 }

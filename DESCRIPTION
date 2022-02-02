@@ -12,13 +12,8 @@ URL: https://github.com/spatialstatisticsupna/bigDM
 BugReports: https://github.com/spatialstatisticsupna/bigDM/issues
 Depends: R (>= 4.0.0)
 Additional_repositories: https://inla.r-inla-download.org/R/stable
-Imports: crayon, INLA (>= 21.11.22), future, future.apply, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, sf, spatialreg, spdep, stats, utils, rlist
-Suggests: 
-    tmap,
-    knitr,
-    rmarkdown,
-    bookdown,
-    testthat (>= 3.0.0)
+Imports: crayon, future, future.apply, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, sf, spatialreg, spdep, stats, utils, rlist
+Suggests: bookdown, INLA (>= 21.11.22), knitr, rmarkdown, testthat (>= 3.0.0), tmap
 RdMacros: Rdpack
 License: GPL-3
 Encoding: UTF-8
