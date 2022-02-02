@@ -15,5 +15,12 @@ The package contains several vignettes which are available at:
 ## R CMD check results
 Comments:
 
-* Almost all check result are 0 errors, 0 warnings and 0 notes.
-* The last test environment (macOS) generates a code note because, the package holds 2 high-dimensional datasets with 5.1Mb.
+* checking installed package size ... NOTE
+  
+  installed size is  7.3Mb
+  
+  sub-directories of 1Mb or more:
+  
+   data    4.1Mb
+   
+   shape   2.7Mb
