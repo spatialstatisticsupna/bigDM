@@ -506,7 +506,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
 ## Auxiliary functions ##
 #########################
 modelSampling <- function(x){
-  inla.posterior.sample(n.sample, x, seed=inla.seed)
+  INLA::inla.posterior.sample(n.sample, x, seed=inla.seed)
 }
 
 linearCompPred <- function(x){
@@ -537,16 +537,16 @@ computeFittedValues <- function(q){
     at <- round(seq(1,length(xx),length.out=75))
     marginals.fitted.values <- matrix(0, nrow=0, ncol=2, dimnames=list(NULL, c("x","y")))
     for(j in xx[at]){
-      aux <- unlist(lapply(marginals, function(x) inla.dmarginal(j,x)))
+      aux <- unlist(lapply(marginals, function(x) INLA::inla.dmarginal(j,x)))
       marginals.fitted.values <- rbind(marginals.fitted.values,c(j,sum(aux*w)))
     }
 
     summary.fitted.values <- data.frame(sum(post.mean*w),
                                         sqrt(sum((post.sd^2+post.mean^2-sum(post.mean*w)^2)*w)),
-                                        inla.qmarginal(0.025,marginals.fitted.values),
-                                        inla.qmarginal(0.5,marginals.fitted.values),
-                                        inla.qmarginal(0.975,marginals.fitted.values),
-                                        inla.mmarginal(marginals.fitted.values),
+                                        INLA::inla.qmarginal(0.025,marginals.fitted.values),
+                                        INLA::inla.qmarginal(0.5,marginals.fitted.values),
+                                        INLA::inla.qmarginal(0.975,marginals.fitted.values),
+                                        INLA::inla.mmarginal(marginals.fitted.values),
                                         sum(post.cdf*w))
     colnames(summary.fitted.values) <- c("mean","sd","0.025quant","0.5quant","0.975quant","mode","1 cdf")
     rownames(summary.fitted.values) <- q
@@ -566,4 +566,11 @@ utils::globalVariables(c("ID.list",
                          "models.marginals.fitted.values",
                          "models.cpo",
                          "n.sample",
-                         "inla.seed"))
+                         "inla.seed",
+                         "inla.posterior.sample",
+                         "inla.rmarginal",
+                         "inla.dmarginal",
+                         "inla.qmarginal",
+                         "inla.mmarginal",
+                         "inla.make.lincombs",
+                         "inla"))

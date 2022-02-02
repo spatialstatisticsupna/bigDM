@@ -110,6 +110,9 @@ For a full model specification and further details see the vignettes accompanyin
 \dontrun{
 if(require("INLA", quietly=TRUE)){
 
+  library(bigDM)
+  library(INLA)
+
   ## Load the Spain colorectal cancer mortality data ##
   data(Carto_SpainMUN)
 
