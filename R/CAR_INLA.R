@@ -83,9 +83,6 @@
 #' \dontrun{
 #' if(require("INLA", quietly=TRUE)){
 #'
-#'   library(bigDM)
-#'   library(INLA)
-#'
 #'   ## Load the Spain colorectal cancer mortality data ##
 #'   data(Carto_SpainMUN)
 #'
