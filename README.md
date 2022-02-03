@@ -107,10 +107,6 @@ __Changes in version 0.2.0__ (2020 Oct 01)
 * small bugs fixed
 
 
-# Copyright and license
-Licensed under the GPL-3 License. [Full license here](/LICENSE.md).
-
-
 # Acknowledgments
 This work has been supported by Project MTM2017-82553-R (AEI/FEDER, UE) and Project PID2020-113125RB-I00/MCIN/AEI/10.13039/501100011033. It has also been partially funded by the Public University of Navarra (project PJUPNA2001) and by la Caixa Foundation (ID 1000010434), Caja Navarra Foundation and UNED Pamplona, under agreement LCF/PR/PR15/51100007 (project REF P/13/20).
 
