@@ -43,6 +43,7 @@ Then, the subregions with number of areas greater than the value given by the \c
 Finally, if \code{prop.zero} argument is set, the subregions with proportion of areas with zero cases below that threshold are merged to its smallest neighbour.
 }
 \examples{
+\dontrun{
 library(tmap)
 
 ## Load the Spain colorectal cancer mortality data ##
@@ -91,5 +92,6 @@ tm_shape(carto.r3) +
   tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)",
             main.title.position="center", main.title.size=1,
             legend.outside=TRUE)
+}
 
 }

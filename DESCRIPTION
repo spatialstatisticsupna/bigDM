@@ -2,10 +2,22 @@ Package: bigDM
 Type: Package
 Title: Scalable Bayesian Disease Mapping Models for High-Dimensional Data
 Version: 0.4.1
-Date: 2022-02-01
-Author: Aritz Adin [aut, cre] <aritz.adin@unavarra.es>,
-        Erick Orozco-Acosta [aut] <erick.orozco@unavarra.es>,
-        Maria Dolores Ugarte [aut] <lola@unavarra.es>
+Date: 2022-02-03
+Authors@R: 
+  c(person(given = "Aritz",
+           family = "Adin",
+           role = c("aut", "cre"),
+           email = "aritz.adin@unavarra.es",
+           comment = c(ORCID = "0000-0003-3232-6147")),
+    person(given = "Erick",
+           family = "Orozco-Acosta",
+           role = "aut",
+           comment = c(ORCID = "0000-0002-1170-667X")),
+    person(given = "Maria Dolores",
+           family = "Ugarte",
+           role = "aut",
+           comment = c(ORCID = "0000-0002-3505-8400"))
+    )
 Maintainer: Aritz Adin <aritz.adin@unavarra.es>
 Description: This package includes functions to fit scalable disease mapping models for high-dimensional spatial and spatio-temporal count data using the INLA technique for approximate Bayesian inference in latent Gaussian models.
 URL: https://github.com/spatialstatisticsupna/bigDM

@@ -23,6 +23,7 @@
 #' @importFrom stats aggregate
 #'
 #' @examples
+#' \dontrun{
 #' library(tmap)
 #'
 #' ## Load the Spain colorectal cancer mortality data ##
@@ -71,6 +72,7 @@
 #'   tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)",
 #'             main.title.position="center", main.title.size=1,
 #'             legend.outside=TRUE)
+#' }
 #'
 #' @export
 random_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=1000, prop.zero=NULL, O=NULL){

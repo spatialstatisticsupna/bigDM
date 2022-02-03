@@ -24,6 +24,7 @@ The function takes an object of class \code{SpatialPolygonsDataFrame} or \code{s
 and divides it into subregions according to some grouping variable.
 }
 \examples{
+\dontrun{
 library(tmap)
 
 ## Load the Spain colorectal cancer mortality data ##
@@ -47,5 +48,6 @@ carto.k2 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=2)
 plot(carto.k2$`Castilla y Leon`$geometry, col="dodgerblue4", main="Castilla y Leon")
 plot(carto.k1$`Castilla y Leon`$geometry, col="dodgerblue", add=TRUE)
 plot(carto.k0$`Castilla y Leon`$geometry, col="lightgrey", add=TRUE)
+}
 
 }

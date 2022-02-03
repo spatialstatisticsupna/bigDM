@@ -16,6 +16,7 @@
 #' @importFrom stats aggregate
 #'
 #' @examples
+#' \dontrun{
 #' library(tmap)
 #'
 #' ## Load the Spain colorectal cancer mortality data ##
@@ -39,6 +40,7 @@
 #' plot(carto.k2$`Castilla y Leon`$geometry, col="dodgerblue4", main="Castilla y Leon")
 #' plot(carto.k1$`Castilla y Leon`$geometry, col="dodgerblue", add=TRUE)
 #' plot(carto.k0$`Castilla y Leon`$geometry, col="lightgrey", add=TRUE)
+#' }
 #'
 #' @export
 divide_carto <- function(carto, ID.group=NULL, k=0, plot=FALSE){
