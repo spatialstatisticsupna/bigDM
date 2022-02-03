@@ -66,9 +66,6 @@
 #' \dontrun{
 #' if(require("INLA", quietly=TRUE)){
 #'
-#'   library(bigDM)
-#'   library(INLA)
-#'
 #'   ## Load the sf object that contains the spatial polygons of the municipalities of Spain ##
 #'   data(Carto_SpainMUN)
 #'   str(Carto_SpainMUN)
