@@ -6,7 +6,8 @@
 #' Several conditional autoregressive (CAR) prior distributions can be specified for the spatial random effect, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 #' the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2 \insertCite{riebler2016intuitive}{bigDM}.
 #'
-#' If covariates are included in the model, two different approaches can be used to address the potential confounding issues between the fixed effects and the spatial random effects of the model: restricted regression and the use of orthogonality constraints. See \insertCite{adin2021alleviating;textual}{bigDM} for further details.
+#' If covariates are included in the model, two different approaches can be used to address the potential confounding issues between the fixed effects and the spatial random effects of the model: restricted regression and the use of orthogonality constraints.
+#' At the moment, only continuous covariates can be included in the model as potential risk factors, which are automatically standardized before fitting the model. See \insertCite{adin2021alleviating;textual}{bigDM} for further details.
 #' \cr\cr
 #' Three main modeling approaches can be considered:
 #' \itemize{
@@ -50,6 +51,7 @@
 #' If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.
 #' @param confounding one of either \code{NULL}, \code{"restricted"} (restricted regression) or \code{"constraints"} (orthogonal constraints), which specifies the estimation method used to alleviate spatial confounding between fixed and random effects.
 #' If only an intercept is considered in the model (\code{X=NULL}), the default value \code{confounding=NULL} will be set.
+#' At the moment, only works for the \emph{Global model} (specified through the \code{model="global"} argument).
 #' @param W optional argument with the binary adjacency matrix of the spatial areal units.  If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).
 #' @param prior one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"},
 #' which specifies the prior distribution considered for the spatial random effect.
