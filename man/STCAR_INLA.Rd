@@ -113,13 +113,14 @@ if(require("INLA", quietly=TRUE)){
   ## Load simulated data of lung cancer mortality data during the period 1991-2015 ##
   data("Data_LungCancer")
   str(Data_LungCancer)
+
   ## Fit the disjoint model with a BYM2 spatial random effect,
   ## RW1 temporal random effect and Type I interaction random effect ##
   Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
                          ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
                          spatial="BYM2", temporal="rw1", interaction="TypeI",
                          model="partition", k=0, strategy="gaussian",
-                         plan="cluster", workers=rep("localhost",4))
+                         plan="cluster", workers=rep("localhost",2))
   summary(Disjoint)
 
   ## Fit the 1st order neighbourhood model with a BYM2 spatial random effect,
@@ -128,7 +129,7 @@ if(require("INLA", quietly=TRUE)){
                        ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
                        spatial="BYM2", temporal="rw1", interaction="TypeI",
                        model="partition", k=1, strategy="gaussian",
-                       plan="cluster", workers=rep("localhost",4))
+                       plan="cluster", workers=rep("localhost",2))
   summary(order1)
 }
 }

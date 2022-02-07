@@ -80,11 +80,7 @@ divide_carto <- function(carto, ID.group=NULL, k=0, plot=FALSE){
     carto.k <- vector("list",D)
     names(carto.k) <- names(carto.k0)
 
-    if(plot){
-      options(warn=-1)
-      color <- RColorBrewer::brewer.pal(k+2,"Blues")
-      options(warn=0)
-    }
+    if(plot) color <- RColorBrewer::brewer.pal(k+2,"Blues")
 
     for(i in 1:D){
       if(plot) plot(carto.k0[[i]]$geometry, col="lightgrey", main=sort(unique(Data[,ID.group]))[i],

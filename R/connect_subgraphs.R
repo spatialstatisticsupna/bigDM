@@ -35,7 +35,7 @@
 #' n.comp.nb(carto.nb)$nc # 2 disjoint connected subgraphs
 #'
 #' ## Plot the spatial polygons and its neighbourhood graph
-#' par(mfrow=c(1,2), pty="s")
+#' op <- par(mfrow=c(1,2), pty="s")
 #'
 #' plot(carto$geometry, main="Original neighbourhood graph")
 #' plot(carto.nb, st_centroid(st_geometry(carto), of_largest_polygon=TRUE),
@@ -46,6 +46,8 @@
 #' title(main="Modified neighbourhood graph")
 #'
 #' n.comp.nb(carto.mod$nb)$nc==1
+#'
+#' par(op)
 #'
 #' @export
 connect_subgraphs <- function(carto, ID.area=NULL, nb=NULL, plot=FALSE){
