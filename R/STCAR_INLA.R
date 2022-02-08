@@ -14,7 +14,7 @@
 #' For both the disjoint and k-order neighbour models, parallel or distributed computation strategies can be performed to speed up computations by using the 'future' package \insertCite{bengtsson2020unifying}{bigDM}.
 #'
 #' Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{https://www.r-inla.org/}).
-#' For the scalable model proposals, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can also be computed.
+#' For the scalable model proposals \insertCite{orozco2022}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can also be computed.
 #'
 #' @details For a full model specification and further details see the vignettes accompanying this package.
 #'
@@ -27,7 +27,7 @@
 #'
 #' \insertRef{orozco2022}{bigDM}
 #'
-#' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}. This object must contain at least the target variable of interest specified in the argument \code{ID.area}.
+#' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}. This object must contain at least the variable with the identifiers of the spatial areal units specified in the argument \code{ID.area}.
 #' @param data object of class \code{data.frame} which must contain the target variables of interest specified in the arguments \code{ID.area}, \code{ID.year}, \code{O} and \code{E}.
 #' @param ID.area character; name of the variable which contains the IDs of spatial areal units. The values of this variable must match those given in the \code{carto} and \code{data} variable.
 #' @param ID.year character; name of the variable which contains the IDs of time points.

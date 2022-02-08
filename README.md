@@ -39,9 +39,11 @@ R version 4.0.0 and newer for Windows requires the new Rtools40 to build R packa
 
 
 ## Install from CRAN
-Not in CRAN
+```
+install.packages("bigDM")
+```
 
-## Install from GitHub
+## Install from GitHub (development version)
 ```
 # Install devtools package from CRAN repository
 install.packages("devtools")
