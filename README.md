@@ -1,7 +1,9 @@
 # bigDM
 
 <!-- badges: start -->
+[![CRAN version](https://www.r-pkg.org/badges/version/bigDM)](https://CRAN.R-project.org/package=bigDM)
 [![R-CMD-check](https://github.com/spatialstatisticsupna/bigDM/workflows/R-CMD-check/badge.svg)](https://github.com/spatialstatisticsupna/bigDM/actions)
+[![Total downloads](https://cranlogs.r-pkg.org/badges/grand-total/bigDM)](https://CRAN.R-project.org/package=bigDM)
 <!-- badges: end -->
 
 
