@@ -306,6 +306,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                 p <- length(X)
                                 W <- Diagonal(n, Model$summary.fitted.values$mode*data.INLA$E)
                                 Bs <- rbind(matrix(1,1,n)%*%W, t(as.matrix(data.INLA[,X]))%*%W)
+                                Bs <- as(Bs,"matrix")
 
                                 formula.char <- Reduce(paste,deparse(formula))
                                 formula.char <- gsub("constr = TRUE",sprintf("constr = FALSE, rankdef=%d, extraconstr=list(A=Bs, e=rep(0,nrow(Bs)))",p+1),formula.char)
@@ -315,6 +316,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                               control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                               control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
                                               control.inla=list(strategy=strategy))
+
+                                t.eigen <- 0
                         }
 
                         Model$cpu.used <- c(time+Model$cpu.used[4],t.eigen+time+Model$cpu.used[4])
