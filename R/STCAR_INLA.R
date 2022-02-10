@@ -104,7 +104,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                        PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
                        save.models=FALSE, plan="sequential", workers=NULL){
 
-  if(suppressPackageStartupMessages("INLA", quietly=TRUE)){
+  if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
 
         ## Check for errors ##
         if(is.null(carto))
