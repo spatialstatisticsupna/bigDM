@@ -21,7 +21,7 @@
 #' @param seed numeric; control the RNG of \code{inla.qsample} (see \code{help(inla.qsample)} for further information). Defaults to \code{NULL}.
 #' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
 #' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-#' Only works if \code{k=0} argument (\emph{disjoint model}) is specified.
+#' Only works if \code{k=0} argument (\emph{disjoint model}) is specified. CAUTION: This method might be very time consuming.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
 #'
 #' @return This function returns an object of class \code{inla} containing the following elements:
