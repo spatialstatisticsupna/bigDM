@@ -4,7 +4,7 @@
 #' This function is valid for both disjoint and \emph{k}-order neighbourhood models.
 #'
 #' @details If the disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
-#' However, to obtain a single estimate of the overall log-risk \eqn{\alpha}, we extract samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
+#' However, a single estimate of the overall log-risk \eqn{\alpha} can be computed by extracting samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
 #' After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{nT}\sum_{i=1}^n\sum_{t=1}^T \log{r_{it}}, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
 #' \cr \cr
 #' If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_{nT})^{'}} is no longer the union of the posterior estimates obtained from each submodel.
