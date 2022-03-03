@@ -35,7 +35,7 @@ mergeINLA(
 \item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
 
 \item{compute.fixed}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-Only works if \code{k=0} argument (\emph{disjoint model}) is specified.}
+Only works if \code{k=0} argument (\emph{disjoint model}) is specified. CAUTION: This method might be very time consuming.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
 }
@@ -61,7 +61,7 @@ This function is valid for both disjoint and \emph{k}-order neighbourhood models
 }
 \details{
 If the disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
-However, to obtain a single estimate of the overall log-risk \eqn{\alpha}, we extract samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
+However, a single estimate of the overall log-risk \eqn{\alpha} can be computed by extracting samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
 After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{nT}\sum_{i=1}^n\sum_{t=1}^T \log{r_{it}}, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
 \cr \cr
 If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_{nT})^{'}} is no longer the union of the posterior estimates obtained from each submodel.

@@ -171,7 +171,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         if(temporal=="rw1") dif <- 1
         if(temporal=="rw2") dif <- 2
         D <- diff(diag(T), differences=dif)
-        Rt <- methods::as(t(D)%*%D, "dgCMatrix")
+        Rt <- inla.as.sparse(t(D)%*%D)
 
         ## Define hyperprior distributions ##
         sdunif="expression:
@@ -294,6 +294,70 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
 
+                Rs <- inla.as.sparse(Rs)
+                Rs.Leroux <- inla.as.sparse(Rs.Leroux)
+
+                form <- "O ~ "
+
+                if(spatial=="Leroux") {
+                        form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif)))", sep="")
+                }
+                if(spatial=="intrinsic" & !PCpriors) {
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                }
+                if(spatial=="intrinsic" & PCpriors) {
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                }
+                if(spatial=="BYM") {
+                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
+                }
+                if(spatial=="BYM2" & !PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif)))", sep="")
+                }
+                if(spatial=="BYM2" & PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
+                }
+
+                if(temporal=="rw1" & !PCpriors) {
+                        form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                }
+                if(temporal=="rw1" & PCpriors) {
+                        form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                }
+                if(temporal=="rw2" & interaction!="TypeII" & !PCpriors) {
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                }
+                if(temporal=="rw2" & interaction!="TypeII" & PCpriors) {
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                }
+                if(temporal=="rw2" & interaction=="TypeII" & !PCpriors) {
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
+                }
+                if(temporal=="rw2" & interaction=="TypeII" & PCpriors) {
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
+                }
+
+                if(interaction=="TypeI" & temporal=="rw1" & !PCpriors) {
+                        form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                }
+                if(interaction=="TypeI" & temporal=="rw1" & PCpriors) {
+                        form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                }
+                if(interaction=="TypeI" & temporal=="rw2" & !PCpriors) {
+                        form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(rep(1:S,each=T),1,S*T),e=0))", sep="")
+                }
+                if(interaction=="TypeI" & temporal=="rw2" & PCpriors) {
+                        form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(rep(1:S,each=T),1,S*T),e=0))", sep="")
+                }
+                if((interaction %in% c("TypeII","TypeIII","TypeIV")) & !PCpriors) {
+                        form <- paste(form,"+ f(ID.area.year, model='generic0', Cmatrix=R, rankdef=r.def, constr=TRUE, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=A.constr, e=rep(0,nrow(A.constr))))", sep="")
+                }
+                if((interaction %in% c("TypeII","TypeIII","TypeIV")) & PCpriors) {
+                        form <- paste(form,"+ f(ID.area.year, model='generic0', Cmatrix=R, rankdef=r.def, constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=A.constr, e=rep(0,nrow(A.constr))))", sep="")
+                }
+
+                formula <- stats::as.formula(form)
+
                 models <- inla(formula, family="poisson", data=data.INLA, E=E,
                                control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
@@ -306,8 +370,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 cat("STEP 2: Fitting global model with INLA (this may take a while...)\n")
 
                 W <- aux$W
-                Rs <- Diagonal(S,colSums(W))-W
-                Rs.Leroux <- Diagonal(S)-Rs
+                Rs <- inla.as.sparse(Diagonal(S,colSums(W))-W)
+                Rs.Leroux <- inla.as.sparse(Diagonal(S)-Rs)
 
                 constr <- constraints(Rs,Rt)
                 R <- constr$R
@@ -402,3 +466,5 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         stop("INLA library is not installed! Please use following command to install the stable version of the R-INLA package:\n install.packages('INLA', repos=c(getOption('repos'), INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)")
   }
 }
+
+utils::globalVariables(c("inla.as.sparse"))

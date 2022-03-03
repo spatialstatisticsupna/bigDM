@@ -235,6 +235,34 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
 
+                Rs <- inla.as.sparse(Rs)
+                Rs.Leroux <- inla.as.sparse(Rs.Leroux)
+
+                form <- "O ~ "
+                if(length(X)>0){
+                        form <- paste(form,paste0(X,collapse="+"),"+")
+                }
+                if(prior=="Leroux") {
+                        form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif)))", sep="")
+                }
+                if(prior=="intrinsic" & !PCpriors) {
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                }
+                if(prior=="intrinsic" & PCpriors) {
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                }
+                if(prior=="BYM") {
+                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
+                }
+                if(prior=="BYM2" & !PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif)))", sep="")
+                }
+                if(prior=="BYM2" & PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
+                }
+
+                formula <- stats::as.formula(form)
+
                 models <- inla(formula, family="poisson", data=data.INLA, E=E,
                                control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
@@ -248,8 +276,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                 W <- aux$W
                 n <- nrow(W)
-                Rs <- Diagonal(n,colSums(W))-W
-                Rs.Leroux <- Diagonal(n)-Rs
+                Rs <- inla.as.sparse(Diagonal(n,colSums(W))-W)
+                Rs.Leroux <- inla.as.sparse(Diagonal(n)-Rs)
 
                 data.INLA <- data.frame(O=data[,O], E=data[,E], Area=data[,ID.area], ID.area=seq(1,n), data[,X])
                 names(data.INLA)[grep("^data...",names(data.INLA))] <- X
@@ -402,3 +430,5 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
         stop("\nINLA library is not installed!\nPlease use following command to install the stable version of the R-INLA package:\n\ninstall.packages('INLA', repos=c(getOption('repos'), INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)")
   }
 }
+
+utils::globalVariables(c("inla.as.sparse"))
