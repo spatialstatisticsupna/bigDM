@@ -296,6 +296,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
 
                 Rs <- inla.as.sparse(Rs)
                 Rs.Leroux <- inla.as.sparse(Rs.Leroux)
+                S <- nrow(Rs)
 
                 form <- "O ~ "
 
