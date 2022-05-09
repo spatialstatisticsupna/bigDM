@@ -62,7 +62,7 @@ install.packages(c("cpp11","proxy","progress","tzdb","vroom"))
 # Install bigDM from GitHub repositoy
 install_github("spatialstatisticsupna/bigDM")
 ```
-**IMPORTANT NOTE: The latest stable version of INLA (22.11.22) must be installed for the correct use of the bigDM package.**
+**IMPORTANT NOTE: At least the stable version of INLA 22.11.22 (or newest) must be installed for the correct use of the bigDM package.**
 
 
 # Basic Use
