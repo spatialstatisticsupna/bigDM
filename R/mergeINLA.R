@@ -43,6 +43,7 @@
 #' \item{\code{cpu.used}}{The sum of cpu times used by the \code{inla} function for each submodel (\code{Pre}, \code{Running} and \code{Post}), and the cpu time of the merging process \code{Merging}.}
 #'
 #' @import parallel
+#' @importFrom methods is
 #' @importFrom stats runif density sd quantile dpois var
 #' @importFrom rlist list.flatten
 #'
