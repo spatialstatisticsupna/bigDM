@@ -58,7 +58,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
           D <- length(inla.models)
 
           ## Check for errors ##
-          if(class(inla.models)!="list" | D==0)
+          if(!is(inla.models,"list") | D==0)
                   stop("the 'inla.models' argument must be a non-empty list")
           if(unlist(unique(lapply(inla.models, function(x) class(x))))!="inla")
                   stop("the 'inla.models' argument must contain 'inla' class objects")
