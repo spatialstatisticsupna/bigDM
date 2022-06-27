@@ -14,7 +14,8 @@ mergeINLA(
   seed = NULL,
   n.sample = 1000,
   compute.fixed = FALSE,
-  compute.DIC = TRUE
+  compute.DIC = TRUE,
+  merge.strategy = "original"
 )
 }
 \arguments{
@@ -35,9 +36,11 @@ mergeINLA(
 \item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
 
 \item{compute.fixed}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-Only works if \code{k=0} argument (\emph{disjoint model}) is specified. CAUTION: This method might be very time consuming.}
+Only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
+
+\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks.}
 }
 \value{
 This function returns an object of class \code{inla} containing the following elements:
@@ -57,15 +60,17 @@ This function returns an object of class \code{inla} containing the following el
 }
 \description{
 The function takes local models fitted for each subregion of the whole spatial domain and unifies them into a single \code{inla} object.
-This function is valid for both disjoint and \emph{k}-order neighbourhood models.
+This function is valid for both Disjoint and \emph{k}-order neighbourhood models.
 }
 \details{
-If the disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
+If the Disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
 However, a single estimate of the overall log-risk \eqn{\alpha} can be computed by extracting samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
 After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{nT}\sum_{i=1}^n\sum_{t=1}^T \log{r_{it}}, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
 \cr \cr
 If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_{nT})^{'}} is no longer the union of the posterior estimates obtained from each submodel.
-To obtain a unique posterior distribution of \eqn{r_{it}} for each areal unit \eqn{i} and time point \eqn{t}, a mixture distribution of the estimated posterior probability density functions is computed using the conditional predictive ordinates (CPO) to compute the mixture weights.
+Since multiple log-risk estimates can be obtained for some areal-time units from the different local submodel, their posterior estimates must be properly combined to obtain a single posterior distribution for each \eqn{r_{it}}.
+Two different merging strategies could be considered. If the \code{merge.strategy="mixture"} argument is specified, mixture distributions of the estimated posterior probability density functions with weights proportional to the conditional predictive ordinates (CPO) are computed.
+If the \code{merge.strategy="original"} argument is specified (default option), the posterior marginal estimate ot the areal-unit corresponding to the original submodel is selected.
 \cr \cr
 See \insertCite{orozco2020;textual}{bigDM} and \insertCite{orozco2022;textual}{bigDM} for more details.
 }

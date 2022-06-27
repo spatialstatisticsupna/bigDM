@@ -26,7 +26,8 @@ STCAR_INLA(
   compute.DIC = TRUE,
   save.models = FALSE,
   plan = "sequential",
-  workers = NULL
+  workers = NULL,
+  merge.strategy = "original"
 )
 }
 \arguments{
@@ -65,7 +66,7 @@ Only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are 
 
 \item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
 
-\item{compute.fixed}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed. Only works if \code{k=0} argument (\emph{disjoint model}) is specified.}
+\item{compute.fixed}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed. Only works if \code{k=0} argument (\emph{Disjoint model}) is specified.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
 
@@ -75,6 +76,8 @@ Only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are 
 If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote compute nodes.}
 
 \item{workers}{character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.}
+
+\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.}
 }
 \value{
 This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
@@ -88,10 +91,10 @@ To ensure model identifiability, sum-to-zero constraints are imposed over the ra
 As in the \code{\link{CAR_INLA}} function, three main modelling approaches can be considered:
 \itemize{
 \item the usual model with a global spatial random effect whose dependence structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument)
-\item a disjoint model based on a partition of the whole spatial domain where independent spatial CAR models are simultaneously fitted in each partition (\code{model="partition"} and \code{k=0} arguments)
-\item a modelling approach where \emph{k}-order neighbours are added to each partition to avoid border effects in the disjoint model (\code{model="partition"} and \code{k>0} arguments).
+\item a Disjoint model based on a partition of the whole spatial domain where independent spatial CAR models are simultaneously fitted in each partition (\code{model="partition"} and \code{k=0} arguments)
+\item a modelling approach where \emph{k}-order neighbours are added to each partition to avoid border effects in the Disjoint model (\code{model="partition"} and \code{k>0} arguments).
 }
-For both the disjoint and k-order neighbour models, parallel or distributed computation strategies can be performed to speed up computations by using the 'future' package \insertCite{bengtsson2020unifying}{bigDM}.
+For both the Disjoint and k-order neighbour models, parallel or distributed computation strategies can be performed to speed up computations by using the 'future' package \insertCite{bengtsson2020unifying}{bigDM}.
 
 Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{https://www.r-inla.org/}).
 For the scalable model proposals \insertCite{orozco2022}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can also be computed.
@@ -114,7 +117,7 @@ if(require("INLA", quietly=TRUE)){
   data("Data_LungCancer")
   str(Data_LungCancer)
 
-  ## Fit the disjoint model with a BYM2 spatial random effect,
+  ## Fit the Disjoint model with a BYM2 spatial random effect,
   ## RW1 temporal random effect and Type I interaction random effect ##
   Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
                          ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",

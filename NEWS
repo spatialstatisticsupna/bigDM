@@ -1,3 +1,7 @@
+version 0.4.2
+- small bugs fixed
+- new merging strategy
+
 version 0.4.1
 - small bugs fixed
 - version submitted to CRAN

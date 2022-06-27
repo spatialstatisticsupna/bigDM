@@ -8,10 +8,10 @@
 #' As in the \code{\link{CAR_INLA}} function, three main modelling approaches can be considered:
 #' \itemize{
 #' \item the usual model with a global spatial random effect whose dependence structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument)
-#' \item a disjoint model based on a partition of the whole spatial domain where independent spatial CAR models are simultaneously fitted in each partition (\code{model="partition"} and \code{k=0} arguments)
-#' \item a modelling approach where \emph{k}-order neighbours are added to each partition to avoid border effects in the disjoint model (\code{model="partition"} and \code{k>0} arguments).
+#' \item a Disjoint model based on a partition of the whole spatial domain where independent spatial CAR models are simultaneously fitted in each partition (\code{model="partition"} and \code{k=0} arguments)
+#' \item a modelling approach where \emph{k}-order neighbours are added to each partition to avoid border effects in the Disjoint model (\code{model="partition"} and \code{k>0} arguments).
 #' }
-#' For both the disjoint and k-order neighbour models, parallel or distributed computation strategies can be performed to speed up computations by using the 'future' package \insertCite{bengtsson2020unifying}{bigDM}.
+#' For both the Disjoint and k-order neighbour models, parallel or distributed computation strategies can be performed to speed up computations by using the 'future' package \insertCite{bengtsson2020unifying}{bigDM}.
 #'
 #' Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{https://www.r-inla.org/}).
 #' For the scalable model proposals \insertCite{orozco2022}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can also be computed.
@@ -45,8 +45,9 @@
 #' Only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
 #' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
 #' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
-#' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed. Only works if \code{k=0} argument (\emph{disjoint model}) is specified.
+#' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed. Only works if \code{k=0} argument (\emph{Disjoint model}) is specified.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
+#' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.
 #' @param save.models logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.
 #' @param plan one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
 #' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote compute nodes.
@@ -77,7 +78,7 @@
 #'   data("Data_LungCancer")
 #'   str(Data_LungCancer)
 #'
-#'   ## Fit the disjoint model with a BYM2 spatial random effect,
+#'   ## Fit the Disjoint model with a BYM2 spatial random effect,
 #'   ## RW1 temporal random effect and Type I interaction random effect ##
 #'   Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
 #'                          ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
@@ -102,7 +103,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                        W=NULL, spatial="Leroux", temporal="rw1", interaction="TypeIV",
                        model="partition", k=0, strategy="simplified.laplace",
                        PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
-                       save.models=FALSE, plan="sequential", workers=NULL){
+                       save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original"){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
 
@@ -133,6 +134,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 stop("invalid 'plan' argument")
         if(plan=="cluster" & is.null(workers))
                 stop("argument 'workers' must be specified when using plan='cluster' computation strategy")
+        if(!(merge.strategy %in% c("mixture","original")))
+                  stop("invalid 'merge.strategy' argument")
 
         cat("STEP 1: Pre-processing data\n")
 
@@ -152,6 +155,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 stop(sprintf("'%s' variable not found in carto object",E))
 
         carto <- carto[order(sf::st_set_geometry(carto, NULL)[,ID.area]),]
+        data <- merge(data,carto[,c(ID.area,ID.group)])
+        data$geometry <- NULL
         data[,ID.year] <- paste(sprintf("%02d", as.numeric(as.character(data[,ID.year]))))
         data <- data[order(data[,ID.year],data[,ID.area]),]
 
@@ -231,7 +236,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         form <- "O ~ "
 
         if(spatial=="Leroux") {
-                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif)))", sep="")
+                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
         }
         if(spatial=="intrinsic" & !PCpriors) {
                 form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
@@ -243,7 +248,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
         }
         if(spatial=="BYM2" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif)))", sep="")
+                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
         }
         if(spatial=="BYM2" & PCpriors) {
                 form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
@@ -301,7 +306,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 form <- "O ~ "
 
                 if(spatial=="Leroux") {
-                        form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif)))", sep="")
+                        form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
                 }
                 if(spatial=="intrinsic" & !PCpriors) {
                         form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
@@ -313,7 +318,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
                 }
                 if(spatial=="BYM2" & !PCpriors) {
-                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif)))", sep="")
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
                 }
                 if(spatial=="BYM2" & PCpriors) {
                         form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
@@ -423,7 +428,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 r.def <- lapply(constr, function(x) x$r.def)
                 A.constr <- lapply(constr, function(x) x$A.constr)
 
-                data.INLA <- mapply(function(x,y){data.frame(O=x[,O], E=x[,E], Area=x[,ID.area], Year=x[,ID.year], ID.area=rep(1:y,T), ID.year=rep(1:T,each=y), ID.area.year=seq(1,T*y))}, x=data.d, y=nd, SIMPLIFY=FALSE)
+                data.INLA <- mapply(function(x,y){data.frame(O=x[,O], E=x[,E], Area=x[,ID.area], Year=x[,ID.year], ID.group=x[,ID.group], ID.area=rep(1:y,T), ID.year=rep(1:T,each=y), ID.area.year=seq(1,T*y))}, x=data.d, y=nd, SIMPLIFY=FALSE)
                 D <- length(data.INLA)
 
                 if(plan=="sequential"){
@@ -454,7 +459,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
 
                 cat("STEP 3: Merging the results\n")
-                Model <- mergeINLA(inla.models=inla.models, ID.year="Year", k=k, seed=seed, n.sample=n.sample, compute.fixed=compute.fixed, compute.DIC=compute.DIC)
+                Model <- mergeINLA(inla.models=inla.models, ID.year="Year", k=k, seed=seed, n.sample=n.sample, compute.fixed=compute.fixed, compute.DIC=compute.DIC, merge.strategy=merge.strategy)
 
                 if(plan=="cluster"){
                         Model$cpu.used <- c(Running=as.numeric(cpu.time[3]), Merging=as.numeric(Model$cpu.used["Merging"]), Total=as.numeric(cpu.time[3]+Model$cpu.used["Merging"]))
