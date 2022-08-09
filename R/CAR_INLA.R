@@ -297,7 +297,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                         if(confounding=="restricted"){
                                 cat("      + Alleviating spatial confounding: restricted regression model\n")
                                 p <- length(X)
-                                W <- Diagonal(n, Model$summary.fitted.values$mode*data.INLA$E)
+                                W <- Diagonal(n, Model$summary.fitted.values$`0.5quant`*data.INLA$E)
                                 W.sqrt <- Diagonal(n, sqrt(diag(W)))
 
                                 cat("         * Computing eigen decomposition... ")
@@ -335,7 +335,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                         if(confounding=="constraints"){
                                 cat("      + Alleviating spatial confounding: orthogonality constraints model\n")
                                 p <- length(X)
-                                W <- Diagonal(n, Model$summary.fitted.values$mode*data.INLA$E)
+                                W <- Diagonal(n, Model$summary.fitted.values$`0.5quant`*data.INLA$E)
                                 Bs <- rbind(matrix(1,1,n)%*%W, t(as.matrix(data.INLA[,X]))%*%W)
                                 Bs <- as(Bs,"matrix")
 
