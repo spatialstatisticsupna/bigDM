@@ -32,7 +32,7 @@ citEntry(entry = "article",
 
 
 citEntry(entry = "Misc",
-  title        = "Parallel and distributed Bayesian modelling for analysing high-dimensional spatio-temporal count data",
+  title        = "Big problems in spatio-temporal disease mapping: methods and software",
   author       = personList(as.person("E Orozco-Acosta"),
                    as.person("A Adin"),
                    as.person("M D Ugarte")),
@@ -42,6 +42,6 @@ citEntry(entry = "Misc",
   url          = "https://arxiv.org/abs/2201.08323",
   textVersion  =
   paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022).",
-        "Parallel and distributed Bayesian modelling for analysing high-dimensional spatio-temporal count data. arXiv preprint. https://arxiv.org/abs/2201.08323"),
+        "Big problems in spatio-temporal disease mapping: methods and software. arXiv preprint. https://arxiv.org/abs/2201.08323"),
   header = "To cite the scalable Bayesian models implemented in the function STCAR_INLA:"
 )
