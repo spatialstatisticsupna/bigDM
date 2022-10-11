@@ -75,7 +75,7 @@ When using this package, please cite the following papers:
 
 [Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021). Scalable Bayesian modeling for smoothing disease risks in large spatial data sets using INLA. _Spatial Statistics_, __41__, 100496.](https://doi.org/10.1016/j.spasta.2021.100496)
 
-[Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022). Parallel and distributed Bayesian modelling for analysing high-dimensional spatio-temporal count data. _arXiv preprint_.](https://arxiv.org/abs/2201.08323)
+[Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022). Big problems in spatio-temporal disease mapping: methods and software. _arXiv preprint_.](https://arxiv.org/abs/2201.08323)
 
 # Updates
 
