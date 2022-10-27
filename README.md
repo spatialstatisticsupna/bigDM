@@ -19,7 +19,7 @@ Scalable Bayesian disease mapping models for high-dimensional data using a divid
 
 
 # The package
-This package implements several (scalable) spatial and spatio-temporal generalised linear mixed models for high-dimensional areal count data in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique.
+This package implements several (scalable) spatial and spatio-temporal Poisson mixed models for high-dimensional areal count data in a fully Bayesian setting using the integrated nested Laplace approximation (INLA) technique.
 
 Below, there is a list with a brief overview of all package functions:
 
@@ -28,16 +28,22 @@ Below, there is a list with a brief overview of all package functions:
 * ```clustering_partition``` Obtain a spatial partition using the DBSC algorithm.
 * ```connect_subgraphs``` Merges disjoint connected subgraphs.
 * ```divide_carto``` Divides the spatial domain into subregions.
+* ```MCAR_INLA``` Fits several spatial multivariate CAR models for high-dimensional count data.
 * ```mergeINLA``` Merges inla objects for partition models.
+* ```Mmodel_compute_cor``` Computes between-disease correlation coefficients for M-models.
+* ```Mmodel_idd``` Implements the spatially non-structured multivariate latent effect.
+* ```Mmodel_icar``` Implements the intrinsic multivariate latent effect.
+* ```Mmodel_lcar``` Implements the Leroux et al. (1999) multivariate latent effect.
+* ```Mmodel_pcar``` Implements the proper multivariate latent effect.
 * ```random_partition``` Defines a random partition of the spatial domain based on a regular grid.
 * ```STCAR_INLA``` Fits several spatio-temporal CAR models for high-dimensional count data.
 
 
 # Installation
 
-[Installing Rtools40 for Windows](https://cran.r-project.org/bin/windows/Rtools/)
+[Installing Rtools42 for Windows](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html)
 
-R version 4.0.0 and newer for Windows requires the new Rtools40 to build R packages with C/C++/Fortran code from source.
+R version 4.2.0 and newer for Windows requires the new Rtools42 to build R packages with C/C++/Fortran code from source.
 
 
 ## Install from CRAN
@@ -70,6 +76,7 @@ See the following vignettes for further details and examples using this package:
 * [bigDM: fitting spatial models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-1-fitting-spatial-models.html)
 * [bigDM: parallel and distributed modelling](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-2-parallel-and-distributed-modelling.html)
 * [bigDM: fitting spatio-temporal models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-3-fitting-spatio-temporal-models.html)
+* [bigDM: fitting multivariate spatial models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-4-fitting-multivariate-spatial-models.html)
 
 When using this package, please cite the following papers:
 
@@ -77,11 +84,18 @@ When using this package, please cite the following papers:
 
 [Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022). Big problems in spatio-temporal disease mapping: methods and software. _arXiv preprint_.](https://arxiv.org/abs/2201.08323)
 
+[Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2022). High-dimensional order-free multivariate spatial disease mapping. _arXiv preprint_.](https://arxiv.org/abs/2210.14849)
+
 # Updates
 
 ```
 news(package="bigDM")
 ```
+
+__Changes in version 0.5.0__ (2022 Oct 27)
+* new `MCAR_INLA()` function to fit scalable spatial multivariate CAR models
+* changes in `mergeINLA()` function
+* development of additional auxiliary functions
 
 __Changes in version 0.4.2__ (2022 Jun 27)
 * small bugs fixed

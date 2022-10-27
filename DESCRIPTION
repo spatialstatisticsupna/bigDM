@@ -1,8 +1,8 @@
 Package: bigDM
 Type: Package
 Title: Scalable Bayesian Disease Mapping Models for High-Dimensional Data
-Version: 0.4.2
-Date: 2022-06-27
+Version: 0.5.0
+Date: 2022-10-05
 Authors@R: 
   c(person(given = "Aritz",
            family = "Adin",
@@ -19,12 +19,12 @@ Authors@R:
            comment = c(ORCID = "0000-0002-3505-8400"))
     )
 Maintainer: Aritz Adin <aritz.adin@unavarra.es>
-Description: Implements several spatial and spatio-temporal scalable disease mapping models for high-dimensional count data using the INLA technique for approximate Bayesian inference in latent Gaussian models (Orozco-Acosta et al., 2021 <doi:10.1016/j.spasta.2021.100496> and Orozco-Acosta et al., 2022 <arXiv:2201.08323>). The creation and develpment of this package has been supported by Project MTM2017-82553-R (AEI/FEDER, UE) and Project PID2020-113125RB-I00/MCIN/AEI/10.13039/501100011033. It has also been partially funded by the Public University of Navarra (project PJUPNA2001).
+Description: Implements several spatial and spatio-temporal scalable disease mapping models for high-dimensional count data using the INLA technique for approximate Bayesian inference in latent Gaussian models (Orozco-Acosta et al., 2021 <doi:10.1016/j.spasta.2021.100496>; Orozco-Acosta et al., 2022 <arXiv:2201.08323> and Vicente et al., 2022 <arXiv:2210.14849>). The creation and develpment of this package has been supported by Project MTM2017-82553-R (AEI/FEDER, UE) and Project PID2020-113125RB-I00/MCIN/AEI/10.13039/501100011033. It has also been partially funded by the Public University of Navarra (project PJUPNA2001).
 URL: https://github.com/spatialstatisticsupna/bigDM
 BugReports: https://github.com/spatialstatisticsupna/bigDM/issues
 Depends: R (>= 4.0.0)
 Additional_repositories: https://inla.r-inla-download.org/R/stable
-Imports: crayon, future, future.apply, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, sf, spatialreg, spdep, stats, utils, rlist
+Imports: crayon, fastDummies, future, future.apply, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, sf, spatialreg, spdep, stats, utils, rlist
 Suggests: bookdown, INLA (>= 21.11.22), knitr, rmarkdown, testthat (>= 3.0.0), tmap
 RdMacros: Rdpack
 License: GPL-3

@@ -17,20 +17,28 @@ Below, there is a list with a brief overview of all package functions:
   \code{\link{clustering_partition}} \tab Obtain a spatial partition using the DBSC algorithm \cr
   \code{\link{connect_subgraphs}} \tab Merges disjoint connected subgraphs \cr
   \code{\link{divide_carto}} \tab Divides the spatial domain into subregions \cr
+  \code{\link{MCAR_INLA}} \tab  Fits several spatial multivariate CAR models for high-dimensional count data \cr
   \code{\link{mergeINLA}} \tab Merges \code{inla} objects for partition models \cr
+  \code{\link{Mmodel_compute_cor}} \tab Computes between-diseases correlation coefficients for M-models \cr
+  \code{\link{Mmodel_icar}} \tab Implements the spatially non-structured multivariate latent effect \cr
+  \code{\link{Mmodel_icar}} \tab Implements the intrinsic multivariate CAR latent effect \cr
+  \code{\link{Mmodel_lcar}} \tab Implements the Leroux et al. (1999) multivariate CAR latent effect \cr
+  \code{\link{Mmodel_pcar}} \tab Implements the proper multivariate CAR latent effect \cr
   \code{\link{random_partition}} \tab Defines a random partition of the spatial domain based on a regular grid \cr
   \code{\link{STCAR_INLA}} \tab Fits several spatio-temporal CAR models for high-dimensional count data \cr
   ----------------------\tab ---------------------------------------------------------------------------------- \cr
   }
 }
 \examples{
-## See the examples for CAR_INLA and STCAR_INLA functions
+## See the examples for CAR_INLA, MCAR_INLA and STCAR_INLA functions
 
 }
 \references{
 \insertRef{orozco2020}{bigDM}
 
 \insertRef{orozco2022}{bigDM}
+
+\insertRef{vicente2022}{bigDM}
 }
 \seealso{
 See the following vignettes for further details and examples using this package:
@@ -38,6 +46,7 @@ See the following vignettes for further details and examples using this package:
    \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-1-fitting-spatial-models.html}{\code{bigDM: fitting spatial models}}}
    \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-2-parallel-and-distributed-modelling.html}{\code{bigDM: parallel and distributed modelling}}}
    \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-3-fitting-spatio-temporal-models.html}{\code{bigDM: fitting spatio-temporal models}}}
+   \item{\href{https://emi-sstcdapp.unavarra.es/bigDM/bigDM-4-fitting-multivariate-spatial-models.html}{\code{bigDM: fitting multivariate spatial models}}}
 }
 }
 \author{

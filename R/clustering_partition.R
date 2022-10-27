@@ -15,8 +15,8 @@
 #' \insertRef{wang2016automatic}{bigDM}
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
-#' @param ID.area character; name of the variable which contains the IDs of spatial areal units.
-#' @param var character; name of the variable which contains the data of interest to compute spatial clusters, usually the vector of log-SMR.
+#' @param ID.area character; name of the variable that contains the IDs of spatial areal units.
+#' @param var character; name of the variable that contains the data of interest to compute spatial clusters, usually the vector of log-SMR.
 #' @param n.cluster numeric; value to fix the number of cluster centers in the DBSC algorithm. Default to 10.
 #' @param min.size numeric (default \code{NULL}); value to fix the minimum size of areas in each spatial partition.
 #' @param W optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).

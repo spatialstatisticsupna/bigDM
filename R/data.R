@@ -43,5 +43,24 @@ NULL
 #' @keywords data
 NULL
 
+#' Spanish cancer mortality data for the joint analysis of multiple diseases
+#'
+#' \code{data.frame} object containing simulated cancer mortality data for three diseases in the 7907 municipalities of continental Spain.
+#'
+#' @usage Data_MultiCancer
+#'
+#' @format Formal class \code{data.frame} with 237.271 rows and 5 colunmns.
+#' \itemize{
+#'   \item ID: character vector of geographic identifiers
+#'   \item disease: numeric vector of disease identifiers
+#'   \item obs: observed number of cases
+#'   \item exp: expected number of cases
+#'   \item SMR: standardized mortality ratios
+#' }
+#' @name Data_MultiCancer
+#' @docType data
+#' @keywords data
+NULL
+
 #' @docType package
 #' @bibliography system.file("REFERENCES.bib", package = "bigDM")

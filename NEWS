@@ -1,3 +1,8 @@
+version 0.5.0
+- new MCAR_INLA() function to fit scalable spatial multivariate CAR models
+- changes in mergeINLA() function
+- development of additional auxiliary functions
+
 version 0.4.2
 - small bugs fixed
 - new merging strategy

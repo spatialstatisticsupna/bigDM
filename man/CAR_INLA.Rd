@@ -20,7 +20,7 @@ CAR_INLA(
   PCpriors = FALSE,
   seed = NULL,
   n.sample = 1000,
-  compute.fixed = FALSE,
+  compute.intercept = FALSE,
   compute.DIC = TRUE,
   save.models = FALSE,
   plan = "sequential",
@@ -32,14 +32,14 @@ CAR_INLA(
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.
 This object must contain at least the target variables of interest specified in the arguments \code{ID.area}, \code{O} and \code{E}.}
 
-\item{ID.area}{character; name of the variable which contains the IDs of spatial areal units.}
+\item{ID.area}{character; name of the variable that contains the IDs of spatial areal units.}
 
-\item{ID.group}{character; name of the variable which contains the IDs of the spatial partition (grouping variable).
+\item{ID.group}{character; name of the variable that contains the IDs of the spatial partition (grouping variable).
 Only required if \code{model="partition"}.}
 
-\item{O}{character; name of the variable which contains the observed number of disease cases for each areal units.}
+\item{O}{character; name of the variable that contains the observed number of disease cases for each areal units.}
 
-\item{E}{character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit.}
+\item{E}{character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit.}
 
 \item{X}{a character vector containing the names of the covariates within the \code{carto} object to be included in the model as fixed effects,
 or a matrix object playing the role of the fixed effects design matrix. For the latter case, the row names must match with the IDs of the spatial units defined by the \code{ID.area} variable.
@@ -47,7 +47,7 @@ If \code{X=NULL} (default), only a global intercept is included in the model as 
 
 \item{confounding}{one of either \code{NULL}, \code{"restricted"} (restricted regression) or \code{"constraints"} (orthogonal constraints), which specifies the estimation method used to alleviate spatial confounding between fixed and random effects.
 If only an intercept is considered in the model (\code{X=NULL}), the default value \code{confounding=NULL} will be set.
-At the moment, only works for the \emph{Global model} (specified through the \code{model="global"} argument).}
+At the moment, it only works for the \emph{Global model} (specified through the \code{model="global"} argument).}
 
 \item{W}{optional argument with the binary adjacency matrix of the spatial areal units.  If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).}
 
@@ -64,21 +64,21 @@ If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code
 which specifies the approximation strategy considered in the \code{inla} function.}
 
 \item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
-Only works if arguments \code{prior="intrinsic"} or \code{prior="BYM2"} are specified.}
+It only works if arguments \code{prior="intrinsic"} or \code{prior="BYM2"} are specified.}
 
 \item{seed}{numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.}
 
 \item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
 
-\item{compute.fixed}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-Only works if \code{k=0} argument (\emph{Disjoint model}) is specified.}
+\item{compute.intercept}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
+It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
 
 \item{save.models}{logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.}
 
 \item{plan}{one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
-If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote compute nodes.}
+If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.}
 
 \item{workers}{character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.}
 
@@ -88,9 +88,9 @@ If \code{plan="sequential"} (default) the models are fitted sequentially and in 
 This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 }
 \description{
-Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{i}}=\alpha+\mathbf{x_i}^{'}\beta + \xi_i, \quad \mbox{for} \quad i=1,\ldots,n;}
+Fit a spatial Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{i}}=\alpha+\mathbf{x_i}^{'}\mathbf{\beta} + \xi_i, \quad \mbox{for} \quad i=1,\ldots,n;}
 where \eqn{\alpha} is a global intercept, \eqn{\mathbf{x_i}^{'}=(x_{i1},\ldots,x_{ip})} is a p-vector of standardized covariates in the i-th area,
-\eqn{\beta=(\beta_1,\ldots,\beta_p)} is the p-vector of fixed effects coefficients, and \eqn{\xi_i} is a spatially structured random effect.
+\eqn{\mathbf{\beta}=(\beta_1,\ldots,\beta_p)} is the p-vector of fixed effects coefficients, and \eqn{\xi_i} is a spatially structured random effect.
 Several conditional autoregressive (CAR) prior distributions can be specified for the spatial random effect, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the convolution or BYM prior \insertCite{besag1991}{bigDM},
 the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2 \insertCite{riebler2016intuitive}{bigDM}.
 
@@ -113,30 +113,37 @@ For a full model specification and further details see the vignettes accompanyin
 }
 \examples{
 \dontrun{
+
 if(require("INLA", quietly=TRUE)){
 
   ## Load the Spain colorectal cancer mortality data ##
   data(Carto_SpainMUN)
 
-  ## Fit the Global model with a Leroux CAR prior distribution ##
+  ## Global model with a Leroux CAR prior distribution ##
   Global <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", O="obs", E="exp",
                      prior="Leroux", model="global", strategy="gaussian")
 
   summary(Global)
 
-  ## Fit the Disjoint model with a Leroux CAR prior distribution ##
+  ## Disjoint model with a Leroux CAR prior distribution  ##
+  ## using 4 local clusters to fit the models in parallel ##
   Disjoint <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
-                       prior="Leroux", model="partition", k=0, strategy="gaussian")
+                       prior="Leroux", model="partition", k=0, strategy="gaussian",
+                       plan="cluster", workers=rep("localhost",4))
   summary(Disjoint)
 
-  ## Fit the 1st order neighbourhood model with a Leroux CAR prior distribution ##
+  ## 1st-order neighbourhood model with a Leroux CAR prior distribution ##
+  ## using 4 local clusters to fit the models in parallel               ##
   order1 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
-                     prior="Leroux", model="partition", k=1, strategy="gaussian")
+                     prior="Leroux", model="partition", k=1, strategy="gaussian",
+                     plan="cluster", workers=rep("localhost",4))
   summary(order1)
 
-  ## Fit the 2nd order neighbourhood model with a Leroux CAR prior distribution ##
+  ## 2nd-order neighbourhood model with a Leroux CAR prior distribution ##
+  ## using 4 local clusters to fit the models in parallel               ##
   order2 <- CAR_INLA(carto=Carto_SpainMUN, ID.area="ID", ID.group="region", O="obs", E="exp",
-                     prior="Leroux", model="partition", k=2, strategy="gaussian")
+                     prior="Leroux", model="partition", k=2, strategy="gaussian",
+                     plan="cluster", workers=rep("localhost",4))
   summary(order2)
 }
 }

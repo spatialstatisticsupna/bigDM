@@ -14,7 +14,7 @@
 #' @param min.size numeric; value to fix the minimum number of areas in each spatial partition (if \code{NULL}, this step is skipped). Default to 50.
 #' @param max.size numeric; value to fix the maximum number of areas in each spatial partition (if \code{NULL}, this step is skipped). Default to 600.
 #' @param prop.zero numeric; value between 0 and 1 that indicates the maximum proportion of areas with no cases for each spatial partition.
-#' @param O character; name of the variable which contains the observed number of disease cases for each areal units. Only required if \code{prop.zero} argument is set.
+#' @param O character; name of the variable that contains the observed number of disease cases for each areal units. Only required if \code{prop.zero} argument is set.
 #'
 #' @return \code{sf} object with the original data and a grouping variable named 'ID.group'
 #'

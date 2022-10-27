@@ -20,9 +20,9 @@ clustering_partition(
 \arguments{
 \item{carto}{object of class \code{SpatialPolygonsDataFrame} or \code{sf}.}
 
-\item{ID.area}{character; name of the variable which contains the IDs of spatial areal units.}
+\item{ID.area}{character; name of the variable that contains the IDs of spatial areal units.}
 
-\item{var}{character; name of the variable which contains the data of interest to compute spatial clusters, usually the vector of log-SMR.}
+\item{var}{character; name of the variable that contains the data of interest to compute spatial clusters, usually the vector of log-SMR.}
 
 \item{n.cluster}{numeric; value to fix the number of cluster centers in the DBSC algorithm. Default to 10.}
 

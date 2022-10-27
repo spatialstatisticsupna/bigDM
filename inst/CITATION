@@ -2,13 +2,14 @@ citEntry(entry = "Manual",
   title        = "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data",
   author       = personList(as.person("A Adin"),
                    as.person("E Orozco-Acosta"),
+                   as.person("G Vicente"),
                    as.person("M D Ugarte")),
   year         = "2022",
-  note = "R package version 0.4.2",
+  note = "R package version 0.5.0",
   url = "https://github.com/spatialstatisticsupna/bigDM",
   textVersion  =
-  paste("Adin, A., Orozco-Acosta, E., Ugarte, M.D. (2022).",
-        "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.4.2",
+  paste("Adin, A., Orozco-Acosta, E., and Ugarte, M.D. (2022).",
+        "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.5.0",
         "https://github.com/spatialstatisticsupna/bigDM."),
   header = "To cite the package:"
 )
@@ -44,4 +45,21 @@ citEntry(entry = "Misc",
   paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022).",
         "Big problems in spatio-temporal disease mapping: methods and software. arXiv preprint. https://arxiv.org/abs/2201.08323"),
   header = "To cite the scalable Bayesian models implemented in the function STCAR_INLA:"
+)
+
+
+citEntry(entry = "Misc",
+  title        = "High-dimensional multivariate disease mapping",
+  author       = personList(as.person("G Vicente"),
+                   as.person("A Adin"),
+                   as.person("T Goicoa"),
+                   as.person("M D Ugarte")),
+  year         = "2022",
+  eprint       = "2210.14849",
+  archivePrefix = "arXiv",
+  url          = "https://arxiv.org/abs/2210.14849",
+  textVersion  =
+  paste("Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2022).",
+        "High-dimensional multivariate disease mapping. arXiv preprint. https://arxiv.org/abs/2210.14849"),
+  header = "To cite the scalable multivariate spatial Bayesian models implemented in the function MCAR_INLA:"
 )

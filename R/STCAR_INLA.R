@@ -28,12 +28,12 @@
 #' \insertRef{orozco2022}{bigDM}
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}. This object must contain at least the variable with the identifiers of the spatial areal units specified in the argument \code{ID.area}.
-#' @param data object of class \code{data.frame} which must contain the target variables of interest specified in the arguments \code{ID.area}, \code{ID.year}, \code{O} and \code{E}.
-#' @param ID.area character; name of the variable which contains the IDs of spatial areal units. The values of this variable must match those given in the \code{carto} and \code{data} variable.
-#' @param ID.year character; name of the variable which contains the IDs of time points.
-#' @param ID.group character; name of the variable which contains the IDs of the spatial partition (grouping variable). Only required if \code{model="partition"}.
-#' @param O character; name of the variable which contains the observed number of disease cases for each areal and time point.
-#' @param E character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit and time point.
+#' @param data object of class \code{data.frame} that must contain the target variables of interest specified in the arguments \code{ID.area}, \code{ID.year}, \code{O} and \code{E}.
+#' @param ID.area character; name of the variable that contains the IDs of spatial areal units. The values of this variable must match those given in the \code{carto} and \code{data} variable.
+#' @param ID.year character; name of the variable that contains the IDs of time points.
+#' @param ID.group character; name of the variable that contains the IDs of the spatial partition (grouping variable). Only required if \code{model="partition"}.
+#' @param O character; name of the variable that contains the observed number of disease cases for each areal and time point.
+#' @param E character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit and time point.
 #' @param W optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).
 #' @param spatial one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"}, which specifies the prior distribution considered for the spatial random effect.
 #' @param temporal one of either \code{"rw1"} (default) or \code{"rw2"}, which specifies the prior distribution considered for the temporal random effect.
@@ -42,15 +42,16 @@
 #' @param k numeric value with the neighbourhood order used for the partition model. Usually k=2 or 3 is enough to get good results. If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.
 #' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
-#' Only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
+#' It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
 #' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
 #' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
-#' @param compute.fixed logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed. Only works if \code{k=0} argument (\emph{Disjoint model}) is specified.
+#' @param compute.intercept logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
+#' It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
 #' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.
 #' @param save.models logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.
 #' @param plan one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
-#' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote compute nodes.
+#' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.
 #' @param workers character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
@@ -78,22 +79,22 @@
 #'   data("Data_LungCancer")
 #'   str(Data_LungCancer)
 #'
-#'   ## Fit the Disjoint model with a BYM2 spatial random effect,
-#'   ## RW1 temporal random effect and Type I interaction random effect ##
+#'   ## Disjoint model with a BYM2 spatial random effect, RW1 temporal random effect and      ##
+#'   ## Type I interaction random effect using 4 local clusters to fit the models in parallel ##
 #'   Disjoint <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
 #'                          ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
 #'                          spatial="BYM2", temporal="rw1", interaction="TypeI",
 #'                          model="partition", k=0, strategy="gaussian",
-#'                          plan="cluster", workers=rep("localhost",2))
+#'                          plan="cluster", workers=rep("localhost",4))
 #'   summary(Disjoint)
 #'
-#'   ## Fit the 1st order neighbourhood model with a BYM2 spatial random effect,
-#'   ## RW1 temporal random effect and Type I interaction random effect ##
+#'   ## 1st-order nb. model with a BYM2 spatial random effect, RW1 temporal random effect and ##
+#'   ## Type I interaction random effect using 4 local clusters to fit the models in parallel ##
 #'   order1 <- STCAR_INLA(carto=Carto_SpainMUN, data=Data_LungCancer,
 #'                        ID.area="ID", ID.year="year", O="obs", E="exp", ID.group="ID.prov",
 #'                        spatial="BYM2", temporal="rw1", interaction="TypeI",
 #'                        model="partition", k=1, strategy="gaussian",
-#'                        plan="cluster", workers=rep("localhost",2))
+#'                        plan="cluster", workers=rep("localhost",4))
 #'   summary(order1)
 #' }
 #' }
@@ -102,7 +103,7 @@
 STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.group=NULL, O=NULL, E=NULL,
                        W=NULL, spatial="Leroux", temporal="rw1", interaction="TypeIV",
                        model="partition", k=0, strategy="simplified.laplace",
-                       PCpriors=FALSE, seed=NULL, n.sample=1000, compute.fixed=FALSE, compute.DIC=TRUE,
+                       PCpriors=FALSE, seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
                        save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original"){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
@@ -176,7 +177,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         if(temporal=="rw1") dif <- 1
         if(temporal=="rw2") dif <- 2
         D <- diff(diag(T), differences=dif)
-        Rt <- inla.as.sparse(t(D)%*%D)
+        Rt <- as(t(D)%*%D, "TsparseMatrix")
+        # Rt <- inla.as.sparse(t(D)%*%D)
 
         ## Define hyperprior distributions ##
         sdunif="expression:
@@ -298,9 +300,11 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         FitModels <- function(Rs, Rs.Leroux, R, r.def, A.constr, data.INLA, d, D){
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
-
-                Rs <- inla.as.sparse(Rs)
-                Rs.Leroux <- inla.as.sparse(Rs.Leroux)
+          
+                Rs <- as(Rs,"TsparseMatrix")
+                Rs.Leroux <- as(Rs.Leroux,"TsparseMatrix")
+                # Rs <- inla.as.sparse(Rs)
+                # Rs.Leroux <- inla.as.sparse(Rs.Leroux)
                 S <- nrow(Rs)
 
                 form <- "O ~ "
@@ -376,8 +380,10 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 cat("STEP 2: Fitting global model with INLA (this may take a while...)\n")
 
                 W <- aux$W
-                Rs <- inla.as.sparse(Diagonal(S,colSums(W))-W)
-                Rs.Leroux <- inla.as.sparse(Diagonal(S)-Rs)
+                Rs <- as(Diagonal(S,colSums(W))-W, "TsparseMatrix")
+                Rs.Leroux <- as(Diagonal(S)-Rs, "TsparseMatrix")
+                # Rs <- inla.as.sparse(Diagonal(S,colSums(W))-W)
+                # Rs.Leroux <- inla.as.sparse(Diagonal(S)-Rs)
 
                 constr <- constraints(Rs,Rt)
                 R <- constr$R
@@ -459,7 +465,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
 
                 cat("STEP 3: Merging the results\n")
-                Model <- mergeINLA(inla.models=inla.models, ID.year="Year", k=k, seed=seed, n.sample=n.sample, compute.fixed=compute.fixed, compute.DIC=compute.DIC, merge.strategy=merge.strategy)
+                Model <- mergeINLA(inla.models=inla.models, ID.year="Year", k=k, seed=seed, n.sample=n.sample, compute.intercept=compute.intercept, compute.DIC=compute.DIC, merge.strategy=merge.strategy)
 
                 if(plan=="cluster"){
                         Model$cpu.used <- c(Running=as.numeric(cpu.time[3]), Merging=as.numeric(Model$cpu.used["Merging"]), Total=as.numeric(cpu.time[3]+Model$cpu.used["Merging"]))
@@ -473,4 +479,4 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
   }
 }
 
-utils::globalVariables(c("inla.as.sparse"))
+# utils::globalVariables(c("inla.as.sparse"))

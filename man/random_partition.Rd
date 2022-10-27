@@ -27,7 +27,7 @@ random_partition(
 
 \item{prop.zero}{numeric; value between 0 and 1 that indicates the maximum proportion of areas with no cases for each spatial partition.}
 
-\item{O}{character; name of the variable which contains the observed number of disease cases for each areal units. Only required if \code{prop.zero} argument is set.}
+\item{O}{character; name of the variable that contains the observed number of disease cases for each areal units. Only required if \code{prop.zero} argument is set.}
 }
 \value{
 \code{sf} object with the original data and a grouping variable named 'ID.group'

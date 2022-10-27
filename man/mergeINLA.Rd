@@ -9,11 +9,12 @@ mergeINLA(
   k = NULL,
   ID.area = "Area",
   ID.year = NULL,
+  ID.disease = NULL,
   O = "O",
   E = "E",
   seed = NULL,
   n.sample = 1000,
-  compute.fixed = FALSE,
+  compute.intercept = FALSE,
   compute.DIC = TRUE,
   merge.strategy = "original"
 )
@@ -23,19 +24,21 @@ mergeINLA(
 
 \item{k}{numeric value with the neighbourhood order used for the partition model. If k=0 the \emph{Disjoint model} is considered.}
 
-\item{ID.area}{character; name of the variable which contains the IDs of spatial areal units. Default to \code{"Area"}.}
+\item{ID.area}{character; name of the variable that contains the IDs of spatial areal units. Default to \code{"Area"}.}
 
-\item{ID.year}{character; name of the variable which contains the IDs of time points. Default to \code{"NULL"} (for spatial models).}
+\item{ID.year}{character; name of the variable that contains the IDs of time points. Default to \code{"NULL"} (for spatial models).}
 
-\item{O}{character; name of the variable which contains the observed number of disease cases for each areal units. Default to \code{"O"}.}
+\item{ID.disease}{character; name of the variable that contains the IDs of the diseases. Default to \code{"NULL"} (only required for multivariate models).}
 
-\item{E}{character; name of the variable which contains either the expected number of disease cases or the population at risk for each areal unit. Default to \code{"E"}.}
+\item{O}{character; name of the variable that contains the observed number of disease cases for each areal units. Default to \code{"O"}.}
+
+\item{E}{character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit. Default to \code{"E"}.}
 
 \item{seed}{numeric; control the RNG of \code{inla.qsample} (see \code{help(inla.qsample)} for further information). Defaults to \code{NULL}.}
 
 \item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
 
-\item{compute.fixed}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
+\item{compute.intercept}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} (for spatial or spatio-temporal models fitted with either \code{\link{CAR_INLA}} or \code{\link{STCAR_INLA}} functions), or disease-specific overall log-risk \eqn{\alpha_j} (for multivariate models fitted with \code{\link{MCAR_INLA}} function) are computed.
 Only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
@@ -44,28 +47,42 @@ Only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION:
 }
 \value{
 This function returns an object of class \code{inla} containing the following elements:
-\item{\code{summary.fixed}}{If \code{compute.fixed=TRUE} a data.frame containing the mean, standard deviation, quantiles and mode of the model's intercept.}
-\item{\code{marginals.fixed}}{If \code{compute.fixed=TRUE} a list containing the posterior marginal density of the model's intercept.}
-\item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's intercept for each partition.}
-\item{\code{marginals.fixed.partition}}{A list containing the posterior marginal density of the model's intercept for each partition.}
+\item{\code{summary.fixed}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's fixed effects.}
+\item{\code{marginals.fixed}}{A list containing the posterior marginal density of the model's fixed effects.}
+\item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's fixed effects in each partition.}
+\item{\code{marginals.fixed.partition}}{A list containing the posterior marginal density of the model's fixed effects in each partition.}
 \item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation, quantiles and mode of the model's random effects.}
 \item{\code{marginals.random}}{If \code{k=0} a list containing the posterior marginal densities of the model's random effects.}
 \item{\code{summary.linear.predictor}}{If \code{k=0} a data.frame containing the mean, standard deviation, quantiles and mode of the log-risks (or log-rates) in the model.}
 \item{\code{marginals.linear.predictor}}{If \code{k=0} a list containing the posterior marginal densities of the log-risks (or log-rates) in the model.}
 \item{\code{summary.fitted.values}}{A data.frame containing the mean, standard deviation, quantiles, mode and cdf of the risks (or rates) in the model.}
 \item{\code{marginals.fitted.values}}{A list containing the posterior marginal densities of the risks (or rates) in the model.}
+\item{\code{summary.cor}}{A data.frame containing the mean, standard deviation, quantiles and mode of the between-disease correlation coefficients. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
+\item{\code{marginals.cor}}{A list containing the posterior marginal densities of the between-disease correlation coefficients. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
+\item{\code{summary.cor.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the between-disease correlation coefficients in each partition. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
+\item{\code{marginals.cor.partition}}{A list containing the posterior marginal densities of the between-disease correlation coefficients in each partition. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
+\item{\code{summary.var}}{A data.frame containing the mean, standard deviation, quantiles and mode of the within-disease variances for each disease. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
+\item{\code{marginals.var}}{A list containing the posterior marginal densities of the within-disease variances for each disease. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
+\item{\code{summary.var.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the within-disease variances in each partition. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
+\item{\code{marginals.var.partition}}{A list containing the posterior marginal densities of the within-disease variances in each partition. Only for the multivariate spatial models fitted using the \code{\link{MCAR_INLA}} function.}
 \item{\code{logfile}}{A list of the log files of each submodel.}
 \item{\code{version}}{A list containing information about the R-INLA version.}
 \item{\code{cpu.used}}{The sum of cpu times used by the \code{inla} function for each submodel (\code{Pre}, \code{Running} and \code{Post}), and the cpu time of the merging process \code{Merging}.}
 }
 \description{
 The function takes local models fitted for each subregion of the whole spatial domain and unifies them into a single \code{inla} object.
-This function is valid for both Disjoint and \emph{k}-order neighbourhood models.
+This function is valid for both disjoint and \emph{k}-order neighbourhood models.
 }
 \details{
-If the Disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
-However, a single estimate of the overall log-risk \eqn{\alpha} can be computed by extracting samples from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
-After joining the \eqn{S} samples from each submodel, we define \deqn{\alpha^s=\frac{1}{nT}\sum_{i=1}^n\sum_{t=1}^T \log{r_{it}}, \quad \mbox{for} \quad s=1,\ldots,S} and then compute the kernel density estimate of \eqn{\alpha}.
+If the disjoint model is fitted (\code{k=0} argument), the log-risk surface is just the union of the posterior estimates of each submodel.
+However, a single estimate of the overall log-risk can be computed by sampling from the joint posterior distribution of the linear predictors using the \code{inla.posterior.sample} function of R-INLA.
+After joining the \eqn{S} samples from each submodel, the following global intercepts could be defined:
+\itemize{
+\item for spatial models fitted with \code{\link{CAR_INLA}} function \deqn{\tilde{\alpha}^s=\frac{1}{n}\sum_{i=1}^n (\log{r_{it}}-\mathbf{x_i}^{'}\beta), \quad \mbox{for} \quad s=1,\ldots,S}
+\item for spatio-temporal models fitted with \code{\link{STCAR_INLA}} function \deqn{\tilde{\alpha}^s=\frac{1}{nT}\sum_{i=1}^n\sum_{t=1}^T \log{r_{it}}, \quad \mbox{for} \quad s=1,\ldots,S}
+\item for multivariate spatial models fitted with \code{\link{MCAR_INLA}} function \deqn{\tilde{\alpha}_j^s=\frac{1}{n}\sum_{i=1}^n \log{r_{ij}}, \quad \mbox{for} \quad s=1,\ldots,S}
+}
+and then it is possible to compute the kernel density estimate of \eqn{\tilde{\alpha}}.
 \cr \cr
 If the \emph{k}-order neighbourhood model is fitted (\code{k>0} argument), note that the final risk surface \eqn{{\bf r}=(r_1,\ldots,r_{nT})^{'}} is no longer the union of the posterior estimates obtained from each submodel.
 Since multiple log-risk estimates can be obtained for some areal-time units from the different local submodel, their posterior estimates must be properly combined to obtain a single posterior distribution for each \eqn{r_{it}}.
