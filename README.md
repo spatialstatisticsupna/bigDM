@@ -7,7 +7,7 @@
 <!-- badges: end -->
 
 
-Scalable Bayesian disease mapping models for high-dimensional data using a divide and conquer approach.
+Scalable Bayesian disease mapping models (univariate and multivariate) for high-dimensional data using a divide and conquer approach.
 
 ## Table of contents
 
