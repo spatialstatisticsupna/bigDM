@@ -209,12 +209,22 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         if(temporal=="rw2") r.def <- 2*S
                         A.constr <- kronecker(matrix(1,1,T),Diagonal(S))
                         A.constr <- as(A.constr[-1,],"matrix")
+
+                        if(PCpriors){
+                                sigma.ref <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
+                                R <- R*sigma.ref
+                        }
                 }
                 if(interaction=="TypeIII"){
                         R <- kronecker(Diagonal(T),Rs)
                         r.def <- T
                         A.constr <- kronecker(Diagonal(T),matrix(1,1,S))
                         A.constr <- as(A.constr[-1,],"matrix")
+
+                        if(PCpriors){
+                                sigma.ref <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
+                                R <- R*sigma.ref
+                        }
                 }
                 if(interaction=="TypeIV"){
                         R <- kronecker(Rt,Rs)
@@ -223,12 +233,11 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         A1 <- kronecker(matrix(1,1,T),Diagonal(S))
                         A2 <- kronecker(Diagonal(T),matrix(1,1,S))
                         A.constr <- as(rbind(A1[-1,],A2[-1,]),"matrix")
-                }
-
-                if(interaction!="TypeI" & PCpriors){
-                        sigma.ref1 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
-                        sigma.ref2 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
-                        R <- R*sigma.ref1*sigma.ref2
+                        if(PCpriors){
+                                sigma.ref1 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
+                                sigma.ref2 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
+                                R <- R*sigma.ref1*sigma.ref2
+                        }
                 }
 
                 return(list(R=R,r.def=r.def,A.constr=A.constr))
@@ -300,7 +309,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         FitModels <- function(Rs, Rs.Leroux, R, r.def, A.constr, data.INLA, d, D){
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
-          
+
                 Rs <- as(Rs,"TsparseMatrix")
                 Rs.Leroux <- as(Rs.Leroux,"TsparseMatrix")
                 # Rs <- inla.as.sparse(Rs)
