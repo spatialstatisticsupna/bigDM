@@ -84,7 +84,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' 
+#'
 #' if(require("INLA", quietly=TRUE)){
 #'
 #'   ## Load the Spain colorectal cancer mortality data ##
@@ -288,8 +288,10 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                 W <- aux$W
                 n <- nrow(W)
-                Rs <- inla.as.sparse(Diagonal(n,colSums(W))-W)
-                Rs.Leroux <- inla.as.sparse(Diagonal(n)-Rs)
+                Rs <- as(Diagonal(n,colSums(W))-W,"TsparseMatrix")
+                Rs.Leroux <- as(Diagonal(n)-Rs,"TsparseMatrix")
+                # Rs <- inla.as.sparse(Diagonal(n,colSums(W))-W)
+                # Rs.Leroux <- inla.as.sparse(Diagonal(n)-Rs)
 
                 data.INLA <- data.frame(O=data[,O], E=data[,E], Area=data[,ID.area], ID.area=seq(1,n), data[,X])
                 names(data.INLA)[grep("^data...",names(data.INLA))] <- X

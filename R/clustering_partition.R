@@ -86,7 +86,7 @@ clustering_partition <- function(carto, ID.area=NULL, var=NULL, n.cluster=10, mi
                 if(verbose) cat("STEP 1: computing adjacency matrix...\n")
 
                 if(is.null(W)){
-                        invisible(utils::capture.output(aux <- connect_subgraphs(carto, ID)))
+                        invisible(utils::capture.output(aux <- connect_subgraphs(carto, ID.area)))
                         W <- aux$W
                 }
 
