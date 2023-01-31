@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-pandoc@v2
 
       # - name: Install system dependencies on MacOS
       #   if: runner.os == 'macOS'
@@ -60,7 +60,7 @@ jobs:
       #     remotes::install_github("rspatial/terra")
       #   shell: Rscript {0}
 
-      - uses: r-lib/actions/check-r-package@v1
+      - uses: r-lib/actions/check-r-package@v2
 
       - name: Show testthat output
         if: always()
