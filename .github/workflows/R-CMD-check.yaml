@@ -49,7 +49,7 @@ jobs:
           extra-repositories: "https://inla.r-inla-download.org/R/stable"
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v1
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: rcmdcheck
 
