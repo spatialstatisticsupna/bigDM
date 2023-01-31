@@ -427,7 +427,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                                 cat(red("Running...\n"))
                         }
                 }
-                aux <- lapply(data.d, function(xx) aggregate(xx[,O], by=list(xx[,ID.area]), sum)$x)
+                aux <- lapply(data.d, function(xx) aggregate(xx[,O], by=list(xx[,ID.area]), sum, na.rm=T)$x)
                 prop.zero <- unlist(lapply(aux, function(x) mean(x==0)))
                 n.zero <- sum(prop.zero>0.5)
                 if(n.zero>0) fun()
