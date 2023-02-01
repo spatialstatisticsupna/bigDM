@@ -53,6 +53,7 @@
 #' @param plan one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
 #' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.
 #' @param workers character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.
+#' @param inla.mode one of either \code{"classic"} (default) or \code{"compact"}, which specifies the approximation method used by INLA. See \code{help(inla)} for further details.
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
@@ -104,9 +105,13 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                        W=NULL, spatial="Leroux", temporal="rw1", interaction="TypeIV",
                        model="partition", k=0, strategy="simplified.laplace",
                        PCpriors=FALSE, seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
-                       save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original"){
+                       save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original",
+                       inla.mode="classic"){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
+
+        ## Set the "inla.mode" argument ##
+        inla.setOption(inla.mode=inla.mode)
 
         ## Check for errors ##
         if(is.null(carto))
@@ -489,3 +494,4 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
 }
 
 # utils::globalVariables(c("inla.as.sparse"))
+utils::globalVariables(c("inla.setOption"))

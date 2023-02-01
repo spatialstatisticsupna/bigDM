@@ -12,6 +12,7 @@ Formal class \code{data.frame} with 197.675 rows and 5 colunmns.
   \item obs: observed number of cases
   \item exp: expected number of cases
   \item SMR: standardized mortality ratios
+  \item pop: population at risk
 }
 }
 \usage{

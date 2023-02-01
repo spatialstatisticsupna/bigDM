@@ -37,6 +37,7 @@ NULL
 #'   \item obs: observed number of cases
 #'   \item exp: expected number of cases
 #'   \item SMR: standardized mortality ratios
+#'   \item pop: population at risk
 #' }
 #' @name Data_LungCancer
 #' @docType data

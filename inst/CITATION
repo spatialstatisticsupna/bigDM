@@ -2,14 +2,13 @@ citEntry(entry = "Manual",
   title        = "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data",
   author       = personList(as.person("A Adin"),
                    as.person("E Orozco-Acosta"),
-                   as.person("G Vicente"),
                    as.person("M D Ugarte")),
-  year         = "2022",
-  note = "R package version 0.5.0",
+  year         = "2023",
+  note = "R package version 0.5.1",
   url = "https://github.com/spatialstatisticsupna/bigDM",
   textVersion  =
-  paste("Adin, A., Orozco-Acosta, E., and Ugarte, M.D. (2022).",
-        "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.5.0",
+  paste("Adin, A., Orozco-Acosta, E., and Ugarte, M.D. (2023).",
+        "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.5.1",
         "https://github.com/spatialstatisticsupna/bigDM."),
   header = "To cite the package:"
 )

@@ -91,6 +91,10 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
+__Changes in version 0.5.1__ (2023 Feb 01)
+* small bugs fixed
+* new `inla.mode` argument included to `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
+* adaptation of `STCAR_INLA()` function for spatio-temporal predictions
 
 __Changes in version 0.5.0__ (2022 Oct 27)
 * new `MCAR_INLA()` function to fit scalable spatial multivariate CAR models

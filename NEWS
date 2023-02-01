@@ -1,3 +1,8 @@
+version 0.5.1
+- small bugs fixed
+- new 'inla.mode' argument included to CAR_INLA, STCAR_INLA and MCAR_INLA functions
+- adaptation of STCAR_INLA function for spatio-temporal predictions
+
 version 0.5.0
 - new MCAR_INLA() function to fit scalable spatial multivariate CAR models
 - changes in mergeINLA() function
