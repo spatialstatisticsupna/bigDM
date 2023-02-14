@@ -16,6 +16,8 @@
 #' Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{https://www.r-inla.org/}).
 #' For the scalable model proposals \insertCite{orozco2022}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can also be computed.
 #'
+#' The function allows also to use the new hybrid approximate method that combines the Laplace method with a low-rank Variational Bayes correction to the posterior mean \insertCite{vanNiekerk2023}{bigDM} by including the \code{inla.mode="compact"} argument.
+#'
 #' @details For a full model specification and further details see the vignettes accompanying this package.
 #'
 #' @references
@@ -26,6 +28,8 @@
 #' \insertRef{orozco2020}{bigDM}
 #'
 #' \insertRef{orozco2022}{bigDM}
+#'
+#' \insertRef{vanNiekerk2023}{bigDM}
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}. This object must contain at least the variable with the identifiers of the spatial areal units specified in the argument \code{ID.area}.
 #' @param data object of class \code{data.frame} that must contain the target variables of interest specified in the arguments \code{ID.area}, \code{ID.year}, \code{O} and \code{E}.
@@ -54,6 +58,7 @@
 #' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.
 #' @param workers character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.
 #' @param inla.mode one of either \code{"classic"} (default) or \code{"compact"}, which specifies the approximation method used by INLA. See \code{help(inla)} for further details.
+#' @param num.threads maximum number of threads the inla-program will use. See \code{help(inla)} for further details.
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
@@ -106,12 +111,12 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                        model="partition", k=0, strategy="simplified.laplace",
                        PCpriors=FALSE, seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
                        save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original",
-                       inla.mode="classic"){
+                       inla.mode="classic", num.threads=NULL){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
 
-        ## Set the "inla.mode" argument ##
-        inla.setOption(inla.mode=inla.mode)
+        ## Set the 'num.threads' argument ##
+        if(is.null(num.threads)) num.threads <- INLA::inla.getOption("num.threads")
 
         ## Check for errors ##
         if(is.null(carto))
@@ -311,7 +316,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         formula <- stats::as.formula(form)
 
         ## Auxiliary functions ##
-        FitModels <- function(Rs, Rs.Leroux, R, r.def, A.constr, data.INLA, d, D){
+        FitModels <- function(Rs, Rs.Leroux, R, r.def, A.constr, data.INLA, d, D, ...){
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
 
@@ -385,7 +390,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 models <- inla(formula, family="poisson", data=data.INLA, E=E,
                                control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                               control.inla=list(strategy=strategy))
+                               control.inla=list(strategy=strategy), ...)
                 return(models)
         }
 
@@ -410,7 +415,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
                               control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                               control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                              control.inla=list(strategy=strategy))
+                              control.inla=list(strategy=strategy),
+                              inla.mode=inla.mode, num.threads=num.threads)
         }
 
         ## Partition model ##
@@ -452,16 +458,17 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 D <- length(data.INLA)
 
                 if(plan=="sequential"){
-                        inla.models <- mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, R=R, r.def=r.def, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, SIMPLIFY=FALSE)
+                        inla.models <- mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, R=R, r.def=r.def, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, num.threads=num.threads, inla.mode=inla.mode, SIMPLIFY=FALSE)
                 }
 
                 if(plan=="cluster"){
                         cl <- future::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
-                        oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
+                        oplan <- future::plan(cluster, workers=cl)
+                        # oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
                         on.exit(future::plan(oplan))
 
                         cpu.time <- system.time({
-                                inla.models <- future.apply::future_mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, R=R, r.def=r.def, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, SIMPLIFY=FALSE, future.seed=TRUE)
+                                inla.models <- future.apply::future_mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, R=R, r.def=r.def, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D,  num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
                         })
 
                         stopCluster(cl)

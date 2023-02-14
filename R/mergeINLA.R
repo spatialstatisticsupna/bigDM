@@ -99,7 +99,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                           set.seed(seed)
                   }
 
-                  result <- vector("list",51)
+                  result <- vector("list",52)
                   attr(result,"class") <- "inla"
 
                   names(result) <- c("names.fixed","summary.fixed","marginals.fixed","summary.lincomb","marginals.lincomb","size.lincomb",
@@ -110,7 +110,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                                      "offset.linear.predictor","model.spde2.blc","summary.spde2.blc","marginals.spde2.blc","size.spde2.blc",
                                      "model.spde3.blc","summary.spde3.blc","marginals.spde3.blc","size.spde3.blc","logfile","misc","dic",
                                      "mode","neffp","joint.hyper","nhyper","version","Q","graph","ok","cpu.used","all.hyper",".args",
-                                     "call","model.matrix")
+                                     "call","model.matrix","inla.mode")
 
                   if(is.null(ID.year)){
                     if(is.null(ID.disease)){
@@ -523,6 +523,9 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
 
                   # parent.frame <- unique(lapply(inla.models, function(x) x$.args$.parent.frame))
                   # if(length(parent.frame)==1) result$.args$.parent.frame <- parent.frame[[1]]
+
+                  inla.mode <- unique(lapply(inla.models, function(x) x$.args$inla.mode))
+                  if(length(inla.mode)==1) result$.args$inla.mode <- inla.mode[[1]]
 
 
                   ## Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) ##

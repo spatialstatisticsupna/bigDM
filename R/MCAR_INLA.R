@@ -16,6 +16,8 @@
 #' Inference is conducted in a fully Bayesian setting using the integrated nested Laplace approximation (INLA; \insertCite{rue2009approximate;textual}{bigDM}) technique through the R-INLA package (\url{https://www.r-inla.org/}).
 #' For the scalable model proposals \insertCite{orozco2020}{bigDM}, approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) can also be computed.
 #'
+#' The function allows also to use the new hybrid approximate method that combines the Laplace method with a low-rank Variational Bayes correction to the posterior mean \insertCite{vanNiekerk2023}{bigDM} by including the \code{inla.mode="compact"} argument.
+#'
 #' @details For a full model specification and further details see the vignettes accompanying this package.
 #'
 #' @references
@@ -30,6 +32,8 @@
 #' \insertRef{rue2009approximate}{bigDM}
 #'
 #' \insertRef{vicente2022}{bigDM}
+#'
+#' \insertRef{vanNiekerk2023}{bigDM}
 #'
 #' @param carto object of class \code{SpatialPolygonsDataFrame} or \code{sf}. This object must contain at least the variable with the identifiers of the spatial areal units specified in the argument \code{ID.area}.
 #' @param data object of class \code{data.frame} that must contain the target variables of interest specified in the arguments \code{ID.area}, \code{ID.disease}, \code{O} and \code{E}.

@@ -31,18 +31,19 @@ citEntry(entry = "article",
 )
 
 
-citEntry(entry = "Misc",
+citEntry(entry = "article",
   title        = "Big problems in spatio-temporal disease mapping: methods and software",
   author       = personList(as.person("E Orozco-Acosta"),
                    as.person("A Adin"),
                    as.person("M D Ugarte")),
-  year         = "2022",
-  eprint       = "2201.08323",
-  archivePrefix = "arXiv",
-  url          = "https://arxiv.org/abs/2201.08323",
+  year         = "2023",
+  volume       = "231",
+  journal      = "Computer Methods and Programs in Biomedicine",
+  pages        = "107403",
+  doi          = "10.1016/j.cmpb.2023.107403",
   textVersion  =
-  paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022).",
-        "Big problems in spatio-temporal disease mapping: methods and software. arXiv preprint. https://arxiv.org/abs/2201.08323"),
+  paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2023).",
+        "Big problems in spatio-temporal disease mapping: methods and software. Computer Methods and Programs in Biomedicine, 231, 107403. https://doi.org/10.1016/j.cmpb.2023.107403"),
   header = "To cite the scalable Bayesian models implemented in the function STCAR_INLA:"
 )
 

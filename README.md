@@ -82,7 +82,7 @@ When using this package, please cite the following papers:
 
 [Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021). Scalable Bayesian modeling for smoothing disease risks in large spatial data sets using INLA. _Spatial Statistics_, __41__, 100496.](https://doi.org/10.1016/j.spasta.2021.100496)
 
-[Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2022). Big problems in spatio-temporal disease mapping: methods and software. _arXiv preprint_.](https://arxiv.org/abs/2201.08323)
+[Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2023). Big problems in spatio-temporal disease mapping: methods and software. _Computer Methods and Programs in Biomedicine_, __231__, 107403.](https://doi.org/10.1016/j.cmpb.2023.107403)
 
 [Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2022). High-dimensional order-free multivariate spatial disease mapping. _arXiv preprint_.](https://arxiv.org/abs/2210.14849)
 
@@ -91,10 +91,11 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.1__ (2023 Feb 01)
+__Changes in version 0.5.1__ (2023 Feb 14)
 * small bugs fixed
-* new `inla.mode` argument included to `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
+* new `inla.mode` and `num.threads` arguments included to `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
 * adaptation of `STCAR_INLA()` function for spatio-temporal predictions
+* parallelization improvements using future package
 
 __Changes in version 0.5.0__ (2022 Oct 27)
 * new `MCAR_INLA()` function to fit scalable spatial multivariate CAR models
