@@ -93,7 +93,7 @@ news(package="bigDM")
 ```
 __Changes in version 0.5.1__ (2023 Feb 14)
 * small bugs fixed
-* new `inla.mode` and `num.threads` arguments included to `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
+* new `inla.mode` and `num.threads` arguments for `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
 * adaptation of `STCAR_INLA()` function for spatio-temporal predictions
 * parallelization improvements using future package
 
