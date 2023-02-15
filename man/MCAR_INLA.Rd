@@ -25,7 +25,8 @@ MCAR_INLA(
   plan = "sequential",
   workers = NULL,
   merge.strategy = "original",
-  inla.mode = "classic"
+  inla.mode = "classic",
+  num.threads = NULL
 )
 }
 \arguments{
@@ -72,6 +73,8 @@ If \code{plan="sequential"} (default) the models are fitted sequentially and in 
 \item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.}
 
 \item{inla.mode}{one of either \code{"classic"} (default) or \code{"compact"}, which specifies the approximation method used by INLA. See \code{help(inla)} for further details.}
+
+\item{num.threads}{maximum number of threads the inla-program will use. See \code{help(inla)} for further details.}
 }
 \value{
 This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.

@@ -58,6 +58,7 @@
 #' @param workers character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.
 #' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.
 #' @param inla.mode one of either \code{"classic"} (default) or \code{"compact"}, which specifies the approximation method used by INLA. See \code{help(inla)} for further details.
+#' @param num.threads maximum number of threads the inla-program will use. See \code{help(inla)} for further details.
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
@@ -109,12 +110,12 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
                       W=NULL, prior="intrinsic", model="partition", k=0, strategy="simplified.laplace",
                       seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
                       save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original",
-                      inla.mode="classic"){
+                      inla.mode="classic", num.threads=NULL){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
 
-    ## Set the "inla.mode" argument ##
-    inla.setOption(inla.mode=inla.mode)
+    ## Set the 'num.threads' argument ##
+    if(is.null(num.threads)) num.threads <- INLA::inla.getOption("num.threads")
 
     ## Check for errors ##
     if(is.null(carto))
@@ -197,7 +198,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
     formula <- stats::as.formula(form)
 
     ## Auxiliary functions ##
-    FitModels <- function(W, A.constr, data.INLA, d, D, initial.values){
+    FitModels <- function(W, A.constr, data.INLA, d, D, initial.values, ...){
 
       cat(sprintf("+ Model %d of %d",d,D),"\n")
 
@@ -222,7 +223,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       models <- inla(formula, family="poisson", data=data.INLA, E=E,
                      control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                      control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                     control.inla=list(strategy=strategy))
+                     control.inla=list(strategy=strategy), ...)
 
       models$Mmodel <- list(model=model, prior=prior)
 
@@ -276,7 +277,8 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       Model <- inla(formula, family="poisson", data=data.INLA, E=E,
                     control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                     control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                    control.inla=list(strategy=strategy))
+                    control.inla=list(strategy=strategy),
+                    inla.mode=inla.mode, num.threads=num.threads)
 
       Model$Mmodel <- list(model=model, prior=prior)
 
@@ -333,16 +335,17 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       initial.values <- lapply(N, function(x) as.vector(c(log(diag(x)), x[lower.tri(x,diag=FALSE)])))
 
       if(plan=="sequential"){
-        inla.models <- mapply(FitModels, W=Wd, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, initial.values=initial.values, SIMPLIFY=FALSE)
+        inla.models <- mapply(FitModels, W=Wd, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, initial.values=initial.values, inla.mode=inla.mode, num.threads=num.threads, SIMPLIFY=FALSE)
       }
 
       if(plan=="cluster"){
         cl <- future::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
-        oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
+        # oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
+        oplan <- future::plan(cluster, workers=cl)
         on.exit(future::plan(oplan))
 
         cpu.time <- system.time({
-          inla.models <- future.apply::future_mapply(FitModels, W=Wd, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, initial.values=initial.values, SIMPLIFY=FALSE, future.seed=TRUE)
+          inla.models <- future.apply::future_mapply(FitModels, W=Wd, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, initial.values=initial.values, num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
         })
 
         stopCluster(cl)
