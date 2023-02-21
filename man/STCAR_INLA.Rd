@@ -19,6 +19,7 @@ STCAR_INLA(
   model = "partition",
   k = 0,
   strategy = "simplified.laplace",
+  scale.model = NULL,
   PCpriors = FALSE,
   seed = NULL,
   n.sample = 1000,
@@ -60,6 +61,9 @@ STCAR_INLA(
 \item{k}{numeric value with the neighbourhood order used for the partition model. Usually k=2 or 3 is enough to get good results. If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.}
 
 \item{strategy}{one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.}
+
+\item{scale.model}{logical value (default \code{NULL}); if \code{TRUE} the structure matrices of the model are scaled so their generalized variances are equal to 1.
+It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.}
 
 \item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
 It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.}

@@ -45,6 +45,8 @@
 #' @param model one of either \code{"global"} or \code{"partition"} (default), which specifies the \emph{Global model} or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}, respectively).
 #' @param k numeric value with the neighbourhood order used for the partition model. Usually k=2 or 3 is enough to get good results. If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.
+#' @param scale.model logical value (default \code{NULL}); if \code{TRUE} the structure matrices of the model are scaled so their generalized variances are equal to 1.
+#' It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
 #' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
 #' It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
 #' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
@@ -109,7 +111,7 @@
 STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.group=NULL, O=NULL, E=NULL,
                        W=NULL, spatial="Leroux", temporal="rw1", interaction="TypeIV",
                        model="partition", k=0, strategy="simplified.laplace",
-                       PCpriors=FALSE, seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
+                       scale.model=NULL, PCpriors=FALSE, seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
                        save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original",
                        inla.mode="classic", num.threads=NULL){
 
@@ -220,7 +222,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         A.constr <- kronecker(matrix(1,1,T),Diagonal(S))
                         A.constr <- as(A.constr[-1,],"matrix")
 
-                        if(PCpriors){
+                        if(PCpriors | !is.null(scale.model)){
                                 sigma.ref <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
                                 R <- R*sigma.ref
                         }
@@ -231,7 +233,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         A.constr <- kronecker(Diagonal(T),matrix(1,1,S))
                         A.constr <- as(A.constr[-1,],"matrix")
 
-                        if(PCpriors){
+                        if(PCpriors | !is.null(scale.model)){
                                 sigma.ref <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
                                 R <- R*sigma.ref
                         }
@@ -243,7 +245,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         A1 <- kronecker(matrix(1,1,T),Diagonal(S))
                         A2 <- kronecker(Diagonal(T),matrix(1,1,S))
                         A.constr <- as(rbind(A1[-1,],A2[-1,]),"matrix")
-                        if(PCpriors){
+                        if(PCpriors | !is.null(scale.model)){
                                 sigma.ref1 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
                                 sigma.ref2 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
                                 R <- R*sigma.ref1*sigma.ref2
@@ -260,7 +262,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
         }
         if(spatial=="intrinsic" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
         }
         if(spatial=="intrinsic" & PCpriors) {
                 form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
@@ -269,26 +271,26 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
         }
         if(spatial=="BYM2" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
+                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
         }
         if(spatial=="BYM2" & PCpriors) {
                 form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
         }
 
         if(temporal=="rw1" & !PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
         }
         if(temporal=="rw1" & PCpriors) {
                 form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
         }
         if(temporal=="rw2" & interaction!="TypeII" & !PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
         }
         if(temporal=="rw2" & interaction!="TypeII" & PCpriors) {
                 form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
         }
         if(temporal=="rw2" & interaction=="TypeII" & !PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
+                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
         }
         if(temporal=="rw2" & interaction=="TypeII" & PCpriors) {
                 form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
@@ -332,7 +334,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
                 }
                 if(spatial=="intrinsic" & !PCpriors) {
-                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
                 }
                 if(spatial=="intrinsic" & PCpriors) {
                         form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
@@ -341,26 +343,26 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
                 }
                 if(spatial=="BYM2" & !PCpriors) {
-                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
                 }
                 if(spatial=="BYM2" & PCpriors) {
                         form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
                 }
 
                 if(temporal=="rw1" & !PCpriors) {
-                        form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                        form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
                 }
                 if(temporal=="rw1" & PCpriors) {
                         form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
                 if(temporal=="rw2" & interaction!="TypeII" & !PCpriors) {
-                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
                 }
                 if(temporal=="rw2" & interaction!="TypeII" & PCpriors) {
                         form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
                 if(temporal=="rw2" & interaction=="TypeII" & !PCpriors) {
-                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
                 }
                 if(temporal=="rw2" & interaction=="TypeII" & PCpriors) {
                         form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
