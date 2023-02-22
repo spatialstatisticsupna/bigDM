@@ -1,65 +1,61 @@
-citEntry(entry = "Manual",
-  title        = "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data",
-  author       = personList(as.person("A Adin"),
-                   as.person("E Orozco-Acosta"),
-                   as.person("M D Ugarte")),
-  year         = "2023",
-  note = "R package version 0.5.1",
+bibentry(
+  header  = "To cite 'bigDM' package:",
+  bibtype = "Manual",
+  title   = "{bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data}",
+  author  = c(person("A","Adin"),
+                   person("E","Orozco-Acosta"),
+                   person("M D","Ugarte")),
+  year    = "2023",
+  note    = "R package version 0.5.1",
   url = "https://github.com/spatialstatisticsupna/bigDM",
-  textVersion  =
-  paste("Adin, A., Orozco-Acosta, E., and Ugarte, M.D. (2023).",
-        "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.5.1",
-        "https://github.com/spatialstatisticsupna/bigDM."),
-  header = "To cite the package:"
+  textVersion = paste("Adin, A., Orozco-Acosta, E., and Ugarte, M.D. (2023).",
+                      "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.5.1", "https://github.com/spatialstatisticsupna/bigDM.")
 )
 
-
-citEntry(entry = "article",
-  title        = "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial data sets using INLA",
-  author       = personList(as.person("E Orozco-Acosta"),
-                   as.person("A Adin"),
-                   as.person("M D Ugarte")),
-  year         = "2021",
-  journal      = "Spatial Statistics",
-  volume       = "41",
-  pages        = "100496",
-  doi          = "10.1016/j.spasta.2021.100496",
-  textVersion  =
-  paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021).",
-        "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial data sets using INLA. Spatial Statistics, 41, 100496. https://doi.org/10.1016/j.spasta.2021.100496"),
-  header = "To cite the scalable Bayesian models implemented in the function CAR_INLA:"
+bibentry(
+  header  = "To cite the scalable Bayesian models implemented in the function CAR_INLA:",
+  bibtype = "Article",
+  title   = "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial data sets using INLA",
+  author  = c(person("E","Orozco-Acosta"),
+                   person("A","Adin"),
+                   person("M D","Ugarte")),
+  year    = "2021",
+  journal = "Spatial Statistics",
+  doi     = "10.1016/j.spasta.2021.100496",
+  volume  = "41",
+  pages   = "100496",
+  textVersion  = paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021).",
+                       "Scalable Bayesian modeling for smoothing disease mapping risks in large spatial data sets using INLA. Spatial Statistics, 41, 100496. https://doi.org/10.1016/j.spasta.2021.100496")
 )
 
-
-citEntry(entry = "article",
-  title        = "Big problems in spatio-temporal disease mapping: methods and software",
-  author       = personList(as.person("E Orozco-Acosta"),
-                   as.person("A Adin"),
-                   as.person("M D Ugarte")),
-  year         = "2023",
-  volume       = "231",
-  journal      = "Computer Methods and Programs in Biomedicine",
-  pages        = "107403",
-  doi          = "10.1016/j.cmpb.2023.107403",
-  textVersion  =
-  paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2023).",
-        "Big problems in spatio-temporal disease mapping: methods and software. Computer Methods and Programs in Biomedicine, 231, 107403. https://doi.org/10.1016/j.cmpb.2023.107403"),
-  header = "To cite the scalable Bayesian models implemented in the function STCAR_INLA:"
+bibentry(
+  header  = "To cite the scalable Bayesian models implemented in the function STCAR_INLA:",
+  bibtype = "Article",
+  title   = "Big problems in spatio-temporal disease mapping: methods and software",
+  author  = c(person("E","Orozco-Acosta"),
+                   person("A","Adin"),
+                   person("M D","Ugarte")),
+  year    = "2023",
+  journal = "Computer Methods and Programs in Biomedicine",
+  doi     = "10.1016/j.cmpb.2023.107403",
+  volume  = "231",
+  pages   = "107403",
+  textVersion  = paste("Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2023).",
+                       "Big problems in spatio-temporal disease mapping: methods and software. Computer Methods and Programs in Biomedicine, 231, 107403. https://doi.org/10.1016/j.cmpb.2023.107403")
 )
 
-
-citEntry(entry = "Misc",
-  title        = "High-dimensional multivariate disease mapping",
-  author       = personList(as.person("G Vicente"),
-                   as.person("A Adin"),
-                   as.person("T Goicoa"),
-                   as.person("M D Ugarte")),
-  year         = "2022",
+bibentry(
+  header  = "To cite the scalable multivariate spatial Bayesian models implemented in the function MCAR_INLA:",
+  bibtype = "Misc",
+  title   = "High-dimensional multivariate disease mapping",
+  author  = c(person("G","Vicente"),
+                   person("A","Adin"),
+                   person("T","Goicoa"),
+                   person("M D","Ugarte")),
+  year    = "2023",
   eprint       = "2210.14849",
   archivePrefix = "arXiv",
   url          = "https://arxiv.org/abs/2210.14849",
-  textVersion  =
-  paste("Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2022).",
-        "High-dimensional multivariate disease mapping. arXiv preprint. https://arxiv.org/abs/2210.14849"),
-  header = "To cite the scalable multivariate spatial Bayesian models implemented in the function MCAR_INLA:"
+  textVersion  = paste("Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2022).",
+                       "High-dimensional multivariate disease mapping. arXiv preprint. https://arxiv.org/abs/2210.14849")
 )
