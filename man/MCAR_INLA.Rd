@@ -17,14 +17,14 @@ MCAR_INLA(
   model = "partition",
   k = 0,
   strategy = "simplified.laplace",
-  seed = NULL,
-  n.sample = 1000,
-  compute.intercept = FALSE,
+  merge.strategy = "original",
+  compute.intercept = NULL,
   compute.DIC = TRUE,
+  n.sample = 1000,
+  compute.fitted.values = FALSE,
   save.models = FALSE,
   plan = "sequential",
   workers = NULL,
-  merge.strategy = "original",
   inla.mode = "classic",
   num.threads = NULL
 )
@@ -54,14 +54,15 @@ MCAR_INLA(
 
 \item{strategy}{one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.}
 
-\item{seed}{numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.}
+\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.}
 
-\item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
-
-\item{compute.intercept}{logical value (default \code{FALSE}); if \code{TRUE} then disease-specific overall log-risk \eqn{\alpha_{j}} are computed.
-Only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.}
+\item{compute.intercept}{CAUTION! This argument is deprecated from version 0.5.2.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
+
+\item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the linear predictor when computing approximate DIC/WAIC values. Default to 1000.}
+
+\item{compute.fitted.values}{logical value (default \code{FALSE}); if \code{TRUE} transforms the posterior marginal distribution of the linear predictor to the exponential scale (risks or rates).}
 
 \item{save.models}{logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.}
 
@@ -69,8 +70,6 @@ Only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION:
 If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote compute nodes.}
 
 \item{workers}{character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.}
-
-\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.}
 
 \item{inla.mode}{one of either \code{"classic"} (default) or \code{"compact"}, which specifies the approximation method used by INLA. See \code{help(inla)} for further details.}
 

@@ -47,11 +47,11 @@
 #' @param model one of either \code{"global"} or \code{"partition"} (default), which specifies the \emph{Global model} or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}, respectively).
 #' @param k numeric value with the neighbourhood order used for the partition model. Usually k=2 or 3 is enough to get good results. If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.
-#' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
-#' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
-#' @param compute.intercept logical value (default \code{FALSE}); if \code{TRUE} then disease-specific overall log-risk \eqn{\alpha_{j}} are computed.
-#' Only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.
+#' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.
+#' @param compute.intercept CAUTION! This argument is deprecated from version 0.5.2.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
+#' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the linear predictor when computing approximate DIC/WAIC values. Default to 1000.
+#' @param compute.fitted.values logical value (default \code{FALSE}); if \code{TRUE} transforms the posterior marginal distribution of the linear predictor to the exponential scale (risks or rates).
 #' @param save.models logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.
 #' @param plan one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
 #' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote compute nodes.
@@ -108,8 +108,9 @@
 #' @export
 MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.group=NULL, O=NULL, E=NULL,
                       W=NULL, prior="intrinsic", model="partition", k=0, strategy="simplified.laplace",
-                      seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
-                      save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original",
+                      merge.strategy="original", compute.intercept=NULL,
+                      compute.DIC=TRUE, n.sample=1000, compute.fitted.values=FALSE,
+                      save.models=FALSE, plan="sequential", workers=NULL,
                       inla.mode="classic", num.threads=NULL){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
@@ -143,6 +144,10 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
     if(!(merge.strategy %in% c("mixture","original")))
       stop("invalid 'merge.strategy' argument")
 
+    if(!missing("compute.intercept")){
+            warning("CAUTION! The 'compute.intercept' argument is deprecated from version 0.5.2\n", immediate.=TRUE)
+    }
+
     cat("STEP 1: Pre-processing data\n")
 
     ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
@@ -160,11 +165,18 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
     if(!E %in% colnames(data))
       stop(sprintf("'%s' variable not found in carto object",E))
 
+    data.old <- data
     carto <- carto[order(sf::st_set_geometry(carto, NULL)[,ID.area]),]
     data <- merge(data,carto[,c(ID.area,ID.group)])
     data$geometry <- NULL
     data[,ID.disease] <- paste(sprintf("%02d", as.numeric(as.character(data[,ID.disease]))))
     data <- data[order(data[,ID.disease],data[,ID.area]),]
+
+    if(!all(order(data[,ID.disease],data[,ID.area])==order(data.old[,ID.disease],data.old[,ID.area]))){
+            order.data <- TRUE
+    }else{
+            order.data <- FALSE
+    }
 
     ## Merge disjoint connected subgraphs ##
     if(is.null(W)){
@@ -363,13 +375,15 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       }
 
       cat("STEP 3: Merging the results\n")
-      Model <- mergeINLA(inla.models=inla.models, ID.disease="Disease", k=k, seed=seed, n.sample=n.sample, compute.intercept=compute.intercept, compute.DIC=compute.DIC, merge.strategy=merge.strategy)
+      Model <- mergeINLA(inla.models=inla.models, ID.disease="Disease", k=k, n.sample=n.sample, compute.DIC=compute.DIC, merge.strategy=merge.strategy, compute.fitted.values=compute.fitted.values)
 
       if(plan=="cluster"){
         Model$cpu.used <- c(Running=as.numeric(cpu.time[3]), Merging=as.numeric(Model$cpu.used["Merging"]), Total=as.numeric(cpu.time[3]+Model$cpu.used["Merging"]))
       }
 
     }
+
+    if(order.data) warning("CAUTION: The input dataset has been sorted by 'ID.area' and 'ID.disease' variables to ensure correct model fitting. Please, check the model$.args$data object for details.\n", call. = FALSE)
 
     return(Model)
 
@@ -429,7 +443,7 @@ Mmodel_compute_cor <- function(model, n.sample=10000){
       marginals.cor <- lapply(cor.density, function(xx) cbind(x=xx$x, y=xx$y))
       names(marginals.cor) <- paste("rho",apply(combn(J,2), 2, function(x) paste0(x, collapse="")),sep="")
 
-      summary.cor <- do.call(rbind,lapply(marginals.cor, compute.summary))
+      summary.cor <- do.call(rbind,lapply(marginals.cor, function(x) compute.summary(x,cdf=NULL)))
 
 
       ## Within-disease variances ##
@@ -439,7 +453,7 @@ Mmodel_compute_cor <- function(model, n.sample=10000){
       marginals.var <- lapply(var.density, function(xx) cbind(x=xx$x, y=xx$y))
       names(marginals.var) <- paste("var",1:J,sep="")
 
-      summary.var <- do.call(rbind,lapply(marginals.var, compute.summary))
+      summary.var <- do.call(rbind,lapply(marginals.var, function(x) compute.summary(x, cdf=NULL)))
     })
 
     if(any(class(o[[1]])=="error")){
@@ -482,15 +496,20 @@ tryCatch.W.E <- function(expr){
        warning = W)
 }
 
-compute.summary <- function(marginal){
-  aux <- data.frame(INLA::inla.emarginal(function(x) x, marginal),
-                    sqrt(INLA::inla.emarginal(function(x) x^2, marginal)-INLA::inla.emarginal(function(x) x, marginal)^2),
-                    INLA::inla.qmarginal(0.025,marginal),
-                    INLA::inla.qmarginal(0.5,marginal),
-                    INLA::inla.qmarginal(0.975,marginal),
-                    INLA::inla.mmarginal(marginal))
-  colnames(aux) <- c("mean","sd","0.025quant","0.5quant","0.975quant","mode")
-  aux
+compute.summary <- function(marginal,cdf=0){
+        m <- INLA::inla.emarginal(function(xx) c(xx, xx^2), marginal)
+        q <- INLA::inla.qmarginal(c(0.025, 0.5, 0.975), marginal)
+
+        if(is.null(cdf)){
+                aux <- data.frame(m[1], sqrt(max(0, m[2]-m[1]^2)), q[1], q[2], q[3])
+                colnames(aux) <- c("mean","sd","0.025quant","0.5quant","0.975quant")
+        }else{
+                p <- INLA::inla.pmarginal(cdf,marginal)
+                aux <- data.frame(m[1], sqrt(max(0, m[2]-m[1]^2)), q[1], q[2], q[3], p)
+                colnames(aux) <- c("mean","sd","0.025quant","0.5quant","0.975quant",paste(cdf,"cdf"))
+        }
+
+        return(aux)
 }
 
 # utils::globalVariables(c("combn"))

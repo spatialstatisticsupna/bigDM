@@ -18,14 +18,14 @@ CAR_INLA(
   k = 0,
   strategy = "simplified.laplace",
   PCpriors = FALSE,
-  seed = NULL,
-  n.sample = 1000,
-  compute.intercept = FALSE,
+  merge.strategy = "original",
+  compute.intercept = NULL,
   compute.DIC = TRUE,
+  n.sample = 1000,
+  compute.fitted.values = FALSE,
   save.models = FALSE,
   plan = "sequential",
   workers = NULL,
-  merge.strategy = "original",
   inla.mode = "classic",
   num.threads = NULL
 )
@@ -68,14 +68,15 @@ which specifies the approximation strategy considered in the \code{inla} functio
 \item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
 It only works if arguments \code{prior="intrinsic"} or \code{prior="BYM2"} are specified.}
 
-\item{seed}{numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.}
+\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.}
 
-\item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
-
-\item{compute.intercept}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.}
+\item{compute.intercept}{CAUTION! This argument is deprecated from version 0.5.2.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
+
+\item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the linear predictor when computing approximate DIC/WAIC values. Default to 1000.}
+
+\item{compute.fitted.values}{logical value (default \code{FALSE}); if \code{TRUE} transforms the posterior marginal distribution of the linear predictor to the exponential scale (risks or rates).}
 
 \item{save.models}{logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.}
 
@@ -83,8 +84,6 @@ It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTI
 If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.}
 
 \item{workers}{character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.}
-
-\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.}
 
 \item{inla.mode}{one of either \code{"classic"} (default) or \code{"compact"}, which specifies the approximation method used by INLA. See \code{help(inla)} for further details.}
 
@@ -103,7 +102,7 @@ the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and 
 If covariates are included in the model, two different approaches can be used to address the potential confounding issues between the fixed effects and the spatial random effects of the model: restricted regression and the use of orthogonality constraints.
 At the moment, only continuous covariates can be included in the model as potential risk factors, which are automatically standardized before fitting the model. See \insertCite{adin2021alleviating;textual}{bigDM} for further details.
 \cr\cr
-Three main modeling approaches can be considered:
+Three main modelling approaches can be considered:
 \itemize{
 \item the usual model with a global spatial random effect whose dependence structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument)
 \item a Disjoint model based on a partition of the whole spatial domain where independent spatial CAR models are simultaneously fitted in each partition (\code{model="partition"} and \code{k=0} arguments)

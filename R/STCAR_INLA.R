@@ -1,8 +1,9 @@
 #' Fit a (scalable) spatio-temporal Poisson mixed model to areal count data.
 #'
 #' @description Fit a spatio-temporal Poisson mixed model to areal count data, where several CAR prior distributions for the spatial random effects, first and second order random walk priors for the temporal random effects, and different types of spatio-temporal interactions described in \insertCite{knorrheld2000;textual}{bigDM} can be specified.
-#' The linear predictor is modelled as \deqn{\log{r_{it}}=\alpha+\xi_i+\gamma_t+\delta_{it}, \quad \mbox{for} \quad i=1,\ldots,n; \quad t=1,\ldots,T}
-#' where \eqn{\alpha} is a global intercept, \eqn{\xi_i} is a spatially structured random effect, \eqn{\gamma_t} is a temporally structured random effect, and \eqn{\delta_{it}} is the space-time interaction effect. If the interaction term is dropped, an additive model is obtained.
+#' The linear predictor is modelled as \deqn{\log{r_{it}}=\alpha + \mathbf{x_{it}}^{'}\mathbf{\beta} + \xi_i+\gamma_t+\delta_{it}, \quad \mbox{for} \quad i=1,\ldots,n; \quad t=1,\ldots,T}
+#' where \eqn{\alpha} is a global intercept, \eqn{\mathbf{x_{it}}^{'}=(x_{it1},\ldots,x_{itp})} is a p-vector of standardized covariates in the i-th area and time period t, \eqn{\mathbf{\beta}=(\beta_1,\ldots,\beta_p)} is the p-vector of fixed effects coefficients,
+#' \eqn{\xi_i} is a spatially structured random effect, \eqn{\gamma_t} is a temporally structured random effect, and \eqn{\delta_{it}} is the space-time interaction effect. If the interaction term is dropped, an additive model is obtained.
 #' To ensure model identifiability, sum-to-zero constraints are imposed over the random effects of the model. Details on the derivation of these constraints can be found in \insertCite{goicoa2018spatio;textual}{bigDM}.
 #' \cr\cr
 #' As in the \code{\link{CAR_INLA}} function, three main modelling approaches can be considered:
@@ -38,6 +39,8 @@
 #' @param ID.group character; name of the variable that contains the IDs of the spatial partition (grouping variable). Only required if \code{model="partition"}.
 #' @param O character; name of the variable that contains the observed number of disease cases for each areal and time point.
 #' @param E character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit and time point.
+#' @param X a character vector containing the names of the covariates within the \code{data} object to be included in the model as fixed effects, or a matrix object playing the role of the fixed effects design matrix.
+#' If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.
 #' @param W optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).
 #' @param spatial one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"}, which specifies the prior distribution considered for the spatial random effect.
 #' @param temporal one of either \code{"rw1"} (default) or \code{"rw2"}, which specifies the prior distribution considered for the temporal random effect.
@@ -49,12 +52,11 @@
 #' It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
 #' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
 #' It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
-#' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
-#' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
-#' @param compute.intercept logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-#' It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.
+#' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.
+#' @param compute.intercept CAUTION! This argument is deprecated from version 0.5.2.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
-#' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.
+#' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the linear predictor when computing approximate DIC/WAIC values. Default to 1000.
+#' @param compute.fitted.values logical value (default \code{FALSE}); if \code{TRUE} transforms the posterior marginal distribution of the linear predictor to the exponential scale (risks or rates). CAUTION: This method might be time consuming.
 #' @param save.models logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.
 #' @param plan one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
 #' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.
@@ -108,11 +110,12 @@
 #' }
 #'
 #' @export
-STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.group=NULL, O=NULL, E=NULL,
+STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.group=NULL, O=NULL, E=NULL, X=NULL,
                        W=NULL, spatial="Leroux", temporal="rw1", interaction="TypeIV",
                        model="partition", k=0, strategy="simplified.laplace",
-                       scale.model=NULL, PCpriors=FALSE, seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
-                       save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original",
+                       scale.model=NULL, PCpriors=FALSE, merge.strategy="original", compute.intercept=NULL,
+                       compute.DIC=TRUE, n.sample=1000, compute.fitted.values=FALSE,
+                       save.models=FALSE, plan="sequential", workers=NULL,
                        inla.mode="classic", num.threads=NULL){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
@@ -150,10 +153,26 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         if(!(merge.strategy %in% c("mixture","original")))
                   stop("invalid 'merge.strategy' argument")
 
+        if(!missing("compute.intercept")){
+                warning("CAUTION! The 'compute.intercept' argument is deprecated from version 0.5.2\n", immediate.=TRUE)
+        }
+
         cat("STEP 1: Pre-processing data\n")
 
         ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
         carto <- sf::st_as_sf(carto)
+
+        ## Add the covariates defined in the X argument ##
+        if(!is.null(X)){
+                if(is.matrix(X)){
+                        if(is.null(colnames(X))) colnames(X) <- paste("X",seq(ncol(X)),sep="")
+                        data <- cbind(data,X)
+                        X <- colnames(X)
+                }
+                if(!all(X %in% colnames(data))){
+                        stop(sprintf("'%s' variable not found in data object",X[!X %in% colnames(data)]))
+                }
+        }
 
         ## Order the data ##
         if(!ID.area %in% colnames(carto))
@@ -167,11 +186,18 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         if(!E %in% colnames(data))
                 stop(sprintf("'%s' variable not found in carto object",E))
 
+        data.old <- data
         carto <- carto[order(sf::st_set_geometry(carto, NULL)[,ID.area]),]
         data <- merge(data,carto[,c(ID.area,ID.group)])
         data$geometry <- NULL
         data[,ID.year] <- paste(sprintf("%02d", as.numeric(as.character(data[,ID.year]))))
         data <- data[order(data[,ID.year],data[,ID.area]),]
+
+        if(!all(order(data[,ID.year],data[,ID.area])==order(data.old[,ID.year],data.old[,ID.area]))){
+                order.data <- TRUE
+        }else{
+                order.data <- FALSE
+        }
 
         ## Merge disjoint connected subgraphs ##
         if(is.null(W)){
@@ -258,6 +284,10 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         ## Formula for INLA model ##
         form <- "O ~ "
 
+        if(length(X)>0){
+                form <- paste(form,paste0(X,collapse="+"),"+")
+        }
+
         if(spatial=="Leroux") {
                 form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
         }
@@ -329,6 +359,10 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 S <- nrow(Rs)
 
                 form <- "O ~ "
+
+                if(length(X)>0){
+                        form <- paste(form,paste0(X,collapse="+"),"+")
+                }
 
                 if(spatial=="Leroux") {
                         form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
@@ -411,8 +445,10 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 r.def <- constr$r.def
                 A.constr <- constr$A.constr
 
-                data.INLA <- data.frame(O=data[,O], E=data[,E], Area=data[,ID.area], Year=data[,ID.year],
+                data.INLA <- data.frame(O=data[,O], E=data[,E], data[,X], Area=data[,ID.area], Year=data[,ID.year],
                                         ID.area=rep(1:S,T), ID.year=rep(1:T,each=S), ID.area.year=seq(1,T*S))
+
+                names(data.INLA)[grep("^data...",names(data.INLA))] <- X
 
                 Model <- inla(formula, family="poisson", data=data.INLA, E=E,
                               control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
@@ -456,7 +492,11 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 r.def <- lapply(constr, function(x) x$r.def)
                 A.constr <- lapply(constr, function(x) x$A.constr)
 
-                data.INLA <- mapply(function(x,y){data.frame(O=x[,O], E=x[,E], Area=x[,ID.area], Year=x[,ID.year], ID.group=x[,ID.group], ID.area=rep(1:y,T), ID.year=rep(1:T,each=y), ID.area.year=seq(1,T*y))}, x=data.d, y=nd, SIMPLIFY=FALSE)
+                data.INLA <- mapply(function(x,y){
+                        aux <- data.frame(O=x[,O], E=x[,E], x[,X], Area=x[,ID.area], Year=x[,ID.year], ID.group=x[,ID.group], ID.area=rep(1:y,T), ID.year=rep(1:T,each=y), ID.area.year=seq(1,T*y))
+                        names(aux)[grep("^x...",names(aux))] <- X
+                        aux
+                }, x=data.d, y=nd, SIMPLIFY=FALSE)
                 D <- length(data.INLA)
 
                 if(plan=="sequential"){
@@ -488,12 +528,14 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
 
                 cat("STEP 3: Merging the results\n")
-                Model <- mergeINLA(inla.models=inla.models, ID.year="Year", k=k, seed=seed, n.sample=n.sample, compute.intercept=compute.intercept, compute.DIC=compute.DIC, merge.strategy=merge.strategy)
+                Model <- mergeINLA(inla.models=inla.models, ID.year="Year", k=k, n.sample=n.sample, compute.DIC=compute.DIC, merge.strategy=merge.strategy, compute.fitted.values=compute.fitted.values)
 
                 if(plan=="cluster"){
                         Model$cpu.used <- c(Running=as.numeric(cpu.time[3]), Merging=as.numeric(Model$cpu.used["Merging"]), Total=as.numeric(cpu.time[3]+Model$cpu.used["Merging"]))
                 }
         }
+
+        if(order.data) warning("CAUTION: The input dataset has been sorted by 'ID.area' and 'ID.year' variables to ensure correct model fitting. Please, check the model$.args$data object for details.\n", call. = FALSE)
 
         return(Model)
 

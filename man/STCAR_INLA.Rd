@@ -12,6 +12,7 @@ STCAR_INLA(
   ID.group = NULL,
   O = NULL,
   E = NULL,
+  X = NULL,
   W = NULL,
   spatial = "Leroux",
   temporal = "rw1",
@@ -21,14 +22,14 @@ STCAR_INLA(
   strategy = "simplified.laplace",
   scale.model = NULL,
   PCpriors = FALSE,
-  seed = NULL,
-  n.sample = 1000,
-  compute.intercept = FALSE,
+  merge.strategy = "original",
+  compute.intercept = NULL,
   compute.DIC = TRUE,
+  n.sample = 1000,
+  compute.fitted.values = FALSE,
   save.models = FALSE,
   plan = "sequential",
   workers = NULL,
-  merge.strategy = "original",
   inla.mode = "classic",
   num.threads = NULL
 )
@@ -47,6 +48,9 @@ STCAR_INLA(
 \item{O}{character; name of the variable that contains the observed number of disease cases for each areal and time point.}
 
 \item{E}{character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit and time point.}
+
+\item{X}{a character vector containing the names of the covariates within the \code{data} object to be included in the model as fixed effects, or a matrix object playing the role of the fixed effects design matrix.
+If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.}
 
 \item{W}{optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).}
 
@@ -68,14 +72,15 @@ It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} a
 \item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
 It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.}
 
-\item{seed}{numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.}
+\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.}
 
-\item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.}
-
-\item{compute.intercept}{logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.}
+\item{compute.intercept}{CAUTION! This argument is deprecated from version 0.5.2.}
 
 \item{compute.DIC}{logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.}
+
+\item{n.sample}{numeric; number of samples to generate from the posterior marginal distribution of the linear predictor when computing approximate DIC/WAIC values. Default to 1000.}
+
+\item{compute.fitted.values}{logical value (default \code{FALSE}); if \code{TRUE} transforms the posterior marginal distribution of the linear predictor to the exponential scale (risks or rates). CAUTION: This method might be time consuming.}
 
 \item{save.models}{logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.}
 
@@ -83,8 +88,6 @@ It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTI
 If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.}
 
 \item{workers}{character or vector (default \code{NULL}) containing the identifications of the local or remote workers where the models are going to be processed. Only required if \code{plan="cluster"}.}
-
-\item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.}
 
 \item{inla.mode}{one of either \code{"classic"} (default) or \code{"compact"}, which specifies the approximation method used by INLA. See \code{help(inla)} for further details.}
 
@@ -95,8 +98,9 @@ This function returns an object of class \code{inla}. See the \code{\link{mergeI
 }
 \description{
 Fit a spatio-temporal Poisson mixed model to areal count data, where several CAR prior distributions for the spatial random effects, first and second order random walk priors for the temporal random effects, and different types of spatio-temporal interactions described in \insertCite{knorrheld2000;textual}{bigDM} can be specified.
-The linear predictor is modelled as \deqn{\log{r_{it}}=\alpha+\xi_i+\gamma_t+\delta_{it}, \quad \mbox{for} \quad i=1,\ldots,n; \quad t=1,\ldots,T}
-where \eqn{\alpha} is a global intercept, \eqn{\xi_i} is a spatially structured random effect, \eqn{\gamma_t} is a temporally structured random effect, and \eqn{\delta_{it}} is the space-time interaction effect. If the interaction term is dropped, an additive model is obtained.
+The linear predictor is modelled as \deqn{\log{r_{it}}=\alpha + \mathbf{x_{it}}^{'}\mathbf{\beta} + \xi_i+\gamma_t+\delta_{it}, \quad \mbox{for} \quad i=1,\ldots,n; \quad t=1,\ldots,T}
+where \eqn{\alpha} is a global intercept, \eqn{\mathbf{x_{it}}^{'}=(x_{it1},\ldots,x_{itp})} is a p-vector of standardized covariates in the i-th area and time period t, \eqn{\mathbf{\beta}=(\beta_1,\ldots,\beta_p)} is the p-vector of fixed effects coefficients,
+\eqn{\xi_i} is a spatially structured random effect, \eqn{\gamma_t} is a temporally structured random effect, and \eqn{\delta_{it}} is the space-time interaction effect. If the interaction term is dropped, an additive model is obtained.
 To ensure model identifiability, sum-to-zero constraints are imposed over the random effects of the model. Details on the derivation of these constraints can be found in \insertCite{goicoa2018spatio;textual}{bigDM}.
 \cr\cr
 As in the \code{\link{CAR_INLA}} function, three main modelling approaches can be considered:

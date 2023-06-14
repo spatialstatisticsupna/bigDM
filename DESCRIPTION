@@ -1,8 +1,8 @@
 Package: bigDM
 Type: Package
 Title: Scalable Bayesian Disease Mapping Models for High-Dimensional Data
-Version: 0.5.1
-Date: 2023-02-22
+Version: 0.5.2
+Date: 2023-06-14
 Authors@R: 
   c(person(given = "Aritz",
            family = "Adin",
@@ -24,8 +24,8 @@ URL: https://github.com/spatialstatisticsupna/bigDM
 BugReports: https://github.com/spatialstatisticsupna/bigDM/issues
 Depends: R (>= 4.0.0)
 Additional_repositories: https://inla.r-inla-download.org/R/stable
-Imports: crayon, fastDummies, future, future.apply, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, sf, spatialreg, spdep, stats, utils, rlist
-Suggests: bookdown, INLA (>= 21.11.22), knitr, rmarkdown, testthat (>= 3.0.0), tmap
+Imports: crayon, doParallel, fastDummies, foreach, future, future.apply, MASS, Matrix, methods, parallel, RColorBrewer, Rdpack, sf, spatialreg, spdep, stats, utils, rlist
+Suggests: bookdown, INLA (>= 22.12.16), knitr, rmarkdown, testthat (>= 3.0.0), tmap
 RdMacros: Rdpack
 License: GPL-3
 Encoding: UTF-8

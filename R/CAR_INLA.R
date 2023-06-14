@@ -9,7 +9,7 @@
 #' If covariates are included in the model, two different approaches can be used to address the potential confounding issues between the fixed effects and the spatial random effects of the model: restricted regression and the use of orthogonality constraints.
 #' At the moment, only continuous covariates can be included in the model as potential risk factors, which are automatically standardized before fitting the model. See \insertCite{adin2021alleviating;textual}{bigDM} for further details.
 #' \cr\cr
-#' Three main modeling approaches can be considered:
+#' Three main modelling approaches can be considered:
 #' \itemize{
 #' \item the usual model with a global spatial random effect whose dependence structure is based on the whole neighbourhood graph of the areal units (\code{model="global"} argument)
 #' \item a Disjoint model based on a partition of the whole spatial domain where independent spatial CAR models are simultaneously fitted in each partition (\code{model="partition"} and \code{k=0} arguments)
@@ -67,12 +67,11 @@
 #' which specifies the approximation strategy considered in the \code{inla} function.
 #' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
 #' It only works if arguments \code{prior="intrinsic"} or \code{prior="BYM2"} are specified.
-#' @param seed numeric (default \code{NULL}); control the RNG of the \code{inla.qsample} function. See \code{help(inla.qsample)} for further information.
-#' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the risks. Default to 1000.
-#' @param compute.intercept logical value (default \code{FALSE}); if \code{TRUE} then the overall log-risk \eqn{\alpha} is computed.
-#' It only works if \code{k=0} argument (\emph{Disjoint model}) is specified. CAUTION: This method might be very time consuming.
+#' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.
+#' @param compute.intercept CAUTION! This argument is deprecated from version 0.5.2.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
-#' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of relative risks. See \code{\link{mergeINLA}} for further details.
+#' @param n.sample numeric; number of samples to generate from the posterior marginal distribution of the linear predictor when computing approximate DIC/WAIC values. Default to 1000.
+#' @param compute.fitted.values logical value (default \code{FALSE}); if \code{TRUE} transforms the posterior marginal distribution of the linear predictor to the exponential scale (risks or rates).
 #' @param save.models logical value (default \code{FALSE}); if \code{TRUE} then a list with all the \code{inla} submodels is saved in '/temp/' folder, which can be used as input argument for the \code{\link{mergeINLA}} function.
 #' @param plan one of either \code{"sequential"} or \code{"cluster"}, which specifies the computation strategy used for model fitting using the 'future' package.
 #' If \code{plan="sequential"} (default) the models are fitted sequentially and in the current R session (local machine). If \code{plan="cluster"} the models are fitted in parallel on external R sessions (local machine) or distributed in remote computing nodes.
@@ -128,8 +127,9 @@
 #' @export
 CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=NULL, confounding=NULL,
                      W=NULL, prior="Leroux", model="partition", k=0, strategy="simplified.laplace",
-                     PCpriors=FALSE, seed=NULL, n.sample=1000, compute.intercept=FALSE, compute.DIC=TRUE,
-                     save.models=FALSE, plan="sequential", workers=NULL, merge.strategy="original",
+                     PCpriors=FALSE, merge.strategy="original", compute.intercept=NULL,
+                     compute.DIC=TRUE, n.sample=1000, compute.fitted.values=FALSE,
+                     save.models=FALSE, plan="sequential", workers=NULL,
                      inla.mode="classic", num.threads=NULL){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
@@ -165,6 +165,10 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
         if(!(merge.strategy %in% c("mixture","original")))
                 stop("invalid 'merge.strategy' argument")
 
+        if(!missing(compute.intercept)){
+                warning("CAUTION! The 'compute.intercept' argument is deprecated from version 0.5.2\n", immediate.=TRUE)
+        }
+
         cat("STEP 1: Pre-processing data\n")
 
         ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
@@ -198,8 +202,14 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
         if(!E %in% colnames(data))
                 stop(sprintf("'%s' variable not found in carto object",E))
 
-        carto <- carto[order(data[,ID.area]),]
-        data <- sf::st_set_geometry(carto, NULL)
+        if(!all(order(data[,"ID"])==seq(1,nrow(data)))){
+                carto <- carto[order(data[,ID.area]),]
+                data <- sf::st_set_geometry(carto, NULL)
+
+                order.data <- TRUE
+        }else{
+                order.data <- FALSE
+        }
 
         ## Merge disjoint connected subgraphs ##
         if(is.null(W)){
@@ -445,12 +455,14 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 }
 
                 cat("STEP 3: Merging the results\n")
-                Model <- mergeINLA(inla.models=inla.models, k=k, seed=seed, n.sample=n.sample, compute.intercept=compute.intercept, compute.DIC=compute.DIC, merge.strategy=merge.strategy)
+                Model <- mergeINLA(inla.models=inla.models, k=k, n.sample=n.sample, compute.DIC=compute.DIC, merge.strategy=merge.strategy, compute.fitted.values=compute.fitted.values)
 
                 if(plan=="cluster"){
                         Model$cpu.used <- c(Running=as.numeric(cpu.time[3]), Merging=as.numeric(Model$cpu.used["Merging"]), Total=as.numeric(cpu.time[3]+Model$cpu.used["Merging"]))
                 }
         }
+
+        if(order.data) warning("CAUTION: The input dataset has been sorted by 'ID.area' variable to ensure correct model fitting. Please, check the model$.args$data object for details.\n", call. = FALSE)
 
         return(Model)
 

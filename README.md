@@ -91,6 +91,10 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
+__Changes in version 0.5.2__ (2023 Jun 14)
+* changes in `mergeINLA()` function
+* 'X' argument included to `STCAR_INLA()` function
+
 __Changes in version 0.5.1__ (2023 Feb 14)
 * small bugs fixed
 * new `inla.mode` and `num.threads` arguments for `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
