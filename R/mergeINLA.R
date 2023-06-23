@@ -663,7 +663,7 @@ compute.summary <- function(marginal,cdf=0){
 }
 
 compute.transform <- function(x){
-        marginals.transform <- INLA::inla.tmarginal(fun=exp, marginal=x)
+        marginals.transform <- INLA::inla.tmarginal(fun=exp, marginal=x, len=75)
         summary.transform <- compute.summary(marginals.transform, cdf=NULL)
 
         return(list(marginals.transform, summary.transform))
