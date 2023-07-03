@@ -55,6 +55,8 @@ connect_subgraphs <- function(carto, ID.area=NULL, nb=NULL, plot=FALSE){
   ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
   carto <- sf::st_as_sf(carto)
 
+  if(nrow(carto)==1) stop("the cartography file has only one area")
+
   ## Compute the neighbours list of class 'nb'
   if(is.null(nb)) nb <- spdep::poly2nb(carto)
 
