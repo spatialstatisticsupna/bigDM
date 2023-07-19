@@ -46,16 +46,17 @@ bibentry(
 
 bibentry(
   header  = "To cite the scalable multivariate spatial Bayesian models implemented in the function MCAR_INLA:",
-  bibtype = "Misc",
-  title   = "High-dimensional multivariate disease mapping",
+  bibtype = "Article",
+  title   = "High-dimensional order-free multivariate spatial disease mapping",
   author  = c(person("G","Vicente"),
                    person("A","Adin"),
                    person("T","Goicoa"),
                    person("M D","Ugarte")),
   year    = "2023",
-  eprint       = "2210.14849",
-  archivePrefix = "arXiv",
-  url          = "https://arxiv.org/abs/2210.14849",
-  textVersion  = paste("Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2022).",
-                       "High-dimensional multivariate disease mapping. arXiv preprint. https://arxiv.org/abs/2210.14849")
+  journal = "Statistics and Computing",
+  doi     = "10.1007/s11222-023-10263-x",
+  volume  = "33",
+  pages   = "104",
+  textVersion  = paste("Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2023).",
+                       "High-dimensional order-free multivariate spatial disease mapping, 33, 104. https://doi.org/10.1007/s11222-023-10263-x")
 )
