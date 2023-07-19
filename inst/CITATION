@@ -56,7 +56,8 @@ bibentry(
   journal = "Statistics and Computing",
   doi     = "10.1007/s11222-023-10263-x",
   volume  = "33",
+  number  = "5",
   pages   = "104",
   textVersion  = paste("Vicente, G., Adin, A., Goicoa, T., and Ugarte, M.D. (2023).",
-                       "High-dimensional order-free multivariate spatial disease mapping, 33, 104. https://doi.org/10.1007/s11222-023-10263-x")
+                       "High-dimensional order-free multivariate spatial disease mapping, 33(5), 104. https://doi.org/10.1007/s11222-023-10263-x")
 )
