@@ -276,7 +276,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
 
                           cl <- makeCluster(detectCores())
                           doParallel::registerDoParallel(cl)
-                          linear.predictor <- foreach::foreach(i=1:length(ID)) %dopar% merge.marginals(ID[i],ID.list,models.summary.linear.predictor,models.marginals.linear.predictor,models.cpo,merge.strategy,ID.group)
+                          linear.predictor <- foreach::foreach(i=1:length(ID)) %dopar% merge_marginals(ID[i],ID.list,models.summary.linear.predictor,models.marginals.linear.predictor,models.cpo,merge.strategy,ID.group)
                           stopCluster(cl)
 
                           # suppressWarnings({
@@ -285,7 +285,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                           #         clusterEvalQ(cl,{
                           #                 INLA::inla.dmarginal
                           #         })
-                          #         linear.predictor <- parLapply(cl,ID,merge.marginals)
+                          #         linear.predictor <- parLapply(cl,ID,merge_marginals)
                           #         stopCluster(cl)
                           # })
 
@@ -597,7 +597,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
 #########################
 ## Auxiliary functions ##
 #########################
-merge.marginals <- function(q,ID.list,models.summary,models.marginals,models.cpo,merge.strategy,ID.group){
+merge_marginals <- function(q,ID.list,models.summary,models.marginals,models.cpo,merge.strategy,ID.group){
 
   pos <- lapply(ID.list, function(x) which(x==q))
   i <- which(unlist(lapply(pos, function(x) length(x)))>0)
