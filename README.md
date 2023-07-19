@@ -41,9 +41,9 @@ Below, there is a list with a brief overview of all package functions:
 
 # Installation
 
-[Installing Rtools43 for Windows](https://cran.r-project.org/bin/windows/Rtools/rtools43/rtools.html)
+[Installing Rtools42 for Windows](https://cran.r-project.org/bin/windows/Rtools/rtools42/rtools.html)
 
-R version 4.3.0 and newer for Windows requires the new Rtools43 to build R packages with C/C++/Fortran code from source.
+R version 4.2.0 and newer for Windows requires the new Rtools43 to build R packages with C/C++/Fortran code from source.
 
 
 ## Install from CRAN
