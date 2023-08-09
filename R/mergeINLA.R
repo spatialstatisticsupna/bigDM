@@ -49,7 +49,7 @@
 #'
 #' @import parallel
 #' @importFrom doParallel registerDoParallel
-#' @importFrom foreach foreach
+#' @importFrom foreach foreach %dopar%
 #' @importFrom methods is
 #' @importFrom stats runif density sd quantile dpois var
 #' @importFrom rlist list.flatten
