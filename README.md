@@ -91,6 +91,10 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
+__Changes in version 0.5.3__ (2023 Sep 08)
+* small bugs fixed
+* faster implementation of `divide_carto()` function
+
 __Changes in version 0.5.2__ (2023 Jun 14)
 * changes in `mergeINLA()` function
 * 'X' argument included to `STCAR_INLA()` function

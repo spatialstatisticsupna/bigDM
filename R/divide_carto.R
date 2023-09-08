@@ -11,8 +11,9 @@
 #'
 #' @return List of \code{sf} objects with the spatial polygons of each subdomain.
 #'
+#' @importFrom geos geos_prepared_intersects
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom sf st_as_sf st_contains st_intersects st_set_geometry st_union
+#' @importFrom sf st_as_sf st_set_geometry st_union
 #' @importFrom stats aggregate
 #'
 #' @examples
@@ -45,62 +46,63 @@
 #' @export
 divide_carto <- function(carto, ID.group=NULL, k=0, plot=FALSE){
 
-  ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
-  carto <- sf::st_as_sf(carto)
+        ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
+        carto <- sf::st_as_sf(carto)
 
-  ## Construct the grouped 'sf' object by ID.group variable ##
-  carto$temp <- seq(1,nrow(carto))
-  Data <- sf::st_set_geometry(carto, NULL)
+        ## Construct the grouped 'sf' object by ID.group variable ##
+        Data <- sf::st_set_geometry(carto, NULL)
+        carto.group <- stats::aggregate(carto[,"geometry"], list(ID.group=Data[,ID.group]), utils::head)
+        D <- nrow(carto.group)
 
-  carto.group <- stats::aggregate(carto[,"geometry"], list(ID.group=Data[,ID.group]), utils::head)
-  D <- nrow(carto.group)
+        ########################
+        ## Disjoint partition ##
+        ########################
+        group.names <- carto.group$ID.group
+        names(group.names) <- group.names
 
-  ########################
-  ## Disjoint partition ##
-  ########################
-  carto.k0 <- vector("list",D)
-  names(carto.k0) <- carto.group$ID.group
+        carto.k0 <- lapply(group.names, function(x) {
+                aux <- carto[st_set_geometry(carto[,ID.group],NULL)==x,]
+                rownames(aux) <- NULL
+                aux
+        })
 
-  for(i in 1:D){
-    loc <- sf::st_contains(carto.group$geometry[i], carto[,"geometry"])
-    carto.k0[[i]] <- merge(carto, data.frame(loc=unlist(loc)), by.x="temp", by.y="loc")
-    carto.k0[[i]]$temp <- NULL
-  }
+        if(k==0){
+                if(plot) lapply(carto.k0, function(x) plot(x$geometry, main=unique(st_set_geometry(x,NULL)[,ID.group])))
+                return(carto.k0)
+        }
 
-  if(k==0){
-    if(plot) lapply(carto.k0, function(x) plot(x$geometry, main=unique(st_set_geometry(x,NULL)[,ID.group])))
-    return(carto.k0)
-  }
+        ############################################
+        ## Partition including k-order neighbours ##
+        ############################################
+        if(k>0){
 
-  ############################################
-  ## Partition including k-order neighbours ##
-  ############################################
-  if(k>0){
+                carto.k <- vector("list",D)
+                names(carto.k) <- names(carto.k0)
 
-    carto.k <- vector("list",D)
-    names(carto.k) <- names(carto.k0)
+                if(plot) color <- RColorBrewer::brewer.pal(k+2,"Blues")
 
-    if(plot) color <- RColorBrewer::brewer.pal(k+2,"Blues")
+                for(i in 1:D){
+                        aux.carto <- carto.group$geometry[i]
 
-    for(i in 1:D){
-      if(plot) plot(carto.k0[[i]]$geometry, col="lightgrey", main=sort(unique(Data[,ID.group]))[i],
-                    xlim=sf::st_bbox(carto.group$geometry[i])[c(1,3)]*c(0.99,1.01),
-                    ylim=sf::st_bbox(carto.group$geometry[i])[c(2,4)]*c(0.99,1.01))
+                        for(j in 1:k){
+                                # loc <- sf::st_intersects(aux.carto, carto[,"geometry"])
+                                # carto.k[[i]] <- merge(carto, data.frame(loc=unlist(loc)), by.x="temp", by.y="loc")
+                                loc <- geos::geos_prepared_intersects(aux.carto, carto[,"geometry"])
+                                carto.k[[i]] <- carto[loc,]
+                                rownames(carto.k[[i]]) <- NULL
 
-      aux.temp <- carto.k0[[i]]$temp
-      aux.carto <- carto.group$geometry[i]
+                                if(plot){
+                                        plot(carto.k[[i]]$geometry, col=color[j+2], main=sort(unique(Data[,ID.group]))[i],
+                                             xlim=sf::st_bbox(carto.group$geometry[i])[c(1,3)]*c(0.99,1.01),
+                                             ylim=sf::st_bbox(carto.group$geometry[i])[c(2,4)]*c(0.99,1.01))
 
-      for(j in 1:k){
-        loc <- sf::st_intersects(aux.carto, carto[,"geometry"])
-        carto.k[[i]] <- merge(carto, data.frame(loc=unlist(loc)), by.x="temp", by.y="loc")
+                                        plot(carto.k0[[i]]$geometry, col=color[1], add=TRUE)
+                                }
 
-        if(plot) plot(carto.k[[i]]$geometry[!(carto.k[[i]]$temp %in% aux.temp)], col=color[j+2], add=TRUE)
-        aux.temp <- carto.k[[i]]$temp
-        aux.carto <- sf::st_union(carto.k[[i]])
-      }
-      carto.k[[i]]$temp <- NULL
-    }
+                                aux.carto <- sf::st_union(carto.k[[i]])
+                        }
+                }
 
-    return(carto.k)
-  }
+                return(carto.k)
+        }
 }

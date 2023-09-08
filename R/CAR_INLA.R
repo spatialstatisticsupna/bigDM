@@ -265,8 +265,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
 
-                Rs <- as(Rs,"TsparseMatrix")
-                Rs.Leroux <- as(Rs.Leroux,"TsparseMatrix")
+                Rs <- as(Rs,"Matrix")
+                Rs.Leroux <- as(Rs.Leroux,"Matrix")
                 # Rs <- inla.as.sparse(Rs)
                 # Rs.Leroux <- inla.as.sparse(Rs.Leroux)
 
@@ -308,8 +308,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
                 W <- aux$W
                 n <- nrow(W)
-                Rs <- as(Diagonal(n,colSums(W))-W,"TsparseMatrix")
-                Rs.Leroux <- as(Diagonal(n)-Rs,"TsparseMatrix")
+                Rs <- as(Diagonal(n,colSums(W))-W,"Matrix")
+                Rs.Leroux <- as(Diagonal(n)-Rs,"Matrix")
                 # Rs <- inla.as.sparse(Diagonal(n,colSums(W))-W)
                 # Rs.Leroux <- inla.as.sparse(Diagonal(n)-Rs)
 
@@ -471,5 +471,5 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
   }
 }
 
-utils::globalVariables(c("inla.as.sparse"))
+# utils::globalVariables(c("inla.as.sparse"))
 utils::globalVariables(c("inla.setOption"))

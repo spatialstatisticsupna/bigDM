@@ -1,3 +1,7 @@
+version 0.5.3
+- bug fixed
+- faster implementation of divide_carto() function
+
 version 0.5.2
 - 'X' argument included to STCAR_INLA() function
 - changes in mergeINLA() function

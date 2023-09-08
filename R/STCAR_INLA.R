@@ -215,7 +215,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         if(temporal=="rw1") dif <- 1
         if(temporal=="rw2") dif <- 2
         D <- diff(diag(T), differences=dif)
-        Rt <- as(t(D)%*%D, "TsparseMatrix")
+        Rt <- as(t(D)%*%D, "Matrix")
         # Rt <- inla.as.sparse(t(D)%*%D)
 
         ## Define hyperprior distributions ##
@@ -352,8 +352,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
 
                 cat(sprintf("+ Model %d of %d",d,D),"\n")
 
-                Rs <- as(Rs,"TsparseMatrix")
-                Rs.Leroux <- as(Rs.Leroux,"TsparseMatrix")
+                Rs <- as(Rs,"Matrix")
+                Rs.Leroux <- as(Rs.Leroux,"Matrix")
                 # Rs <- inla.as.sparse(Rs)
                 # Rs.Leroux <- inla.as.sparse(Rs.Leroux)
                 S <- nrow(Rs)
@@ -435,8 +435,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 cat("STEP 2: Fitting global model with INLA (this may take a while...)\n")
 
                 W <- aux$W
-                Rs <- as(Diagonal(S,colSums(W))-W, "TsparseMatrix")
-                Rs.Leroux <- as(Diagonal(S)-Rs, "TsparseMatrix")
+                Rs <- as(Diagonal(S,colSums(W))-W, "Matrix")
+                Rs.Leroux <- as(Diagonal(S)-Rs, "Matrix")
                 # Rs <- inla.as.sparse(Diagonal(S,colSums(W))-W)
                 # Rs.Leroux <- inla.as.sparse(Diagonal(S)-Rs)
 
