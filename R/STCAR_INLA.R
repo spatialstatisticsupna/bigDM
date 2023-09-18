@@ -468,7 +468,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 data.d <- lapply(carto.d, function(x) data[data[,ID.area] %in% unlist(sf::st_set_geometry(x[,ID.area],NULL)),])
 
                 fun <- function(){
-                        text <- sprintf("\n%d subdomains(s) have more than 50%% of areas with no observed cases during the whole study period.\nAre you sure that you want to continue fitting the model?\nPress any key to continue or [s] to stop: ",n.zero)
+                        text <- sprintf("\n%d subdomains(s) have more than 60%% of areas with no observed cases during the whole study period.\nAre you sure that you want to continue fitting the model?\nPress any key to continue or [s] to stop: ",n.zero)
                         answer <- readline(cat(red(text," ")))
                         if(answer=="s"){
                                 stop("Stopped by the user.", call.=FALSE)
@@ -478,7 +478,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
                 aux <- lapply(data.d, function(xx) aggregate(xx[,O], by=list(xx[,ID.area]), sum, na.rm=T)$x)
                 prop.zero <- unlist(lapply(aux, function(x) mean(x==0)))
-                n.zero <- sum(prop.zero>0.5)
+                n.zero <- sum(prop.zero>0.6)
                 if(n.zero>0) fun()
 
                 invisible(utils::capture.output(aux <- lapply(carto.d, function(x) connect_subgraphs(x, ID.area))))
