@@ -9,10 +9,8 @@
 #' \itemize{
 #'   \item ID: character vector of geographic identifiers
 #'   \item name: character vector of municipality names
-#'   \item lat: numeric vector of longitude values
-#'   \item long: numeric vector of latitude values
-#'   \item area: municipality polygon areas in square meters
-#'   \item perimeter: municipality polygon perimeters in degree units
+#'   \item area: municipality polygon areas (in square meters)
+#'   \item perimeter: municipality polygon perimeters (in meters)
 #'   \item obs: observed number of cases
 #'   \item exp: expected number of cases
 #'   \item SMR: standardized mortality ratios
