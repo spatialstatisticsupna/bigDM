@@ -91,8 +91,8 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.3__ (2023 Sep 08)
-* small bugs fixed
+__Changes in version 0.5.3__ (2023 Oct 17)
+* bugs fixed
 * faster implementation of `divide_carto()` function
 
 __Changes in version 0.5.2__ (2023 Jun 14)

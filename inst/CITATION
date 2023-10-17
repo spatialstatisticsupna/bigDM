@@ -6,10 +6,10 @@ bibentry(
                    person("E","Orozco-Acosta"),
                    person("M D","Ugarte")),
   year    = "2023",
-  note    = "R package version 0.5.2",
+  note    = "R package version 0.5.3",
   url = "https://github.com/spatialstatisticsupna/bigDM",
   textVersion = paste("Adin, A., Orozco-Acosta, E., and Ugarte, M.D. (2023).",
-                      "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.5.2", "https://github.com/spatialstatisticsupna/bigDM.")
+                      "bigDM: Scalable Bayesian Disease Mapping Models for High-Dimensional Data. R package version 0.5.3", "https://github.com/spatialstatisticsupna/bigDM.")
 )
 
 bibentry(

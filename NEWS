@@ -1,5 +1,5 @@
 version 0.5.3
-- bug fixed
+- bugs fixed
 - faster implementation of divide_carto() function
 
 version 0.5.2
