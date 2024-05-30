@@ -43,13 +43,13 @@ mergeINLA(
 }
 \value{
 This function returns an object of class \code{inla} containing the following elements:
-\item{\code{summary.fixed}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's fixed effects.}
-\item{\code{marginals.fixed}}{A list containing the posterior marginal density of the model's fixed effects.}
-\item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's fixed effects in each partition.}
+\item{\code{summary.fixed}}{A data.frame containing the mean, standard deviation and quantiles of the model's fixed effects. This feature is EXPERIMENTAL for the moment.}
+\item{\code{marginals.fixed}}{A list containing the posterior marginal density of the model's fixed effects. This feature is EXPERIMENTAL for the moment.}
+\item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation and quantiles of the model's fixed effects in each partition.}
 \item{\code{marginals.fixed.partition}}{A list containing the posterior marginal density of the model's fixed effects in each partition.}
-\item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation, quantiles and mode of the model's random effects.}
+\item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation and quantiles of the model's random effects.}
 \item{\code{marginals.random}}{If \code{k=0} a list containing the posterior marginal densities of the model's random effects.}
-\item{\code{summary.linear.predictor}}{If \code{k=0} a data.frame containing the mean, standard deviation, quantiles and mode of the log-risks (or log-rates) in the model.}
+\item{\code{summary.linear.predictor}}{If \code{k=0} a data.frame containing the mean, standard deviation and quantiles of the log-risks (or log-rates) in the model.}
 \item{\code{marginals.linear.predictor}}{If \code{k=0} a list containing the posterior marginal densities of the log-risks (or log-rates) in the model.}
 \item{\code{summary.fitted.values}}{A data.frame containing the mean, standard deviation, quantiles, mode and cdf of the risks (or rates) in the model. Available only if \code{compute.fitted.values=TRUE}.}
 \item{\code{marginals.fitted.values}}{A list containing the posterior marginal densities of the risks (or rates) in the model. Available only if \code{compute.fitted.values=TRUE}.}
@@ -80,6 +80,6 @@ If the \code{merge.strategy="original"} argument is specified (default option), 
 See \insertCite{orozco2020;textual}{bigDM} and \insertCite{orozco2022;textual}{bigDM} for more details.
 }
 \examples{
-## See the vignettes accompanying this package for an example of its use.
+## See the vignettes accompanying this package ##
 
 }

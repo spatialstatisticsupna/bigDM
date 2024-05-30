@@ -171,6 +171,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
     data$geometry <- NULL
     data[,ID.disease] <- paste(sprintf("%02d", as.numeric(as.character(data[,ID.disease]))))
     data <- data[order(data[,ID.disease],data[,ID.area]),]
+    rownames(data) <- NULL
 
     if(!all(order(data[,ID.disease],data[,ID.area])==order(data.old[,ID.disease],data.old[,ID.area]))){
             order.data <- TRUE
@@ -303,8 +304,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
 
     ## Partition model ##
     if(model=="partition"){
-      if(is.null(ID.group))
-        stop("the ID.group argument is missing")
+      if(is.null(ID.group)) stop("the ID.group argument is missing")
 
       cat("STEP 2:",sprintf("Fitting partition (k=%d) model with INLA",k),"\n")
 
@@ -395,7 +395,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
 
 #' Compute correlation coefficients between diseases
 #'
-#' @description This function takes a \code{inla} object fitted using the \code{\link{MCAR_INLA}} function and computes the correlation coefficients between diseases. See Details for more information.
+#' @description This function takes a \code{inla} object fitted using the \code{\link{MCAR_INLA}} function and computes the correlation coefficients between diseases.
 #'
 #' @param model object of class \code{inla} fitted using the \code{\link{MCAR_INLA}} function.
 #' @param n.sample numeric; number of samples to generate from the approximated joint posterior for the hyperparameters (see \code{help(inla.hyperpar.sample)}). Default to 1000.

@@ -32,7 +32,7 @@
 #' \insertRef{orozco2020}{bigDM}
 #'
 #' \insertRef{orozco2022}{bigDM}
-#' 
+#'
 #' \insertRef{vicente2022}{bigDM}
 #'
 #' @seealso See the following vignettes for further details and examples using this package:
@@ -44,9 +44,8 @@
 #' }
 #'
 #' @examples
-#' ## See the examples for CAR_INLA, MCAR_INLA and STCAR_INLA functions
+#' ## See the examples for CAR_INLA, MCAR_INLA and STCAR_INLA functions ##
 #'
-#' @docType package
 #' @name bigDM-package
 #' @aliases bigDM
-NULL
+"_PACKAGE"

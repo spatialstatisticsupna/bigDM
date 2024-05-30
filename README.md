@@ -41,9 +41,9 @@ Below, there is a list with a brief overview of all package functions:
 
 # Installation
 
-[Installing Rtools43 for Windows](https://cran.r-project.org/bin/windows/Rtools/rtools43/rtools.html)
+[Installing Rtools44 for Windows](https://cran.r-project.org/bin/windows/Rtools/rtools44/rtools.html)
 
-R version 4.3.0 and newer for Windows requires the new Rtools43 to build R packages with C/C++/Fortran code from source.
+R version 4.4.0 and newer for Windows requires the new Rtools44 to build R packages with C/C++/Fortran code from source.
 
 
 ## Install from CRAN
@@ -78,6 +78,7 @@ See the following vignettes for further details and examples using this package:
 * [bigDM: fitting spatio-temporal models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-3-fitting-spatio-temporal-models.html)
 * [bigDM: fitting multivariate spatial models](https://emi-sstcdapp.unavarra.es/bigDM/bigDM-4-fitting-multivariate-spatial-models.html)
 
+
 When using this package, please cite the following papers:
 
 [Orozco-Acosta, E., Adin, A., and Ugarte, M.D. (2021). Scalable Bayesian modeling for smoothing disease risks in large spatial data sets using INLA. _Spatial Statistics_, __41__, 100496.](https://doi.org/10.1016/j.spasta.2021.100496)
@@ -91,6 +92,10 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
+__Changes in version 0.5.4__ (2024 May 30)
+* small bugs fixed and performance improvements
+* package built for R-4.4
+
 __Changes in version 0.5.3__ (2023 Oct 17)
 * bugs fixed
 * faster implementation of `divide_carto()` function

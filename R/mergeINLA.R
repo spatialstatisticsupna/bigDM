@@ -25,13 +25,13 @@
 #' @param compute.fitted.values logical value (default \code{FALSE}); if \code{TRUE} transforms the posterior marginal distribution of the linear predictor to the exponential scale (risks or rates). CAUTION: This method might be time consuming.
 #'
 #' @return This function returns an object of class \code{inla} containing the following elements:
-#' \item{\code{summary.fixed}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's fixed effects.}
-#' \item{\code{marginals.fixed}}{A list containing the posterior marginal density of the model's fixed effects.}
-#' \item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation, quantiles and mode of the model's fixed effects in each partition.}
+#' \item{\code{summary.fixed}}{A data.frame containing the mean, standard deviation and quantiles of the model's fixed effects. This feature is EXPERIMENTAL for the moment.}
+#' \item{\code{marginals.fixed}}{A list containing the posterior marginal density of the model's fixed effects. This feature is EXPERIMENTAL for the moment.}
+#' \item{\code{summary.fixed.partition}}{A data.frame containing the mean, standard deviation and quantiles of the model's fixed effects in each partition.}
 #' \item{\code{marginals.fixed.partition}}{A list containing the posterior marginal density of the model's fixed effects in each partition.}
-#' \item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation, quantiles and mode of the model's random effects.}
+#' \item{\code{summary.random}}{If \code{k=0} a list with a data.frame containing the mean, standard deviation and quantiles of the model's random effects.}
 #' \item{\code{marginals.random}}{If \code{k=0} a list containing the posterior marginal densities of the model's random effects.}
-#' \item{\code{summary.linear.predictor}}{If \code{k=0} a data.frame containing the mean, standard deviation, quantiles and mode of the log-risks (or log-rates) in the model.}
+#' \item{\code{summary.linear.predictor}}{If \code{k=0} a data.frame containing the mean, standard deviation and quantiles of the log-risks (or log-rates) in the model.}
 #' \item{\code{marginals.linear.predictor}}{If \code{k=0} a list containing the posterior marginal densities of the log-risks (or log-rates) in the model.}
 #' \item{\code{summary.fitted.values}}{A data.frame containing the mean, standard deviation, quantiles, mode and cdf of the risks (or rates) in the model. Available only if \code{compute.fitted.values=TRUE}.}
 #' \item{\code{marginals.fitted.values}}{A list containing the posterior marginal densities of the risks (or rates) in the model. Available only if \code{compute.fitted.values=TRUE}.}
@@ -55,7 +55,7 @@
 #' @importFrom rlist list.flatten
 #'
 #' @examples
-#' ## See the vignettes accompanying this package for an example of its use.
+#' ## See the vignettes accompanying this package ##
 #'
 #' @export
 mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, ID.disease=NULL, O="O", E="E",
@@ -148,6 +148,9 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                           fixed.CMC <- compute.CMC(marginals=result$marginals.fixed.partition, names=unlist(names.fixed))
                           result$summary.fixed <- fixed.CMC$summary.CMC
                           result$marginals.fixed <- fixed.CMC$marginals.CMC
+
+                          result$summary.fixed <- result$summary.fixed[-union(which(rownames(result$summary.fixed)=="(Intercept)"),grep("^I",rownames(result$summary.fixed))),]
+                          result$marginals.fixed[union(which(names(result$marginals.fixed)=="(Intercept)"),grep("^I",names(result$marginals.fixed)))] <- NULL
                   }
 
 
@@ -380,6 +383,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                           result$.args$data$ID <- as.character(result$.args$data[,ID.area])
                           result$.args$data <- result$.args$data[!duplicated(result$.args$data$ID),]
                           result$.args$data <- result$.args$data[order(result$.args$data$ID),]
+                          result$.args$data$ID.area <- seq(1:nrow(result$.args$data))
                     }else{
                       result$.args$data$ID <- paste(result$.args$data[,ID.disease],result$.args$data[,ID.area],sep=".")
                       result$.args$data <- result$.args$data[!duplicated(result$.args$data$ID),]
@@ -567,7 +571,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                     }
 
                     if(length(names.var)>1){
-                      stop("Different variances for INLA models")
+                      stop("Different variables for INLA models")
                     }else{
                       aux <- do.call(rbind,lapply(inla.models, function(x) x$summary.var))
                       rownames(aux) <- paste(rep(unlist(names.var),D),rep(formatC(1:D, width=ceiling(log(D+1,10)), flag='0'),each=length(unlist(names.var))),sep=".")
@@ -585,7 +589,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                   }
           })
 
-          result$cpu.used <- c(result$cpu.used[1:3], Merging=as.numeric(tt[3]), Total=as.numeric(result$cpu.used[4]+tt[3]))
+          result$cpu.used <- c(Running=as.numeric(result$cpu.used["Total"]), Merging=as.numeric(tt[3]), Total=as.numeric(result$cpu.used["Total"]+tt[3]))
 
           return(result)
   }else{

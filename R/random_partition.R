@@ -98,11 +98,10 @@ random_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=100
                 ID.group[aux[[i]]] <- i
         }
         carto$ID.group <- factor(as.numeric(factor(ID.group)))
+        partition.size <- table(carto$ID.group)
 
         ## Merge the subregions with lower number of areas than min.size ##
         if(!is.null(min.size)){
-                partition.size <- table(carto$ID.group)
-
                 while(any(partition.size<min.size)){
                         cat(sprintf("+ Merging small subregions (min.size=%d)\n",min.size))
 
@@ -182,6 +181,8 @@ random_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=100
         }
 
         if(any(table(carto$ID.group)>max.size)) warning(sprintf("%d subregion(s) have more than %d areas",sum(table(carto$ID.group)>max.size),max.size), call.=FALSE)
+
+        carto$ID.group <- as.character(carto$ID.group)
 
         return(carto)
 }

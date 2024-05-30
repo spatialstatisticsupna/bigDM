@@ -171,6 +171,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
                 if(!all(X %in% colnames(data))){
                         stop(sprintf("'%s' variable not found in data object",X[!X %in% colnames(data)]))
+                }else{
+                        data[,X] <- scale(data[,X])
                 }
         }
 
@@ -192,6 +194,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
         data$geometry <- NULL
         data[,ID.year] <- paste(sprintf("%02d", as.numeric(as.character(data[,ID.year]))))
         data <- data[order(data[,ID.year],data[,ID.area]),]
+        rownames(data) <- NULL
 
         if(!all(order(data[,ID.year],data[,ID.area])==order(data.old[,ID.year],data.old[,ID.area]))){
                 order.data <- TRUE
@@ -427,6 +430,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                                control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
                                control.inla=list(strategy=strategy), ...)
+
                 return(models)
         }
 
@@ -510,7 +514,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         on.exit(future::plan(oplan))
 
                         cpu.time <- system.time({
-                                inla.models <- future.apply::future_mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, R=R, r.def=r.def, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D,  num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
+                                inla.models <- future.apply::future_mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, R=R, r.def=r.def, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
                         })
 
                         stopCluster(cl)

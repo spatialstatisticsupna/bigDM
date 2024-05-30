@@ -173,26 +173,25 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
         ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
         carto <- sf::st_as_sf(carto)
-        data <- sf::st_set_geometry(carto, NULL)
 
         ## Add the covariates defined in the X argument ##
         if(!is.null(X)){
                 if(is.matrix(X)){
-                        if(!isTRUE(all.equal(rownames(X),as.character(data[,ID.area])))){
+                        if(!isTRUE(all.equal(rownames(X),as.character(sf::st_set_geometry(carto, NULL)[,ID.area])))){
                                 stop(sprintf("row names of 'X' must match with the IDs of the spatial units defined by the '%s' variable",ID.area))
                         }else{
                                 if(is.null(colnames(X))) colnames(X) <- paste("X",seq(ncol(X)),sep="")
                                 carto <- cbind(carto,X)
-                                data <- sf::st_set_geometry(carto, NULL)
                                 X <- colnames(X)
                         }
                 }
-                if(!all(X %in% colnames(data))){
-                        stop(sprintf("'%s' variable not found in carto object",X[!X %in% colnames(data)]))
+                if(!all(X %in% names(carto))){
+                        stop(sprintf("'%s' variable not found in carto object",X[!X %in% names(carto)]))
                 }else{
-                        carto[,X] <- scale(data[,X])
+                        carto[,X] <- scale(sf::st_set_geometry(carto, NULL)[,X])
                 }
         }
+        data <- sf::st_set_geometry(carto, NULL)
 
         ## Order the data ##
         if(!ID.area %in% colnames(data))
@@ -210,6 +209,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
         }else{
                 order.data <- FALSE
         }
+        rownames(data) <- NULL
 
         ## Merge disjoint connected subgraphs ##
         if(is.null(W)){
@@ -299,6 +299,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
                                control.inla=list(strategy=strategy), ...)
+
                 return(models)
         }
 
@@ -385,8 +386,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                 t.eigen <- 0
                         }
 
-                        Model$cpu.used <- c(time+Model$cpu.used[4],t.eigen+time+Model$cpu.used[4])
-                        names(Model$cpu.used) <- c("INLA.time","Total.time")
+                        Model$cpu.used <- c(time+Model$cpu.used[4],t.eigen,t.eigen+time+Model$cpu.used[4])
+                        names(Model$cpu.used) <- c("INLA.time","eigen.time","Total")
                 }
         }
 

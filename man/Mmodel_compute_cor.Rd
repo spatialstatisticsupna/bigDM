@@ -19,5 +19,5 @@ The input \code{inla} object with two additional elements:
 \item{\code{marginals.var}}{A list containing the posterior marginal densities of the variances for each disease.}
 }
 \description{
-This function takes a \code{inla} object fitted using the \code{\link{MCAR_INLA}} function and computes the correlation coefficients between diseases. See Details for more information.
+This function takes a \code{inla} object fitted using the \code{\link{MCAR_INLA}} function and computes the correlation coefficients between diseases.
 }

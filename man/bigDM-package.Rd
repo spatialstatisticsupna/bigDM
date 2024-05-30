@@ -30,7 +30,7 @@ Below, there is a list with a brief overview of all package functions:
   }
 }
 \examples{
-## See the examples for CAR_INLA, MCAR_INLA and STCAR_INLA functions
+## See the examples for CAR_INLA, MCAR_INLA and STCAR_INLA functions ##
 
 }
 \references{
