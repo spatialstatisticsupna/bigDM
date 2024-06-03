@@ -14,7 +14,7 @@
 #' @return This function returns a list with the following two elements:
 #' \itemize{
 #'   \item \code{nb}: the modified neighbours list
-#'   \item \code{W}: associated spatial adjacency matrix of class \code{CsparseMatrix}
+#'   \item \code{W}: associated spatial adjacency matrix of class \code{dgCMatrix}
 #' }
 #'
 #' @import spatialreg
