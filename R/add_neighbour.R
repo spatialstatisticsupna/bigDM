@@ -16,7 +16,7 @@
 #'
 #' @importFrom methods as
 #' @importFrom sf st_as_sf st_centroid st_geometry
-#' @importFrom spdep card knearneigh knn2nb nb2listw
+#' @importFrom spdep card knearneigh knn2nb nb2listw n.comp.nb
 #'
 #' @examples
 #' library(spdep)
@@ -39,7 +39,7 @@ add_neighbour <- function(carto, nb=NULL, plot=FALSE){
   carto <- sf::st_as_sf(carto)
 
   ## Compute the neighbours list of class 'nb'
-  if(is.null(nb)) nb <- spdep::poly2nb(carto)
+  if(is.null(nb)) suppressWarnings(nb <- spdep::poly2nb(carto))
 
   ## Search for regions with no links
   card.nb <- spdep::card(nb)
@@ -48,7 +48,7 @@ add_neighbour <- function(carto, nb=NULL, plot=FALSE){
   if(any(card.nb==0)){
 
     ## Add to these regions its nearest neighbour
-    knn.nb <- spdep::knn2nb(spdep::knearneigh(sf::st_centroid(sf::st_geometry(carto), of_largest_polygon=TRUE), k=1))
+    suppressWarnings(knn.nb <- spdep::knn2nb(spdep::knearneigh(sf::st_centroid(sf::st_geometry(carto), of_largest_polygon=TRUE), k=1)))
 
     for(i in which(card(nb)==0)){
       j <- knn.nb[[i]]
@@ -56,6 +56,7 @@ add_neighbour <- function(carto, nb=NULL, plot=FALSE){
       nb[[j]] <- as.integer(unique(sort(c(i,nb[[j]]))))
     }
   }
+  attr(nb,"ncomp") <- spdep::n.comp.nb(nb)
 
   ## Plot the spatial polygons and the computed neighbourhood graph
   if(plot){

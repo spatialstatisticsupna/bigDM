@@ -1,3 +1,7 @@
+version 0.5.5 (development)
+- small changes for compatibility with 'spdep' version 1.3-6
+- new 'Data_MultiCancer' object
+
 version 0.5.4
 - small bugs fixed and performance improvements
 - package built for R-4.4

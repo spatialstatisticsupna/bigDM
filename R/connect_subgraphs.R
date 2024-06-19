@@ -58,23 +58,24 @@ connect_subgraphs <- function(carto, ID.area=NULL, nb=NULL, plot=FALSE){
   if(nrow(carto)==1) stop("the cartography file has only one area")
 
   ## Compute the neighbours list of class 'nb'
-  if(is.null(nb)) nb <- spdep::poly2nb(carto)
+  if(is.null(nb)) suppressWarnings(nb <- spdep::poly2nb(carto))
 
   ## Search for regions with no links ##
   cat("Searching for isolated areas:\n")
   nb <- add_neighbour(carto=carto, nb=nb, plot=FALSE)$nb
+  attr(nb,"ncomp") <- spdep::n.comp.nb(nb)
 
   ## Search for disjoint connected subgraphs ##
-  nc <- spdep::n.comp.nb(nb)$nc
+  nc <- attr(nb,"ncomp")
 
   cat("\nSearching for disjoint connected subgraphs:\n")
-  if(nc==1){
+  if(nc$nc==1){
     cat(" No disjoint connected subgraphs\n")
   }else{
-    cat(" ",nc,"disjoint connected subgraphs\n")
+    cat(" ",nc$nc,"disjoint connected subgraphs\n")
   }
 
-  while(nc>1){
+  while(nc$nc>1){
 
     ## Compute distance matrix between centroids ##
     dist.matrix <- sf::st_distance(sf::st_centroid(sf::st_geometry(carto), of_largest_polygon=TRUE))
@@ -100,8 +101,9 @@ connect_subgraphs <- function(carto, ID.area=NULL, nb=NULL, plot=FALSE){
     nb[[i]] <- as.integer(sort(c(j,nb[[i]])))
     nb[[j]] <- as.integer(sort(c(nb[[j]],i)))
 
-    nc <- spdep::n.comp.nb(nb)$nc
+    nc <- spdep::n.comp.nb(nb)
   }
+  attr(nb,"ncomp") <- nc
 
   ## Plot the spatial polygons and the computed neighbourhood graph
   if(plot){

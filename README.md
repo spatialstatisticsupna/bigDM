@@ -92,6 +92,10 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
+__Changes in version 0.5.5__ (2024 Jun 19)
+* small changes for compatibility with `spdep` version 1.3-6
+* new `Data_MultiCancer` object
+
 __Changes in version 0.5.4__ (2024 May 30)
 * small bugs fixed and performance improvements
 * package built for R-4.4
