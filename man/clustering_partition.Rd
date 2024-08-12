@@ -69,11 +69,21 @@ table(carto.new$ID.group)
 carto.data <- st_set_geometry(carto.new, NULL)
 carto.partition <- aggregate(carto.new[,"geometry"], list(ID.group=carto.data[,"ID.group"]), head)
 
-tm_shape(carto.new) +
-        tm_polygons(col="ID.group") +
-        tm_shape(carto.partition) +
-        tm_borders(col="black", lwd=2) +
-        tm_layout(legend.outside=TRUE)
+tmap4 <- packageVersion("tmap") >= "3.99"
+
+if(tmap4){
+        tm_shape(carto.new) +
+                tm_polygons(fill="ID.group", fill.scale=tm_scale(values="brewer.set3")) +
+                tm_shape(carto.partition) +
+                tm_borders(col="black", lwd=2) +
+                tm_layout(legend.outside=TRUE, legend.frame=FALSE)
+}else{
+        tm_shape(carto.new) +
+                tm_polygons(col="ID.group") +
+                tm_shape(carto.partition) +
+                tm_borders(col="black", lwd=2) +
+                tm_layout(legend.outside=TRUE)
+}
 }
 
 }

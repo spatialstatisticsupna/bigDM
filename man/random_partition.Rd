@@ -45,6 +45,7 @@ Finally, if \code{prop.zero} argument is set, the subregions with proportion of 
 \examples{
 \dontrun{
 library(tmap)
+tmap4 <- packageVersion("tmap") >= "3.99"
 
 ## Load the Spain colorectal cancer mortality data ##
 data(Carto_SpainMUN)
@@ -56,13 +57,21 @@ table(carto.r1$ID.group)
 
 part1 <- aggregate(carto.r1[,"geometry"], by=list(ID.group=carto.r1$ID.group), head)
 
-tm_shape(carto.r1) +
-  tm_polygons(col="ID.group") +
-  tm_shape(part1) + tm_borders(col="black", lwd=2) +
-  tm_layout(main.title="3x3 regular grid (with no size restrictions)",
-            main.title.position="center", main.title.size=1,
-            legend.outside=TRUE)
-
+if(tmap4){
+        tm_shape(carto.r1) +
+                tm_polygons(fill="ID.group",
+                            fill.scale=tm_scale(values="brewer.set3"),
+                            fill.legend=tm_legend(frame=FALSE)) +
+                tm_shape(part1) + tm_borders(col="black", lwd=2) +
+                tm_title(text="3x3 regular grid (with no size restrictions)")
+}else{
+        tm_shape(carto.r1) +
+                tm_polygons(col="ID.group") +
+                tm_shape(part1) + tm_borders(col="black", lwd=2) +
+                tm_layout(main.title="3x3 regular grid (with no size restrictions)",
+                          main.title.position="center", main.title.size=1,
+                          legend.outside=TRUE)
+}
 
 ## Random partition based on a 6x4 regular grid (with size restrictions) ##
 carto.r2 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
@@ -71,13 +80,21 @@ table(carto.r2$ID.group)
 
 part2 <- aggregate(carto.r2[,"geometry"], by=list(ID.group=carto.r2$ID.group), head)
 
-tm_shape(carto.r2) +
-  tm_polygons(col="ID.group") +
-  tm_shape(part2) + tm_borders(col="black", lwd=2) +
-  tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600)",
-            main.title.position="center", main.title.size=1,
-            legend.outside=TRUE)
-
+if(tmap4){
+        tm_shape(carto.r2) +
+                tm_polygons(fill="ID.group",
+                            fill.scale=tm_scale(values="brewer.set3"),
+                            fill.legend=tm_legend(frame=FALSE)) +
+                tm_shape(part2) + tm_borders(col="black", lwd=2) +
+                tm_title(text="6x4 regular grid (min.size=50, max.size=600)")
+}else{
+        tm_shape(carto.r2) +
+                tm_polygons(col="ID.group") +
+                tm_shape(part2) + tm_borders(col="black", lwd=2) +
+                tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600)",
+                          main.title.position="center", main.title.size=1,
+                          legend.outside=TRUE)
+}
 
 ## Random partition based on a 6x4 regular grid (with size and proportion of zero restrictions) ##
 carto.r3 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
@@ -86,12 +103,21 @@ table(carto.r3$ID.group)
 
 part3 <- aggregate(carto.r3[,"geometry"], by=list(ID.group=carto.r3$ID.group), head)
 
-tm_shape(carto.r3) +
-  tm_polygons(col="ID.group") +
-  tm_shape(part3) + tm_borders(col="black", lwd=2) +
-  tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)",
-            main.title.position="center", main.title.size=1,
-            legend.outside=TRUE)
+if(tmap4){
+        tm_shape(carto.r3) +
+                tm_polygons(fill="ID.group",
+                            fill.scale=tm_scale(values="brewer.set3"),
+                            fill.legend=tm_legend(frame=FALSE)) +
+                tm_shape(part3) + tm_borders(col="black", lwd=2) +
+                tm_title(text="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)")
+}else{
+        tm_shape(carto.r3) +
+                tm_polygons(col="ID.group") +
+                tm_shape(part3) + tm_borders(col="black", lwd=2) +
+                tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)",
+                          main.title.position="center", main.title.size=1,
+                          legend.outside=TRUE)
+}
 }
 
 }
