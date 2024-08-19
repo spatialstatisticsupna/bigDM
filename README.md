@@ -92,7 +92,7 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.5__ (2024 Aug 12)
+__Changes in version 0.5.5__ (2024 Aug 19)
 * condition for the upcoming release of `tmap` v4
 * small changes for compatibility with `spdep` version 1.3-6
 * new `Data_MultiCancer` object
