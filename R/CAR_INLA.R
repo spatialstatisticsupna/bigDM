@@ -81,7 +81,9 @@
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
-#' @import crayon future Matrix parallel Rdpack
+#' @import crayon Matrix parallel Rdpack
+#' @importFrom parallelly makeClusterPSOCK
+#' @importFrom future cluster plan
 #' @importFrom future.apply future_mapply
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
@@ -432,13 +434,13 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 }
 
                 if(plan=="cluster"){
-                        cl <- future::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
-                        oplan <- future::plan(cluster, workers=cl)
-                        # oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
-                        on.exit(future::plan(oplan))
+                        cl <- makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
+                        oplan <- plan(cluster, workers=cl)
+                        # oplan <- plan(list(tweak(cluster, workers=workers), multisession))
+                        on.exit(plan(oplan))
 
                         cpu.time <- system.time({
-                                inla.models <- future.apply::future_mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, data.INLA=data.INLA, d=seq(1,D), D=D, num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
+                                inla.models <- future_mapply(FitModels, Rs=Rs, Rs.Leroux=Rs.Leroux, data.INLA=data.INLA, d=seq(1,D), D=D, num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
                         })
 
                         stopCluster(cl)

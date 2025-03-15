@@ -64,6 +64,8 @@
 #'
 #' @import crayon future Matrix parallel Rdpack
 #' @importFrom fastDummies dummy_cols
+#' @importFrom parallelly makeClusterPSOCK
+#' @importFrom future cluster plan
 #' @importFrom future.apply future_mapply
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula cov
@@ -351,13 +353,13 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       }
 
       if(plan=="cluster"){
-        cl <- future::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
-        # oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
-        oplan <- future::plan(cluster, workers=cl)
-        on.exit(future::plan(oplan))
+        cl <- makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
+        # oplan <- plan(list(tweak(cluster, workers=workers), multisession))
+        oplan <- plan(cluster, workers=cl)
+        on.exit(plan(oplan))
 
         cpu.time <- system.time({
-          inla.models <- future.apply::future_mapply(FitModels, W=Wd, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, initial.values=initial.values, num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
+          inla.models <- future_mapply(FitModels, W=Wd, A.constr=A.constr, data.INLA=data.INLA, d=seq(1,D), D=D, initial.values=initial.values, num.threads=num.threads, inla.mode=inla.mode, future.seed=TRUE, SIMPLIFY=FALSE)
         })
 
         stopCluster(cl)
