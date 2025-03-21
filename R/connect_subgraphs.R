@@ -80,8 +80,8 @@ connect_subgraphs <- function(carto, ID.area=NULL, nb=NULL, plot=FALSE){
     ## Compute distance matrix between centroids ##
     dist.matrix <- sf::st_distance(sf::st_centroid(sf::st_geometry(carto), of_largest_polygon=TRUE))
 
-    rownames(dist.matrix) <- sf::st_drop_geometry(carto)[,ID.area]
-    colnames(dist.matrix) <- sf::st_drop_geometry(carto)[,ID.area]
+    rownames(dist.matrix) <- unlist(sf::st_drop_geometry(carto)[,ID.area])
+    colnames(dist.matrix) <- unlist(sf::st_drop_geometry(carto)[,ID.area])
 
     smallest.subgraph <- which.min(table(spdep::n.comp.nb(nb)$comp.id))
     smallest.loc <- which(spdep::n.comp.nb(nb)$comp.id==smallest.subgraph)

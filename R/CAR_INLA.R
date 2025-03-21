@@ -65,8 +65,8 @@
 #' If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"},
 #' which specifies the approximation strategy considered in the \code{inla} function.
-#' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
-#' It only works if arguments \code{prior="intrinsic"} or \code{prior="BYM2"} are specified.
+#' @param scale.model logical value (default \code{FALSE}); if \code{TRUE} then scale the models so their generalized variance is equal to 1. Note that \code{"BYM2"} model is always scaled.
+#' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect. It does not work for the \code{"Leroux"} model.
 #' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.
 #' @param compute.intercept CAUTION! This argument is deprecated from version 0.5.2.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
@@ -81,8 +81,10 @@
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
-#' @import crayon future Matrix parallel Rdpack
+#' @import crayon Matrix parallel Rdpack
+#' @importFrom future cluster plan
 #' @importFrom future.apply future_mapply
+#' @importFrom parallelly makeClusterPSOCK
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
 #' @importFrom utils capture.output
@@ -127,7 +129,7 @@
 #' @export
 CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=NULL, confounding=NULL,
                      W=NULL, prior="Leroux", model="partition", k=0, strategy="simplified.laplace",
-                     PCpriors=FALSE, merge.strategy="original", compute.intercept=NULL,
+                     scale.model=FALSE, PCpriors=FALSE, merge.strategy="original", compute.intercept=NULL,
                      compute.DIC=TRUE, n.sample=1000, compute.fitted.values=FALSE,
                      save.models=FALSE, plan="sequential", workers=NULL,
                      inla.mode="classic", num.threads=NULL){
@@ -234,36 +236,10 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
           log_jacobian = log(beta*(1-beta));
           return(logdens+log_jacobian)"
 
-        ## Formula for INLA model ##
-        form <- "O ~ "
-        if(length(X)>0){
-                form <- paste(form,paste0(X,collapse="+"),"+")
-        }
-        if(prior=="Leroux") {
-                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
-        }
-        if(prior=="intrinsic" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
-        }
-        if(prior=="intrinsic" & PCpriors) {
-                form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
-        }
-        if(prior=="BYM") {
-                form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
-        }
-        if(prior=="BYM2" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
-        }
-        if(prior=="BYM2" & PCpriors) {
-                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
-        }
+        ## Auxiliary function to fit INLA models ##
+        FitModels <- function(Rs, Rs.Leroux, data.INLA, d, D, lincomb=NULL, ...){
 
-        formula <- stats::as.formula(form)
-
-        ## Auxiliary functions ##
-        FitModels <- function(Rs, Rs.Leroux, data.INLA, d, D, ...){
-
-                cat(sprintf("+ Model %d of %d",d,D),"\n")
+                if(!is.null(d)) cat(sprintf("+ Model %d of %d",d,D),"\n")
 
                 Rs <- as(Rs,"Matrix")
                 Rs.Leroux <- as(Rs.Leroux,"Matrix")
@@ -275,22 +251,32 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                         form <- paste(form,paste0(X,collapse="+"),"+")
                 }
                 if(prior=="Leroux") {
-                        form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
+                        if(!scale.model){
+                                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
+                        }else{
+                                Rs.scaled <- INLA::inla.scale.model(Rs, constr=list(A=matrix(1,1,n), e=0))
+                                # Rs.scaled <- Rs*exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
+                                Rs.Leroux <- as(Diagonal(n)-Rs.scaled,"Matrix")
+                                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
+                        }
                 }
                 if(prior=="intrinsic" & !PCpriors) {
-                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
                 }
                 if(prior=="intrinsic" & PCpriors) {
-                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
-                if(prior=="BYM") {
-                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
+                if(prior=="BYM" & !PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
+                }
+                if(prior=="BYM" & PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(theta1=list(prior='pc.prec', param=c(1,0.01)), theta2=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
                 if(prior=="BYM2" & !PCpriors) {
                         form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
                 }
                 if(prior=="BYM2" & PCpriors) {
-                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
                 }
 
                 formula <- stats::as.formula(form)
@@ -298,6 +284,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 models <- inla(formula, family="poisson", data=data.INLA, E=E,
                                control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
+                               lincomb=lincomb,
                                control.inla=list(strategy=strategy), ...)
 
                 return(models)
@@ -315,13 +302,10 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 # Rs.Leroux <- inla.as.sparse(Diagonal(n)-Rs)
 
                 data.INLA <- data.frame(O=data[,O], E=data[,E], Area=data[,ID.area], ID.area=seq(1,n), data[,X])
+
                 names(data.INLA)[grep("^data...",names(data.INLA))] <- X
 
-                Model <- inla(formula, family="poisson", data=data.INLA, E=E,
-                              control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
-                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                              control.inla=list(strategy=strategy),
-                              inla.mode=inla.mode, num.threads=num.threads)
+                Model <- FitModels(Rs, Rs.Leroux, data.INLA, d=NULL, num.threads=num.threads, inla.mode=inla.mode)
 
                 ## Alleviate spatial confounding ##
                 if(!is.null(confounding)){
@@ -348,12 +332,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                                 names(beta.lc) <- paste("X",as.character(0:p),sep="")
 
                                 cat("         * Fitting INLA model... ")
-                                Model <- inla(formula, family="poisson", data=data.INLA, E=E,
-                                              control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
-                                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                                              lincomb=beta.lc,
-                                              control.inla=list(strategy=strategy),
-                                              inla.mode=inla.mode, num.threads=num.threads)
+                                Model <- FitModels(Rs, Rs.Leroux, data.INLA, d=NULL, lincomb=beta.lc, num.threads=num.threads, inla.mode=inla.mode)
                                 cat("Done \n")
 
                                 names <- rownames(Model$summary.fixed)
@@ -369,11 +348,13 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                         if(confounding=="constraints"){
                                 cat("      + Alleviating spatial confounding: orthogonality constraints model\n")
                                 p <- length(X)
-                                W <- Diagonal(n, Model$summary.fitted.values$`0.5quant`*data.INLA$E)
+                                W <- Diagonal(n, Model$summary.fitted.values$`0.5quant`[1:n]*data.INLA$E)
                                 Bs <- rbind(matrix(1,1,n)%*%W, t(as.matrix(data.INLA[,X]))%*%W)
                                 Bs <- as(Bs,"matrix")
 
-                                formula.char <- Reduce(paste,deparse(formula))
+                                if(prior %in% c("BYM","BYM2")) Bs <- cbind(Bs,matrix(0,nrow(Bs),ncol(Bs)))
+
+                                formula.char <- Reduce(paste,deparse(Model$.args$formula))
                                 formula.char <- gsub("constr = TRUE",sprintf("constr = FALSE, rankdef=%d, extraconstr=list(A=Bs, e=rep(0,nrow(Bs)))",p+1),formula.char)
                                 formula <- as.formula(formula.char)
 
@@ -432,7 +413,7 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
                 }
 
                 if(plan=="cluster"){
-                        cl <- future::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
+                        cl <- parallelly::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
                         oplan <- future::plan(cluster, workers=cl)
                         # oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
                         on.exit(future::plan(oplan))

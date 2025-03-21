@@ -50,8 +50,8 @@
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.
 #' @param scale.model logical value (default \code{NULL}); if \code{TRUE} the structure matrices of the model are scaled so their generalized variances are equal to 1.
 #' It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
-#' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
-#' It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.
+#' @param scale.model logical value (default \code{FALSE}); if \code{TRUE} then scale the precision matrices of the models so their generalized variance is equal to 1. Note that \code{"BYM2"} spatial prior is always scaled.
+#' @param PCpriors logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect. It does not work for the \code{"Leroux"} spatial prior.
 #' @param merge.strategy one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.
 #' @param compute.intercept CAUTION! This argument is deprecated from version 0.5.2.
 #' @param compute.DIC logical value; if \code{TRUE} (default) then approximate values of the Deviance Information Criterion (DIC) and Watanabe-Akaike Information Criterion (WAIC) are computed.
@@ -66,8 +66,10 @@
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
-#' @import crayon future Matrix parallel
+#' @import crayon Matrix parallel
+#' @importFrom future cluster plan
 #' @importFrom future.apply future_mapply
+#' @importFrom parallelly makeClusterPSOCK
 #' @importFrom MASS ginv
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula
@@ -113,7 +115,7 @@
 STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.group=NULL, O=NULL, E=NULL, X=NULL,
                        W=NULL, spatial="Leroux", temporal="rw1", interaction="TypeIV",
                        model="partition", k=0, strategy="simplified.laplace",
-                       scale.model=NULL, PCpriors=FALSE, merge.strategy="original", compute.intercept=NULL,
+                       scale.model=FALSE, PCpriors=FALSE, merge.strategy="original", compute.intercept=NULL,
                        compute.DIC=TRUE, n.sample=1000, compute.fitted.values=FALSE,
                        save.models=FALSE, plan="sequential", workers=NULL,
                        inla.mode="classic", num.threads=NULL){
@@ -189,7 +191,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 stop(sprintf("'%s' variable not found in carto object",E))
 
         data.old <- data
-        carto <- carto[order(sf::st_set_geometry(carto, NULL)[,ID.area]),]
+        carto <- carto[order(unlist(sf::st_set_geometry(carto, NULL)[,ID.area])),]
         data <- merge(data,carto[,c(ID.area,ID.group)])
         data$geometry <- NULL
         data[,ID.year] <- paste(sprintf("%02d", as.numeric(as.character(data[,ID.year]))))
@@ -235,9 +237,19 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
           return(logdens+log_jacobian)"
 
         ## Identifiability constraints ##
-        constraints <- function(Rs, Rt) {
+        constraints <- function(Rs, Rt, scale.model) {
                 S <- nrow(Rs)
                 T <- nrow(Rt)
+
+                if(scale.model){
+                        Rs <- INLA::inla.scale.model(Rs, constr=list(A=matrix(1,1,S), e=0))
+
+                        if(temporal=="rw1"){
+                                Rt <- INLA::inla.scale.model(Rt, constr=list(A=matrix(1,1,T), e=0))
+                        }else{
+                                Rt <- INLA::inla.scale.model(Rt, constr=list(A=rbind(matrix(1,1,T),matrix(1:T,1,T)), e=rep(0,2)))
+                        }
+                }
 
                 if(interaction %in% c("none","TypeI")){
                         R <- NULL
@@ -250,22 +262,12 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         if(temporal=="rw2") r.def <- 2*S
                         A.constr <- kronecker(matrix(1,1,T),Diagonal(S))
                         A.constr <- as(A.constr[-1,],"matrix")
-
-                        if(PCpriors | !is.null(scale.model)){
-                                sigma.ref <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
-                                R <- R*sigma.ref
-                        }
                 }
                 if(interaction=="TypeIII"){
                         R <- kronecker(Diagonal(T),Rs)
                         r.def <- T
                         A.constr <- kronecker(Diagonal(T),matrix(1,1,S))
                         A.constr <- as(A.constr[-1,],"matrix")
-
-                        if(PCpriors | !is.null(scale.model)){
-                                sigma.ref <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
-                                R <- R*sigma.ref
-                        }
                 }
                 if(interaction=="TypeIV"){
                         R <- kronecker(Rt,Rs)
@@ -274,86 +276,15 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                         A1 <- kronecker(matrix(1,1,T),Diagonal(S))
                         A2 <- kronecker(Diagonal(T),matrix(1,1,S))
                         A.constr <- as(rbind(A1[-1,],A2[-1,]),"matrix")
-                        if(PCpriors | !is.null(scale.model)){
-                                sigma.ref1 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
-                                sigma.ref2 <- exp(mean(log(diag(MASS::ginv(as.matrix(Rt))))))
-                                R <- R*sigma.ref1*sigma.ref2
-                        }
                 }
 
                 return(list(R=R,r.def=r.def,A.constr=A.constr))
         }
 
-        ## Formula for INLA model ##
-        form <- "O ~ "
-
-        if(length(X)>0){
-                form <- paste(form,paste0(X,collapse="+"),"+")
-        }
-
-        if(spatial=="Leroux") {
-                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
-        }
-        if(spatial=="intrinsic" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
-        }
-        if(spatial=="intrinsic" & PCpriors) {
-                form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
-        }
-        if(spatial=="BYM") {
-                form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
-        }
-        if(spatial=="BYM2" & !PCpriors) {
-                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
-        }
-        if(spatial=="BYM2" & PCpriors) {
-                form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
-        }
-
-        if(temporal=="rw1" & !PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
-        }
-        if(temporal=="rw1" & PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
-        }
-        if(temporal=="rw2" & interaction!="TypeII" & !PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
-        }
-        if(temporal=="rw2" & interaction!="TypeII" & PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
-        }
-        if(temporal=="rw2" & interaction=="TypeII" & !PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
-        }
-        if(temporal=="rw2" & interaction=="TypeII" & PCpriors) {
-                form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
-        }
-
-        if(interaction=="TypeI" & temporal=="rw1" & !PCpriors) {
-                form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior=sdunif)))", sep="")
-        }
-        if(interaction=="TypeI" & temporal=="rw1" & PCpriors) {
-                form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
-        }
-        if(interaction=="TypeI" & temporal=="rw2" & !PCpriors) {
-                form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(rep(1:S,each=T),1,S*T),e=0))", sep="")
-        }
-        if(interaction=="TypeI" & temporal=="rw2" & PCpriors) {
-                form <- paste(form,"+ f(ID.area.year, model='iid', constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(rep(1:S,each=T),1,S*T),e=0))", sep="")
-        }
-        if((interaction %in% c("TypeII","TypeIII","TypeIV")) & !PCpriors) {
-                form <- paste(form,"+ f(ID.area.year, model='generic0', Cmatrix=R, rankdef=r.def, constr=TRUE, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=A.constr, e=rep(0,nrow(A.constr))))", sep="")
-        }
-        if((interaction %in% c("TypeII","TypeIII","TypeIV")) & PCpriors) {
-                form <- paste(form,"+ f(ID.area.year, model='generic0', Cmatrix=R, rankdef=r.def, constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=A.constr, e=rep(0,nrow(A.constr))))", sep="")
-        }
-
-        formula <- stats::as.formula(form)
-
-        ## Auxiliary functions ##
+        ## Auxiliary function to fit INLA models ##
         FitModels <- function(Rs, Rs.Leroux, R, r.def, A.constr, data.INLA, d, D, ...){
 
-                cat(sprintf("+ Model %d of %d",d,D),"\n")
+                if(!is.null(d)) cat(sprintf("+ Model %d of %d",d,D),"\n")
 
                 Rs <- as(Rs,"Matrix")
                 Rs.Leroux <- as(Rs.Leroux,"Matrix")
@@ -368,41 +299,51 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
 
                 if(spatial=="Leroux") {
-                        form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
+                        if(!scale.model){
+                                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
+                        }else{
+                                Rs.scaled <- INLA::inla.scale.model(Rs, constr=list(A=matrix(1,1,S), e=0))
+                                # Rs.scaled <- Rs*exp(mean(log(diag(MASS::ginv(as.matrix(Rs))))))
+                                Rs.Leroux <- as(Diagonal(S)-Rs.scaled,"Matrix")
+                                form <- paste(form,"f(ID.area, model='generic1', Cmatrix=Rs.Leroux, constr=TRUE, hyper=list(prec=list(prior=sdunif),beta=list(prior=lunif, initial=0)))", sep="")
+                        }
                 }
                 if(spatial=="intrinsic" & !PCpriors) {
                         form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
                 }
                 if(spatial=="intrinsic" & PCpriors) {
-                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                        form <- paste(form,"f(ID.area, model='besag', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
-                if(spatial=="BYM") {
-                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
+                if(spatial=="BYM" & !PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(theta1=list(prior=sdunif), theta2=list(prior=sdunif)))", sep="")
+                }
+                if(spatial=="BYM" & PCpriors) {
+                        form <- paste(form,"f(ID.area, model='bym', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(theta1=list(prior='pc.prec', param=c(1,0.01)), theta2=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
                 if(spatial=="BYM2" & !PCpriors) {
-                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior=sdunif),phi=list(prior=lunif, initial=0)))", sep="")
                 }
                 if(spatial=="BYM2" & PCpriors) {
-                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
+                        form <- paste(form,"f(ID.area, model='bym2', graph=Rs, constr=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01)),phi=list(prior='pc', param=c(0.5,0.5))))", sep="")
                 }
 
                 if(temporal=="rw1" & !PCpriors) {
                         form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
                 }
                 if(temporal=="rw1" & PCpriors) {
-                        form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                        form <- paste(form,"+ f(ID.year, model='rw1', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
                 if(temporal=="rw2" & interaction!="TypeII" & !PCpriors) {
                         form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)))", sep="")
                 }
                 if(temporal=="rw2" & interaction!="TypeII" & PCpriors) {
-                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))))", sep="")
                 }
                 if(temporal=="rw2" & interaction=="TypeII" & !PCpriors) {
                         form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior=sdunif)), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
                 }
                 if(temporal=="rw2" & interaction=="TypeII" & PCpriors) {
-                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=TRUE, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
+                        form <- paste(form,"+ f(ID.year, model='rw2', constr=TRUE, scale.model=scale.model, hyper=list(prec=list(prior='pc.prec', param=c(1,0.01))), extraconstr=list(A=matrix(1:T,1,T),e=0))", sep="")
                 }
 
                 if(interaction=="TypeI" & temporal=="rw1" & !PCpriors) {
@@ -444,7 +385,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 # Rs <- inla.as.sparse(Diagonal(S,colSums(W))-W)
                 # Rs.Leroux <- inla.as.sparse(Diagonal(S)-Rs)
 
-                constr <- constraints(Rs,Rt)
+                constr <- constraints(Rs,Rt,scale.model)
                 R <- constr$R
                 r.def <- constr$r.def
                 A.constr <- constr$A.constr
@@ -454,11 +395,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
 
                 names(data.INLA)[grep("^data...",names(data.INLA))] <- X
 
-                Model <- inla(formula, family="poisson", data=data.INLA, E=E,
-                              control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
-                              control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                              control.inla=list(strategy=strategy),
-                              inla.mode=inla.mode, num.threads=num.threads)
+                Model <- FitModels(Rs, Rs.Leroux, R, r.def, A.constr, data.INLA, d=NULL, num.threads=num.threads, inla.mode=inla.mode)
         }
 
         ## Partition model ##
@@ -508,7 +445,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 }
 
                 if(plan=="cluster"){
-                        cl <- future::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
+                        cl <- parallelly::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
                         oplan <- future::plan(cluster, workers=cl)
                         # oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
                         on.exit(future::plan(oplan))

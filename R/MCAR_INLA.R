@@ -62,9 +62,11 @@
 #'
 #' @return This function returns an object of class \code{inla}. See the \code{\link{mergeINLA}} function for details.
 #'
-#' @import crayon future Matrix parallel Rdpack
+#' @import crayon Matrix parallel Rdpack
 #' @importFrom fastDummies dummy_cols
+#' @importFrom future cluster plan
 #' @importFrom future.apply future_mapply
+#' @importFrom parallelly makeClusterPSOCK
 #' @importFrom sf st_as_sf st_set_geometry
 #' @importFrom stats as.formula cov
 #' @importFrom utils capture.output combn
@@ -166,12 +168,14 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       stop(sprintf("'%s' variable not found in carto object",E))
 
     data.old <- data
-    carto <- carto[order(sf::st_set_geometry(carto, NULL)[,ID.area]),]
+    carto <- carto[order(unlist(sf::st_set_geometry(carto, NULL)[,ID.area])),]
     data <- merge(data,carto[,c(ID.area,ID.group)])
     data$geometry <- NULL
     data[,ID.disease] <- paste(sprintf("%02d", as.numeric(as.character(data[,ID.disease]))))
     data <- data[order(data[,ID.disease],data[,ID.area]),]
     rownames(data) <- NULL
+
+    J <- length(unique(data[,ID.disease]))
 
     if(!all(order(data[,ID.disease],data[,ID.area])==order(data.old[,ID.disease],data.old[,ID.area]))){
             order.data <- TRUE
@@ -202,18 +206,10 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
           log_jacobian = log(beta*(1-beta));
           return(logdens+log_jacobian)"
 
-    ## Formula for INLA model ##
-    J <- length(unique(data[,ID.disease]))
-
-    form <- "O ~ -1+"
-    form <- paste(form, paste(paste0("I",1:J),collapse="+"),sep="")
-    form <- paste(form, "+ f(idx, model=Mmodel, constr=FALSE, extraconstr=list(A=A.constr, e=rep(0,J)))")
-    formula <- stats::as.formula(form)
-
-    ## Auxiliary functions ##
+    ## Auxiliary functions to fit INLA models ##
     FitModels <- function(W, A.constr, data.INLA, d, D, initial.values, ...){
 
-      cat(sprintf("+ Model %d of %d",d,D),"\n")
+      if(!is.null(d)) cat(sprintf("+ Model %d of %d",d,D),"\n")
 
       form <- "O ~ -1+"
       form <- paste(form, paste(paste0("I",1:J),collapse="+"),sep="")
@@ -274,32 +270,8 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       N <- t(chol(Sigma))
       initial.values <- as.vector(c(log(diag(N)), N[lower.tri(N,diag=FALSE)]))
 
-      if(prior=="intrinsic"){
-        Mmodel <- INLA::inla.rgeneric.define(Mmodel_icar, debug=FALSE, J=J, W=W, initial.values=initial.values)
-      }
-      if(prior=="Leroux"){
-        Mmodel <- INLA::inla.rgeneric.define(Mmodel_lcar, debug=FALSE, J=J, W=W, initial.values=initial.values, alpha.min=0, alpha.max=1)
-      }
-      if(prior=="proper"){
-        Mmodel <- INLA::inla.rgeneric.define(Mmodel_pcar, debug=FALSE, J=J, W=W, initial.values=initial.values, alpha.min=0, alpha.max=1)
-      }
-      if(prior=="iid"){
-        Mmodel <- INLA::inla.rgeneric.define(Mmodel_iid, debug=FALSE, J=J, W=W, initial.values=initial.values)
-      }
+      Model <- FitModels(W, A.constr, data.INLA, d=NULL, initial.values=initial.values, inla.mode=inla.mode, num.threads=num.threads)
 
-      Model <- inla(formula, family="poisson", data=data.INLA, E=E,
-                    control.predictor=list(compute=TRUE, link=1, cdf=c(log(1))),
-                    control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
-                    control.inla=list(strategy=strategy),
-                    inla.mode=inla.mode, num.threads=num.threads)
-
-      Model$Mmodel <- list(model=model, prior=prior)
-
-      Mmodel.compute <- Mmodel_compute_cor(Model, n.sample=1000)
-      Model$summary.cor <- Mmodel.compute$summary.cor
-      Model$marginals.cor <- Mmodel.compute$marginals.cor
-      Model$summary.var <- Mmodel.compute$summary.var
-      Model$marginals.var <- Mmodel.compute$marginals.var
     }
 
     ## Partition model ##
@@ -351,7 +323,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       }
 
       if(plan=="cluster"){
-        cl <- future::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
+        cl <- parallelly::makeClusterPSOCK(workers, revtunnel=TRUE, outfile="")
         # oplan <- future::plan(list(future::tweak(cluster, workers=workers), multisession))
         oplan <- future::plan(cluster, workers=cl)
         on.exit(future::plan(oplan))

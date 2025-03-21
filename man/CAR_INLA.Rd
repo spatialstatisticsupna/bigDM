@@ -17,6 +17,7 @@ CAR_INLA(
   model = "partition",
   k = 0,
   strategy = "simplified.laplace",
+  scale.model = FALSE,
   PCpriors = FALSE,
   merge.strategy = "original",
   compute.intercept = NULL,
@@ -65,8 +66,9 @@ If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code
 \item{strategy}{one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"},
 which specifies the approximation strategy considered in the \code{inla} function.}
 
-\item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
-It only works if arguments \code{prior="intrinsic"} or \code{prior="BYM2"} are specified.}
+\item{scale.model}{logical value (default \code{FALSE}); if \code{TRUE} then scale the models so their generalized variance is equal to 1. Note that \code{"BYM2"} model is always scaled.}
+
+\item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect. It does not work for the \code{"Leroux"} model.}
 
 \item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.}
 

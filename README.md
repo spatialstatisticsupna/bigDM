@@ -92,6 +92,11 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
+__Changes in version 0.5.6__ (2025 Mar 21)
+* small changes for compatibility with the upcoming release of `future`
+* new 'scale.model' argument for `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
+* code adjustments
+
 __Changes in version 0.5.5__ (2024 Aug 19)
 * condition for the upcoming release of `tmap` v4
 * small changes for compatibility with `spdep` version 1.3-6

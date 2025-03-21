@@ -20,7 +20,7 @@ STCAR_INLA(
   model = "partition",
   k = 0,
   strategy = "simplified.laplace",
-  scale.model = NULL,
+  scale.model = FALSE,
   PCpriors = FALSE,
   merge.strategy = "original",
   compute.intercept = NULL,
@@ -66,11 +66,9 @@ If \code{X=NULL} (default), only a global intercept is included in the model as 
 
 \item{strategy}{one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.}
 
-\item{scale.model}{logical value (default \code{NULL}); if \code{TRUE} the structure matrices of the model are scaled so their generalized variances are equal to 1.
-It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.}
+\item{scale.model}{logical value (default \code{FALSE}); if \code{TRUE} then scale the precision matrices of the models so their generalized variance is equal to 1. Note that \code{"BYM2"} spatial prior is always scaled.}
 
-\item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect.
-It only works if arguments \code{spatial="intrinsic"} or \code{spatial="BYM2"} are specified.}
+\item{PCpriors}{logical value (default \code{FALSE}); if \code{TRUE} then penalised complexity (PC) priors are used for the precision parameter of the spatial random effect. It does not work for the \code{"Leroux"} spatial prior.}
 
 \item{merge.strategy}{one of either \code{"mixture"} or \code{"original"} (default), which specifies the merging strategy to compute posterior marginal estimates of the linear predictor. See \code{\link{mergeINLA}} for further details.}
 

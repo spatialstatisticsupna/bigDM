@@ -1,3 +1,8 @@
+version 0.5.6
+- small changes for compatibility with the upcoming release of 'future'
+- new 'scale.model' argument for CAR_INLA(), STCAR_INLA() and MCAR_INLA() functions
+- code adjustments
+
 version 0.5.5
 - condition for the upcoming release of 'tmap' v4
 - small changes for compatibility with 'spdep' version 1.3-6
