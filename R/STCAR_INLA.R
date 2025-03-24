@@ -428,7 +428,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 Rs <- mapply(function(x,y){Diagonal(x,colSums(y))-y}, x=nd, y=Wd)
                 Rs.Leroux <- mapply(function(x,y){Diagonal(x)-y}, x=nd, y=Rs)
 
-                constr <- lapply(Rs, function(x) constraints(x,Rt))
+                constr <- lapply(Rs, function(x) constraints(x,Rt,scale.model))
                 R <- lapply(constr, function(x) x$R)
                 r.def <- lapply(constr, function(x) x$r.def)
                 A.constr <- lapply(constr, function(x) x$A.constr)
