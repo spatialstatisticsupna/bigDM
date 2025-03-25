@@ -92,7 +92,7 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.6__ (2025 Mar 21)
+__Changes in version 0.5.6__ (2025 Mar 25)
 * small changes for compatibility with the upcoming release of `future`
 * new 'scale.model' argument for `CAR_INLA()`, `STCAR_INLA()` and `MCAR_INLA()` functions
 * code adjustments
