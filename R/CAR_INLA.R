@@ -203,8 +203,8 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
         if(!E %in% colnames(data))
                 stop(sprintf("'%s' variable not found in carto object",E))
 
-        if(!all(order(data[,ID.area])==seq(1,nrow(data)))){
-                carto <- carto[order(data[,ID.area]),]
+        if(!all(order(unlist(data[,ID.area]))==seq(1,nrow(data)))){
+                carto <- carto[order(unlist(data[,ID.area])),]
                 data <- sf::st_set_geometry(carto, NULL)
 
                 order.data <- TRUE
