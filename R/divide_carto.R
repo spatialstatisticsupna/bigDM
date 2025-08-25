@@ -69,8 +69,15 @@ divide_carto <- function(carto, ID.group=NULL, k=0, plot=FALSE){
         group.names <- carto.group$ID.group
         names(group.names) <- group.names
 
-        carto.k0 <- lapply(group.names, function(x) {
-                aux <- carto[st_set_geometry(carto[,ID.group],NULL)==x,]
+        # carto.k0 <- lapply(group.names, function(x) {
+        #         aux <- carto[st_set_geometry(carto[,ID.group],NULL)==x,]
+        #         rownames(aux) <- NULL
+        #         aux
+        # })
+
+        carto.k0 <- split(carto, sf::st_set_geometry(carto[, ID.group], NULL))
+
+        carto.k0 <- lapply(carto.k0, function(aux) {
                 rownames(aux) <- NULL
                 aux
         })
