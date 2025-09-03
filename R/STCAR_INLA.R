@@ -308,11 +308,16 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                 # }
 
                 # Check which covariates have a constant value
-                X.rm <- sapply(data.INLA[,X,drop=FALSE], function(col) length(unique(col))==1)
+                X.rm <- sapply(data.INLA[,X,drop=FALSE], function(col) all(col==0))
                 X.d <- X[!X.rm]
 
-                if(length(X.d)>0){
-                        form <- paste(form, paste0(X.d,collapse="+"),"+")
+                if(!is.null(X.d)){
+                        if(length(X.d)==1 & all(data.INLA[,X.d]==1)){
+                                intercept.rename <- TRUE
+                        }else{
+                                intercept.rename <- FALSE
+                                form <- paste(form, paste0(X.d,collapse="+"),"+")
+                        }
                 }
 
                 if(spatial=="Leroux") {
@@ -389,10 +394,12 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
                                control.compute=list(dic=TRUE, cpo=TRUE, waic=TRUE, config=TRUE, return.marginals.predictor=TRUE),
                                control.inla=list(strategy=strategy), ...)
 
-                if(!is.null(X) & all(data.INLA[,names(X.rm)]!=0)){
-                        rownames(models$summary.fixed)[rownames(models$summary.fixed)=="(Intercept)"] <- paste0(names(which(X.rm)),"1")
-                        names(models$marginals.fixed)[names(models$marginals.fixed)=="(Intercept)"] <- paste0(names(which(X.rm)),"1")
-                        models$names.fixed[models$names.fixed=="(Intercept)"] <- paste0(names(which(X.rm)),"1")
+                if(!is.null(X.d)){
+                        idx <- ifelse(intercept.rename,1,-1)
+
+                        rownames(models$summary.fixed)[idx] <- X.d
+                        names(models$marginals.fixed)[idx] <- X.d
+                        models$names.fixed[idx] <- X.d
                 }
 
                 return(models)

@@ -706,6 +706,8 @@ compute.transform <- function(x){
 
 compute.CMC <- function(marginals,names){
 
+  names <- sort(names)
+
   marginals.CMC <- vector("list",length(names))
   names(marginals.CMC) <- names
 
@@ -713,15 +715,19 @@ compute.CMC <- function(marginals,names){
     pos <- grep(i,names(marginals))
     pos <- pos[!unlist(lapply(marginals[pos], function(x) all(is.na(x))))]
 
-    w <- 1/unlist(lapply(marginals[pos], function(x) INLA::inla.emarginal(function(y) y^2,x)-INLA::inla.emarginal(function(y) y,x)^2))
-    w <- w/sum(w)
+    if(length(pos)>1){
+            w <- 1/unlist(lapply(marginals[pos], function(x) INLA::inla.emarginal(function(y) y^2,x)-INLA::inla.emarginal(function(y) y,x)^2))
+            w <- w/sum(w)
 
-    marginals.sample <- lapply(marginals[pos], function(x) INLA::inla.rmarginal(10000,x))
-    marginals.density <- density(c(do.call(cbind,marginals.sample)%*%w), n=75, bw="SJ")
-    marginals.matrix <- cbind(x=marginals.density$x, y=marginals.density$y)
-    dimnames(marginals.matrix) <- list(NULL, c("x","y"))
+            marginals.sample <- lapply(marginals[pos], function(x) INLA::inla.rmarginal(10000,x))
+            marginals.density <- density(c(do.call(cbind,marginals.sample)%*%w), n=75, bw="SJ")
+            marginals.matrix <- cbind(x=marginals.density$x, y=marginals.density$y)
+            dimnames(marginals.matrix) <- list(NULL, c("x","y"))
 
-    marginals.CMC[[i]] <- marginals.matrix
+            marginals.CMC[[i]] <- marginals.matrix
+    }else{
+            marginals.CMC[[i]] <- marginals[[pos]]
+    }
   }
 
   summary.CMC <- do.call(rbind,lapply(marginals.CMC, function(x) compute.summary(x,cdf=NULL)))

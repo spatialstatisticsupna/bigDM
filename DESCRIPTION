@@ -2,7 +2,7 @@ Package: bigDM
 Type: Package
 Title: Scalable Bayesian Disease Mapping Models for High-Dimensional Data
 Version: 0.5.7
-Date: 2025-08-25
+Date: 2025-09-04
 Authors@R: 
   c(person(given = "Aritz",
            family = "Adin",
