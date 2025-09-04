@@ -44,8 +44,8 @@ Only required if \code{model="partition"}.}
 
 \item{E}{character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit.}
 
-\item{X}{a character vector containing the names of the covariates within the \code{carto} object to be included in the model as fixed effects,
-or a matrix object playing the role of the fixed effects design matrix. For the latter case, the row names must match with the IDs of the spatial units defined by the \code{ID.area} variable.
+\item{X}{a character vector specifying the names of covariates within the \code{carto} object to include as fixed effects in the model, or a \code{data.frame} object where each column corresponds to a covariate for the model.
+For the latter case, the row names of the data frame must match with the spatial unit IDs defined by the \code{ID.area} variable.
 If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.}
 
 \item{confounding}{one of either \code{NULL}, \code{"restricted"} (restricted regression) or \code{"constraints"} (orthogonal constraints), which specifies the estimation method used to alleviate spatial confounding between fixed and random effects.

@@ -39,7 +39,7 @@
 #' @param ID.group character; name of the variable that contains the IDs of the spatial partition (grouping variable). Only required if \code{model="partition"}.
 #' @param O character; name of the variable that contains the observed number of disease cases for each areal and time point.
 #' @param E character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit and time point.
-#' @param X a character vector containing the names of the covariates within the \code{data} object to be included in the model as fixed effects, or a matrix object playing the role of the fixed effects design matrix.
+#' @param X a character vector containing the names of the covariates within the \code{data} object to be included in the model as fixed effects, or a \code{data.frame} object where each column corresponds to a covariate for the model.
 #' If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.
 #' @param W optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).
 #' @param spatial one of either \code{"Leroux"} (default), \code{"intrinsic"}, \code{"BYM"} or \code{"BYM2"}, which specifies the prior distribution considered for the spatial random effect.
@@ -166,8 +166,8 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
 
         ## Add the covariates defined in the X argument (scale numerical covariates) ##
         if(!is.null(X)){
-                if(is.matrix(X)){
-                        if(is.null(colnames(X))) colnames(X) <- paste("X",seq(ncol(X)),sep="")
+                if(is.data.frame(X)){
+                        #if(is.null(colnames(X))) colnames(X) <- paste("X",seq(ncol(X)),sep="")
                         data <- cbind(data,X)
                         X <- colnames(X)
                 }

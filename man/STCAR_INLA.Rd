@@ -49,7 +49,7 @@ STCAR_INLA(
 
 \item{E}{character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit and time point.}
 
-\item{X}{a character vector containing the names of the covariates within the \code{data} object to be included in the model as fixed effects, or a matrix object playing the role of the fixed effects design matrix.
+\item{X}{a character vector containing the names of the covariates within the \code{data} object to be included in the model as fixed effects, or a \code{data.frame} object where each column corresponds to a covariate for the model.
 If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.}
 
 \item{W}{optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).}

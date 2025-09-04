@@ -50,8 +50,8 @@
 #' Only required if \code{model="partition"}.
 #' @param O character; name of the variable that contains the observed number of disease cases for each areal units.
 #' @param E character; name of the variable that contains either the expected number of disease cases or the population at risk for each areal unit.
-#' @param X a character vector containing the names of the covariates within the \code{carto} object to be included in the model as fixed effects,
-#' or a matrix object playing the role of the fixed effects design matrix. For the latter case, the row names must match with the IDs of the spatial units defined by the \code{ID.area} variable.
+#' @param X a character vector specifying the names of covariates within the \code{carto} object to include as fixed effects in the model, or a \code{data.frame} object where each column corresponds to a covariate for the model.
+#' For the latter case, the row names of the data frame must match with the spatial unit IDs defined by the \code{ID.area} variable.
 #' If \code{X=NULL} (default), only a global intercept is included in the model as fixed effect.
 #' @param confounding one of either \code{NULL}, \code{"restricted"} (restricted regression) or \code{"constraints"} (orthogonal constraints), which specifies the estimation method used to alleviate spatial confounding between fixed and random effects.
 #' If only an intercept is considered in the model (\code{X=NULL}), the default value \code{confounding=NULL} will be set.
@@ -178,11 +178,11 @@ CAR_INLA <- function(carto=NULL, ID.area=NULL, ID.group=NULL, O=NULL, E=NULL, X=
 
         ## Add the covariates defined in the X argument (scale numerical covariates) ##
         if(!is.null(X)){
-                if(is.matrix(X)){
+                if(is.data.frame(X)){
                         if(!isTRUE(all.equal(rownames(X),as.character(sf::st_set_geometry(carto, NULL)[,ID.area])))){
                                 stop(sprintf("row names of 'X' must match with the IDs of the spatial units defined by the '%s' variable",ID.area))
                         }else{
-                                if(is.null(colnames(X))) colnames(X) <- paste("X",seq(ncol(X)),sep="")
+                                #if(is.null(colnames(X))) colnames(X) <- paste("X",seq(ncol(X)),sep="")
                                 carto <- cbind(carto,X)
                                 X <- colnames(X)
                         }
