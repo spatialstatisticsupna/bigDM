@@ -167,7 +167,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
     if(!E %in% colnames(data))
       stop(sprintf("'%s' variable not found in carto object",E))
 
-    data.old <- data
+    data.old <- as.data.frame(data)
     carto <- carto[order(unlist(sf::st_set_geometry(carto, NULL)[,ID.area])),]
     data <- merge(data,carto[,c(ID.area,ID.group)])
     data$geometry <- NULL
