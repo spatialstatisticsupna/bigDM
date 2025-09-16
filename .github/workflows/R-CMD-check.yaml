@@ -50,10 +50,13 @@ jobs:
           # extra-repositories: "https://inla.r-inla-download.org/R/testing"
           use-public-rspm: true
 
+      - name: Set INLA repository
+        run: |
+          Rscript -e 'options(repos = c(INLA="https://inla.r-inla-download.org/R/stable", CRAN="https://cloud.r-project.org"))'
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: rcmdcheck
-          extra-repos: INLA=https://inla.r-inla-download.org/R/stable
 
       # - name: Install dependencies
       #   if: runner.os == 'macOS'
