@@ -92,7 +92,7 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.7__ (2025 Sep 10)
+__Changes in version 0.5.7__ (2025 Sep 16)
 * support dummy-coded clusters as fixed effects in spatial and spatio-temporal models
 
 __Changes in version 0.5.6__ (2025 Mar 25)
