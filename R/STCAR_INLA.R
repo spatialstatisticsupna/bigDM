@@ -163,6 +163,7 @@ STCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.year=NULL, ID.gro
 
         ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
         carto <- sf::st_as_sf(carto)
+        class(carto) <- c("sf", "data.frame")
 
         ## Add the covariates defined in the X argument (scale numerical covariates) ##
         if(!is.null(X)){

@@ -154,6 +154,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
 
     ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
     carto <- sf::st_as_sf(carto)
+    class(carto) <- c("sf", "data.frame")
 
     ## Order the data ##
     if(!ID.area %in% colnames(carto))
