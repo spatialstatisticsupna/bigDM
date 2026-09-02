@@ -28,6 +28,8 @@ Below, there is a list with a brief overview of all package functions:
 * ```clustering_partition``` Obtain a spatial partition using the DBSC algorithm.
 * ```connect_subgraphs``` Merges disjoint connected subgraphs.
 * ```divide_carto``` Divides the spatial domain into subregions.
+* ```grid_partition``` Defines a spatial partition of the spatial domain based on a regular grid.
+* ```kmeans_partition``` Define a random spatial partition of the domain based on k-means clustering of polygon centroids.
 * ```MCAR_INLA``` Fits several spatial multivariate CAR models for high-dimensional count data.
 * ```mergeINLA``` Merges inla objects for partition models.
 * ```Mmodel_compute_cor``` Computes between-disease correlation coefficients for M-models.
@@ -35,7 +37,6 @@ Below, there is a list with a brief overview of all package functions:
 * ```Mmodel_icar``` Implements the intrinsic multivariate latent effect.
 * ```Mmodel_lcar``` Implements the Leroux et al. (1999) multivariate latent effect.
 * ```Mmodel_pcar``` Implements the proper multivariate latent effect.
-* ```random_partition``` Defines a random partition of the spatial domain based on a regular grid.
 * ```STCAR_INLA``` Fits several spatio-temporal CAR models for high-dimensional count data.
 
 
@@ -92,7 +93,11 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.8__ (2026 Aug 18)
+__Changes in version 0.5.9__ (2026 Sep 02)
+* new `kmeans_partition()` function 
+* `random_partition()` has been renamed to `grid_partition()`
+
+__Changes in version 0.5.8__ (2026 Aug 19)
 * bugs fixed
 * package built for R-4.6
 

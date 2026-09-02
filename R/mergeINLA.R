@@ -145,7 +145,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                   #         result$marginals.fixed.partition <- aux[order(names(aux))]
                   #
                   #         ## CMC algorithm for the fixed effects ##
-                  #         fixed.CMC <- compute.CMC(marginals=result$marginals.fixed.partition, names=unlist(names.fixed))
+                  #         fixed.CMC <- compute_CMC(marginals=result$marginals.fixed.partition, names=unlist(names.fixed))
                   #         result$summary.fixed <- fixed.CMC$summary.CMC
                   #         result$marginals.fixed <- fixed.CMC$marginals.CMC
                   #
@@ -177,7 +177,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                   result$marginals.fixed.partition <- aux[order(names(aux))]
 
                   ## CMC algorithm for the fixed effects ##
-                  fixed.CMC <- compute.CMC(marginals=result$marginals.fixed.partition, names=unlist(names.fixed))
+                  fixed.CMC <- compute_CMC(marginals=result$marginals.fixed.partition, names=unlist(names.fixed))
                   result$summary.fixed <- fixed.CMC$summary.CMC
                   result$marginals.fixed <- fixed.CMC$marginals.CMC
 
@@ -342,7 +342,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                           # cl <- makeCluster(detectCores())
                           # doParallel::registerDoParallel(cl)
                           # result$marginals.fitted.values <- foreach::foreach(i=1:length(result$marginals.linear.predictor)) %dopar% INLA::inla.tmarginal(fun=exp, marginal=result$marginals.linear.predictor[[i]])
-                          # result$summary.fitted.values <- do.call(rbind,foreach::foreach(i=1:length(result$marginals.fitted.values)) %dopar% compute.summary(result$marginals.fitted.values[[i]], cdf=NULL))
+                          # result$summary.fitted.values <- do.call(rbind,foreach::foreach(i=1:length(result$marginals.fitted.values)) %dopar% compute_summary(result$marginals.fitted.values[[i]], cdf=NULL))
                           # stopCluster(cl)
 
                           suppressWarnings({
@@ -352,7 +352,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                                   clusterEvalQ(cl,{
                                           INLA::inla.tmarginal
                                   })
-                                  aux <- parLapply(cl, mm, compute.transform)
+                                  aux <- parLapply(cl, mm, compute_transform)
                                   stopCluster(cl)
                           })
 
@@ -596,7 +596,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                       result$marginals.cor.partition <- aux[order(names(aux))]
 
                       ## CMC algorithm for the correlation coefficients ##
-                      cor.CMC <- compute.CMC(marginals=result$marginals.cor.partition, names=unlist(names.cor))
+                      cor.CMC <- compute_CMC(marginals=result$marginals.cor.partition, names=unlist(names.cor))
                       result$summary.cor <- cor.CMC$summary.CMC
                       result$marginals.cor <- cor.CMC$marginals.CMC
                     }
@@ -613,7 +613,7 @@ mergeINLA <- function(inla.models=list(), k=NULL, ID.area="Area", ID.year=NULL, 
                       result$marginals.var.partition <- aux[order(names(aux))]
 
                       ## CMC algorithm for the correlation coefficients ##
-                      var.CMC <- compute.CMC(marginals=result$marginals.var.partition, names=unlist(names.var))
+                      var.CMC <- compute_CMC(marginals=result$marginals.var.partition, names=unlist(names.var))
                       result$summary.var <- var.CMC$summary.CMC
                       result$marginals.var <- var.CMC$marginals.CMC
                     }
@@ -666,7 +666,7 @@ merge_marginals <- function(q,ID.list,models.summary,models.marginals,models.cpo
         marginals.linear.predictor <- rbind(marginals.linear.predictor,c(j,sum(aux*w)))
       }
 
-      summary.linear.predictor <- compute.summary(marginals.linear.predictor)
+      summary.linear.predictor <- compute_summary(marginals.linear.predictor)
       rownames(summary.linear.predictor) <- q
 
       marginals.linear.predictor <- list(marginals.linear.predictor)
@@ -681,7 +681,7 @@ riskSampleDeviance <- function(x){
   exp(INLA::inla.rmarginal(n.sample,x))
 }
 
-compute.summary <- function(marginal,cdf=0){
+compute_summary <- function(marginal,cdf=0){
         m <- INLA::inla.emarginal(function(xx) c(xx, xx^2), marginal)
         q <- INLA::inla.qmarginal(c(0.025, 0.5, 0.975), marginal)
 
@@ -697,14 +697,14 @@ compute.summary <- function(marginal,cdf=0){
         return(aux)
 }
 
-compute.transform <- function(x){
+compute_transform <- function(x){
         marginals.transform <- INLA::inla.tmarginal(fun=exp, marginal=x, n=75)
-        summary.transform <- compute.summary(marginals.transform, cdf=NULL)
+        summary.transform <- compute_summary(marginals.transform, cdf=NULL)
 
         return(list(marginals.transform, summary.transform))
 }
 
-compute.CMC <- function(marginals,names){
+compute_CMC <- function(marginals,names){
 
   names <- sort(names)
 
@@ -730,7 +730,7 @@ compute.CMC <- function(marginals,names){
     }
   }
 
-  summary.CMC <- do.call(rbind,lapply(marginals.CMC, function(x) compute.summary(x,cdf=NULL)))
+  summary.CMC <- do.call(rbind,lapply(marginals.CMC, function(x) compute_summary(x,cdf=NULL)))
   # summary.CMC <- summary.CMC[,c("mean","sd","0.025quant","0.5quant","0.975quant")]
 
   return(list(marginals.CMC=marginals.CMC, summary.CMC=summary.CMC))

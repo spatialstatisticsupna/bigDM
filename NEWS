@@ -1,3 +1,7 @@
+version 0.5.9
+- new `kmeans_partition()` function
+- random_partition() has been renamed to grid_partition()
+
 version 0.5.8
 - bugs fixed
 - package built for R-4.6

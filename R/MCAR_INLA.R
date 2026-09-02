@@ -416,7 +416,7 @@ Mmodel_compute_cor <- function(model, n.sample=10000){
       marginals.cor <- lapply(cor.density, function(xx) cbind(x=xx$x, y=xx$y))
       names(marginals.cor) <- paste("rho",apply(combn(J,2), 2, function(x) paste0(x, collapse="")),sep="")
 
-      summary.cor <- do.call(rbind,lapply(marginals.cor, function(x) compute.summary(x,cdf=NULL)))
+      summary.cor <- do.call(rbind,lapply(marginals.cor, function(x) compute_summary(x,cdf=NULL)))
 
 
       ## Within-disease variances ##
@@ -426,7 +426,7 @@ Mmodel_compute_cor <- function(model, n.sample=10000){
       marginals.var <- lapply(var.density, function(xx) cbind(x=xx$x, y=xx$y))
       names(marginals.var) <- paste("var",1:J,sep="")
 
-      summary.var <- do.call(rbind,lapply(marginals.var, function(x) compute.summary(x, cdf=NULL)))
+      summary.var <- do.call(rbind,lapply(marginals.var, function(x) compute_summary(x, cdf=NULL)))
     })
 
     if(any(class(o[[1]])=="error")){
@@ -469,7 +469,7 @@ tryCatch.W.E <- function(expr){
        warning = W)
 }
 
-compute.summary <- function(marginal,cdf=0){
+compute_summary <- function(marginal,cdf=0){
         m <- INLA::inla.emarginal(function(xx) c(xx, xx^2), marginal)
         q <- INLA::inla.qmarginal(c(0.025, 0.5, 0.975), marginal)
 

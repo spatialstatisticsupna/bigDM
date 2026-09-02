@@ -1,10 +1,10 @@
-#' Define a random partition of the spatial domain based on a regular grid
+#' Define a spatial partition of the domain based on a regular grid
 #'
 #' @description The function takes an object of class \code{SpatialPolygonsDataFrame} or \code{sf} and
-#' defines a random partition of the spatial polygons based on a regular grid over the whole domain
+#' defines a spatial partition of the polygons based on a regular grid over the whole domain
 #' using the \code{st_make_grid} function of the \code{sf} package.
 #'
-#' @details After defining a random partition of the spatial polygons based on a regular grid, the subregions with number of areas smaller than the value given by the \code{min.size} are merged to its nearest neighbour.
+#' @details After defining a partition of the spatial polygons based on a regular grid, the subregions with number of areas smaller than the value given by the \code{min.size} are merged to its nearest neighbour.
 #' Then, the subregions with number of areas greater than the value given by the \code{max.size} argument are divided.
 #' Finally, if \code{prop.zero} argument is set, the subregions with proportion of areas with zero cases below that threshold are merged to its smallest neighbour.
 #'
@@ -18,90 +18,65 @@
 #'
 #' @return \code{sf} object with the original data and a grouping variable named 'ID.group'
 #'
-#' @importFrom sf st_as_sf st_bbox st_centroid st_geometry st_intersects st_make_grid
+#' @importFrom sf st_as_sf st_bbox st_centroid st_drop_geometry st_geometry st_intersects st_make_grid
 #' @importFrom spdep knearneigh knn2nb
 #' @importFrom stats aggregate
+#'
+#' @seealso
+#' \code{\link{kmeans_partition}} for a random partition based on k-means clustering.
 #'
 #' @examples
 #' \dontrun{
 #' library(tmap)
-#' tmap4 <- packageVersion("tmap") >= "3.99"
 #'
 #' ## Load the Spain colorectal cancer mortality data ##
 #' data(Carto_SpainMUN)
 #'
-#' ## Random partition based on a 3x3 regular grid (with no size restrictions) ##
-#' carto.r1 <- random_partition(carto=Carto_SpainMUN, rows=3, columns=3,
-#'                              min.size=NULL, max.size=NULL)
-#' table(carto.r1$ID.group)
+#' ## Partition based on a 3x3 regular grid (with no size restrictions) ##
+#' carto.g1 <- grid_partition(carto=Carto_SpainMUN, rows=3, columns=3,
+#'                            min.size=NULL, max.size=NULL)
+#' table(carto.g1$ID.group)
 #'
-#' part1 <- aggregate(carto.r1[,"geometry"], by=list(ID.group=carto.r1$ID.group), head)
+#' part1 <- aggregate(carto.g1[,"geometry"], by=list(ID.group=carto.g1$ID.group), head)
 #'
-#' if(tmap4){
-#'         tm_shape(carto.r1) +
-#'                 tm_polygons(fill="ID.group",
-#'                             fill.scale=tm_scale(values="brewer.set3"),
-#'                             fill.legend=tm_legend(frame=FALSE)) +
-#'                 tm_shape(part1) + tm_borders(col="black", lwd=2) +
-#'                 tm_title(text="3x3 regular grid (with no size restrictions)")
-#' }else{
-#'         tm_shape(carto.r1) +
-#'                 tm_polygons(col="ID.group") +
-#'                 tm_shape(part1) + tm_borders(col="black", lwd=2) +
-#'                 tm_layout(main.title="3x3 regular grid (with no size restrictions)",
-#'                           main.title.position="center", main.title.size=1,
-#'                           legend.outside=TRUE)
-#' }
+#' tm_shape(carto.g1) +
+#'         tm_polygons(fill="ID.group",
+#'                     fill.scale=tm_scale(values="brewer.set3"),
+#'                     fill.legend=tm_legend(frame=FALSE)) +
+#'         tm_shape(part1) + tm_borders(col="black", lwd=2) +
+#'         tm_title(text="3x3 regular grid (with no size restrictions)")
 #'
-#' ## Random partition based on a 6x4 regular grid (with size restrictions) ##
-#' carto.r2 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
-#'                              min.size=50, max.size=600)
-#' table(carto.r2$ID.group)
+#' ## Partition based on a 6x4 regular grid (with size restrictions) ##
+#' carto.g2 <- grid_partition(carto=Carto_SpainMUN, rows=6, columns=4,
+#'                            min.size=50, max.size=600)
+#' table(carto.g2$ID.group)
+#' part2 <- aggregate(carto.g2[,"geometry"], by=list(ID.group=carto.g2$ID.group), head)
 #'
-#' part2 <- aggregate(carto.r2[,"geometry"], by=list(ID.group=carto.r2$ID.group), head)
+#' tm_shape(carto.g2) +
+#'         tm_polygons(fill="ID.group",
+#'                     fill.scale=tm_scale(values="brewer.set3"),
+#'                     fill.legend=tm_legend(frame=FALSE)) +
+#'         tm_shape(part2) + tm_borders(col="black", lwd=2) +
+#'         tm_title(text="6x4 regular grid (min.size=50, max.size=600)")
 #'
-#' if(tmap4){
-#'         tm_shape(carto.r2) +
-#'                 tm_polygons(fill="ID.group",
-#'                             fill.scale=tm_scale(values="brewer.set3"),
-#'                             fill.legend=tm_legend(frame=FALSE)) +
-#'                 tm_shape(part2) + tm_borders(col="black", lwd=2) +
-#'                 tm_title(text="6x4 regular grid (min.size=50, max.size=600)")
-#' }else{
-#'         tm_shape(carto.r2) +
-#'                 tm_polygons(col="ID.group") +
-#'                 tm_shape(part2) + tm_borders(col="black", lwd=2) +
-#'                 tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600)",
-#'                           main.title.position="center", main.title.size=1,
-#'                           legend.outside=TRUE)
-#' }
 #'
-#' ## Random partition based on a 6x4 regular grid (with size and proportion of zero restrictions) ##
-#' carto.r3 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
+#' ## Partition based on a 6x4 regular grid (with size and proportion of zero restrictions) ##
+#' carto.g3 <- random_partition(carto=Carto_SpainMUN, rows=6, columns=4,
 #'                              min.size=50, max.size=600, prop.zero=0.5, O="obs")
-#' table(carto.r3$ID.group)
+#' table(carto.g3$ID.group)
 #'
-#' part3 <- aggregate(carto.r3[,"geometry"], by=list(ID.group=carto.r3$ID.group), head)
+#' part3 <- aggregate(carto.g3[,"geometry"], by=list(ID.group=carto.g3$ID.group), head)
 #'
-#' if(tmap4){
-#'         tm_shape(carto.r3) +
-#'                 tm_polygons(fill="ID.group",
-#'                             fill.scale=tm_scale(values="brewer.set3"),
-#'                             fill.legend=tm_legend(frame=FALSE)) +
-#'                 tm_shape(part3) + tm_borders(col="black", lwd=2) +
-#'                 tm_title(text="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)")
-#' }else{
-#'         tm_shape(carto.r3) +
-#'                 tm_polygons(col="ID.group") +
-#'                 tm_shape(part3) + tm_borders(col="black", lwd=2) +
-#'                 tm_layout(main.title="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)",
-#'                           main.title.position="center", main.title.size=1,
-#'                           legend.outside=TRUE)
-#' }
+#' tm_shape(carto.g3) +
+#'         tm_polygons(fill="ID.group",
+#'                     fill.scale=tm_scale(values="brewer.set3"),
+#'                     fill.legend=tm_legend(frame=FALSE)) +
+#'         tm_shape(part3) + tm_borders(col="black", lwd=2) +
+#'         tm_title(text="6x4 regular grid (min.size=50, max.size=600, prop.zero=0.5)")
 #' }
 #'
 #' @export
-random_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=1000, prop.zero=NULL, O=NULL){
+grid_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=1000, prop.zero=NULL, O=NULL){
 
         ## Transform 'SpatialPolygonsDataFrame' object to 'sf' class
         carto <- sf::st_as_sf(carto)
@@ -131,11 +106,13 @@ random_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=100
                 while(any(partition.size<min.size)){
                         cat(sprintf("+ Merging small subregions (min.size=%d)\n",min.size))
 
-                        data <- st_set_geometry(carto,NULL)
+                        data <- sf::st_drop_geometry(carto)
                         partition <- stats::aggregate(carto[,"geometry"], list(ID.group=data$ID.group), head)
 
                         pos <- which(partition.size<min.size)
-                        knn.nb <- spdep::knn2nb(spdep::knearneigh(sf::st_centroid(sf::st_geometry(partition), of_largest_polygon=TRUE), k=1))
+                        knn.nb <- suppressWarnings(
+                                spdep::knn2nb(spdep::knearneigh(sf::st_centroid(sf::st_geometry(partition), of_largest_polygon=TRUE), k=1))
+                        )
 
                         for(i in pos){
                                 carto$ID.group[carto$ID.group==i] <- knn.nb[[i]]
@@ -191,7 +168,9 @@ random_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=100
                 it <- 1
                 while(length(pos)>0){
                         cat(sprintf("  -> Iteration %d: %d subregion(s) are been merged\n",it,length(pos)))
-                        knn.nb <- spdep::knn2nb(spdep::knearneigh(sf::st_centroid(sf::st_geometry(partition), of_largest_polygon=TRUE), k=4))
+                        knn.nb <- suppressWarnings(
+                                spdep::knn2nb(spdep::knearneigh(sf::st_centroid(sf::st_geometry(partition), of_largest_polygon=TRUE), k=4))
+                        )
 
                         for(i in pos){
                                 carto$ID.group[carto$ID.group==i] <- as.numeric(names(which.min(partition.size[knn.nb[[i]]])))
@@ -211,4 +190,14 @@ random_partition <- function(carto, rows=3, columns=3, min.size=50, max.size=100
         # carto$ID.group <- as.character(carto$ID.group)
 
         return(carto)
+}
+
+#' Deprecated alias for \code{grid_partition()}
+#'
+#' @param ... Arguments passed to \code{grid_partition()}.
+#'
+#' @export
+random_partition <- function(...) {
+        .Deprecated("grid_partition")
+        grid_partition(...)
 }

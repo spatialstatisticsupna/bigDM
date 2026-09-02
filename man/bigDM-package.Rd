@@ -17,6 +17,8 @@ Below, there is a list with a brief overview of all package functions:
   \code{\link{clustering_partition}} \tab Obtain a spatial partition using the DBSC algorithm \cr
   \code{\link{connect_subgraphs}} \tab Merges disjoint connected subgraphs \cr
   \code{\link{divide_carto}} \tab Divides the spatial domain into subregions \cr
+  \code{\link{grid_partition}} \tab Defines a spatial partition of the spatial domain based on a regular grid \cr
+  \code{\link{kmeans_partition}} \tab Define a random spatial partition of the domain based on k-means clustering of polygon centroids \cr
   \code{\link{MCAR_INLA}} \tab  Fits several spatial multivariate CAR models for high-dimensional count data \cr
   \code{\link{mergeINLA}} \tab Merges \code{inla} objects for partition models \cr
   \code{\link{Mmodel_compute_cor}} \tab Computes between-diseases correlation coefficients for M-models \cr
@@ -24,7 +26,6 @@ Below, there is a list with a brief overview of all package functions:
   \code{\link{Mmodel_icar}} \tab Implements the intrinsic multivariate CAR latent effect \cr
   \code{\link{Mmodel_lcar}} \tab Implements the Leroux et al. (1999) multivariate CAR latent effect \cr
   \code{\link{Mmodel_pcar}} \tab Implements the proper multivariate CAR latent effect \cr
-  \code{\link{random_partition}} \tab Defines a random partition of the spatial domain based on a regular grid \cr
   \code{\link{STCAR_INLA}} \tab Fits several spatio-temporal CAR models for high-dimensional count data \cr
   ----------------------\tab ---------------------------------------------------------------------------------- \cr
   }

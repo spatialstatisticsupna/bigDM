@@ -24,18 +24,10 @@
 #' data(Carto_SpainMUN)
 #'
 #' ## Plot of the grouping variable 'region' ##
-#' tmap4 <- packageVersion("tmap") >= "3.99"
-#'
-#' if(tmap4){
-#'         tm_shape(Carto_SpainMUN) +
-#'                 tm_polygons(fill="region",
-#'                             fill.scale=tm_scale(values="brewer.set3"),
-#'                             fill.legend=tm_legend(frame=FALSE))
-#' }else{
-#'         tm_shape(Carto_SpainMUN) +
-#'                 tm_polygons(col="region") +
-#'                 tm_layout(legend.outside=TRUE)
-#' }
+#' tm_shape(Carto_SpainMUN) +
+#'         tm_polygons(fill="region",
+#'                     fill.scale=tm_scale(values="brewer.set3"),
+#'                     fill.legend=tm_legend(frame=FALSE))
 #'
 #' ## Disjoint partition ##
 #' carto.k0 <- divide_carto(carto=Carto_SpainMUN, ID.group="region", k=0)
