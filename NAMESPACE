@@ -2,6 +2,7 @@
 
 export(CAR_INLA)
 export(MCAR_INLA)
+export(Mmodel_bym2)
 export(Mmodel_compute_cor)
 export(Mmodel_icar)
 export(Mmodel_iid)
@@ -67,3 +68,4 @@ importFrom(stats,sd)
 importFrom(stats,var)
 importFrom(utils,capture.output)
 importFrom(utils,combn)
+importFrom(utils,getFromNamespace)

@@ -22,7 +22,8 @@ Below, there is a list with a brief overview of all package functions:
   \code{\link{MCAR_INLA}} \tab  Fits several spatial multivariate CAR models for high-dimensional count data \cr
   \code{\link{mergeINLA}} \tab Merges \code{inla} objects for partition models \cr
   \code{\link{Mmodel_compute_cor}} \tab Computes between-diseases correlation coefficients for M-models \cr
-  \code{\link{Mmodel_icar}} \tab Implements the spatially non-structured multivariate latent effect \cr
+  \code{\link{Mmodel_bym2}} \tab Implements the BYM2 multivariate latent effect \cr
+  \code{\link{Mmodel_iid}} \tab Implements the spatially non-structured multivariate latent effect \cr
   \code{\link{Mmodel_icar}} \tab Implements the intrinsic multivariate CAR latent effect \cr
   \code{\link{Mmodel_lcar}} \tab Implements the Leroux et al. (1999) multivariate CAR latent effect \cr
   \code{\link{Mmodel_pcar}} \tab Implements the proper multivariate CAR latent effect \cr

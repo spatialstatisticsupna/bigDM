@@ -4,12 +4,14 @@
 \alias{Mmodel_compute_cor}
 \title{Compute correlation coefficients between diseases}
 \usage{
-Mmodel_compute_cor(model, n.sample = 10000)
+Mmodel_compute_cor(model, n.sample = 10000, W = W)
 }
 \arguments{
 \item{model}{object of class \code{inla} fitted using the \code{\link{MCAR_INLA}} function.}
 
 \item{n.sample}{numeric; number of samples to generate from the approximated joint posterior for the hyperparameters (see \code{help(inla.hyperpar.sample)}). Default to 1000.}
+
+\item{W}{binary adjacency matrix of the spatial areal units.}
 }
 \value{
 The input \code{inla} object with two additional elements:

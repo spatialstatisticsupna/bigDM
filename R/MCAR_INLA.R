@@ -3,7 +3,7 @@
 #' @description Fit a spatial multivariate Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{ij}}=\alpha_j + \theta_{ij}, \quad \mbox{for} \quad i=1,\ldots,n; \quad j=1,\ldots,J}
 #' where \eqn{\alpha_j} is a disease-specific intercept and \eqn{\theta_{ij}} is the spatial main effect of area \eqn{i} for the \eqn{j}-th disease.
 #' Following \insertCite{botella2015unifying;textual}{bigDM}, we rearrange the spatial effects into the matrix \eqn{\mathbf{\Theta} = \{ \theta_{ij}: i=1, \ldots, I; j=1, \ldots, J \}} whose columns are spatial random effects and its joint distribution specifies how dependence within-diseases and between-diseases is defined.
-#' Several conditional autoregressive (CAR) prior distributions can be specified to deal with spatial dependence within-diseases, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the proper CAR prior distribution.
+#' Several conditional autoregressive (CAR) prior distributions can be specified to deal with spatial dependence within-diseases, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2 \insertCite{riebler2016intuitive}{bigDM}, and the proper CAR prior distribution.
 #' \cr\cr
 #' As in the \code{\link{CAR_INLA}} function, three main modelling approaches can be considered:
 #' \itemize{
@@ -43,7 +43,7 @@
 #' @param O character; name of the variable that contains the observed number of cases for each areal unit and disease.
 #' @param E character; name of the variable that contains either the expected number of cases or the population at risk for each areal unit and disease.
 #' @param W optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).
-#' @param prior one of either \code{"intrinsic"} (default), \code{"Leroux"}, \code{"proper"}, or \code{"iid"} which specifies the prior distribution considered for the spatial random effect.
+#' @param prior one of either \code{"intrinsic"} (default), \code{"Leroux"}, \code{"BYM2"}, \code{"proper"}, or \code{"iid"} which specifies the prior distribution considered for the spatial random effect.
 #' @param model one of either \code{"global"} or \code{"partition"} (default), which specifies the \emph{Global model} or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}, respectively).
 #' @param k numeric value with the neighbourhood order used for the partition model. Usually k=2 or 3 is enough to get good results. If k=0 (default) the \emph{Disjoint model} is considered. Only required if \code{model="partition"}.
 #' @param strategy one of either \code{"gaussian"}, \code{"simplified.laplace"} (default), \code{"laplace"} or \code{"adaptive"}, which specifies the approximation strategy considered in the \code{inla} function.
@@ -133,7 +133,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       stop("the 'O' argument is missing")
     if(is.null(E))
       stop("the 'E' argument is missing")
-    if(!(prior %in% c("intrinsic","Leroux","proper","iid")))
+    if(!(prior %in% c("intrinsic","Leroux","BYM2","proper","iid")))
       stop("invalid 'prior' argument")
     if(!(model %in% c("global","partition")))
       stop("invalid 'model' argument")
@@ -223,6 +223,9 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
       if(prior=="Leroux"){
         Mmodel <- INLA::inla.rgeneric.define(Mmodel_lcar, debug=FALSE, J=J, W=W, initial.values=initial.values, alpha.min=0, alpha.max=1)
       }
+      if(prior=="BYM2"){
+        Mmodel <- INLA::inla.rgeneric.define(Mmodel_bym2, debug=FALSE, J=J, W=W, initial.values=initial.values, alpha.min=0, alpha.max=1)
+      }
       if(prior=="proper"){
         Mmodel <- INLA::inla.rgeneric.define(Mmodel_pcar, debug=FALSE, J=J, W=W, initial.values=initial.values, alpha.min=0, alpha.max=1)
       }
@@ -237,7 +240,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
 
       models$Mmodel <- list(model=model, prior=prior)
 
-      Mmodel.compute <- Mmodel_compute_cor(models, n.sample=1000)
+      Mmodel.compute <- Mmodel_compute_cor(models, n.sample=1000, W=W)
       models$summary.cor <- Mmodel.compute$summary.cor
       models$marginals.cor <- Mmodel.compute$marginals.cor
       models$summary.var <- Mmodel.compute$summary.var
@@ -372,6 +375,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
 #'
 #' @param model object of class \code{inla} fitted using the \code{\link{MCAR_INLA}} function.
 #' @param n.sample numeric; number of samples to generate from the approximated joint posterior for the hyperparameters (see \code{help(inla.hyperpar.sample)}). Default to 1000.
+#' @param W binary adjacency matrix of the spatial areal units.
 #'
 #' @return The input \code{inla} object with two additional elements:
 #' \item{\code{summary.cor}}{A data.frame containing the mean, standard deviation, quantiles and mode of the correlation coefficients between diseases.}
@@ -380,7 +384,7 @@ MCAR_INLA <- function(carto=NULL, data=NULL, ID.area=NULL, ID.disease=NULL, ID.g
 #' \item{\code{marginals.var}}{A list containing the posterior marginal densities of the variances for each disease.}
 #'
 #' @export
-Mmodel_compute_cor <- function(model, n.sample=10000){
+Mmodel_compute_cor <- function(model, n.sample=10000, W=W){
 
   if(suppressPackageStartupMessages(requireNamespace("INLA", quietly=TRUE))){
 
@@ -399,10 +403,18 @@ Mmodel_compute_cor <- function(model, n.sample=10000){
         hyperpar.sample <- split(hyperpar.sample[,seq(1+J,J+J*(J+1)/2)], seq(nrow(hyperpar.sample)))
       }
 
+      if(model$Mmodel$prior=="BYM2"){
+        DW <- Matrix::Diagonal(x=colSums(W))-W
+        var.scale <- exp(mean(log(inla.ginv.diag(DW))))
+      }
+
       param.sample <- lapply(hyperpar.sample, function(x){
         N <- diag(x[seq(J)])
         N[lower.tri(N, diag=FALSE)] <- x[-seq(J)]
         Sigma <- N %*% t(N)
+
+        if(model$Mmodel$prior=="BYM2") Sigma <- Sigma/var.scale
+
         Rho <- cov2cor(Sigma)
         Rho.values <- Rho[lower.tri(Rho)]
 
@@ -483,6 +495,53 @@ compute_summary <- function(marginal,cdf=0){
         }
 
         return(aux)
+}
+
+##################################################################################
+## INLA-based function for computing marginal variances from a precision matrix ##
+## i.e, diagonal elements of the Moore-Penrose inverse                          ##
+##################################################################################
+inla.ginv.diag <- function(Q, constr = NULL, eps = sqrt(.Machine$double.eps)) {
+
+        marg.var <- rep(0, nrow(Q))
+        Q <- INLA::inla.as.sparse(Q)
+        g <- INLA::inla.read.graph(Q)
+
+        if(is.null(constr)) constr <- list(A=matrix(1,1,nrow(Q)), e=0)
+
+        for (k in seq_len(g$cc$n)) {
+                i <- g$cc$nodes[[k]]
+                n <- length(i)
+                QQ <- Q[i, i, drop = FALSE]
+                if (n == 1) {
+                        QQ[1, 1] <- 1
+                        marg.var[i] <- 1
+                }
+                else {
+                        cconstr <- constr
+                        if (!is.null(constr)) {
+                                cconstr$A <- constr$A[, i, drop = FALSE]
+                                eeps <- eps
+                        }
+                        else {
+                                eeps <- 0
+                        }
+                        idx.zero <- which(rowSums(abs(cconstr$A)) == 0)
+                        if (length(idx.zero) > 0) {
+                                cconstr$A <- cconstr$A[-idx.zero, , drop = FALSE]
+                                cconstr$e <- cconstr$e[-idx.zero]
+                        }
+                        res <- INLA::inla.qinv(QQ + Matrix::Diagonal(n) * max(diag(QQ)) * eeps, constr = cconstr)
+
+                        # fac <- exp(mean(log(diag(res))))
+                        # QQ <- fac * QQ
+                        # marg.var[i] <- diag(res)/fac
+
+                        marg.var[i] <- diag(res)
+                }
+                Q[i,i] <- QQ
+        }
+        return(marg.var)
 }
 
 # utils::globalVariables(c("combn"))

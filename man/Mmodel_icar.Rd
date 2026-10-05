@@ -23,7 +23,8 @@ M-model implementation of the intrinsic multivariate CAR latent effect using the
 \details{
 This function considers an intrinsic CAR prior for the spatial latent effects of the different diseases and introduces correlation between them using the M-model proposal of \insertCite{botella2015unifying;textual}{bigDM}.
 Putting the spatial latent effects for each disease in a matrix, the between disease dependence is introduced through the M matrix as \eqn{\Theta=\Phi M}, where the columns of \eqn{\Phi} follow an intrinsic CAR prior distribution (within-disease correlation).
-A Wishart prior for the between covariance matrix \eqn{M'M} is considered using the Bartlett decomposition.
+A Wishart prior for the between covariance matrix \eqn{\Sigma=M'M} is considered using the Bartlett decomposition.
+The joint precision matrix of the spatial latent effects is given by \eqn{Q=\Sigma^{-1}\otimes Q_{\mathrm{iCAR}}}, where \eqn{Q_{\mathrm{iCAR}}} denotes the intrinsic CAR precision matrix.
 \cr\cr
 The following arguments are required to be defined before calling the functions:
 \itemize{
@@ -34,4 +35,7 @@ The following arguments are required to be defined before calling the functions:
 }
 \references{
 \insertRef{botella2015unifying}{bigDM}
+}
+\seealso{
+\code{\link{Mmodel_bym2}}, \code{\link{Mmodel_lcar}} and \code{\link{Mmodel_pcar}} for alternative multivariate CAR prior distributions.
 }

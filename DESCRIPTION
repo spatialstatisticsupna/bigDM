@@ -2,7 +2,7 @@ Package: bigDM
 Type: Package
 Title: Scalable Bayesian Disease Mapping Models for High-Dimensional Data
 Version: 0.5.9
-Date: 2026-09-02
+Date: 2026-10-05
 Authors@R: 
   c(person(given = "Aritz",
            family = "Adin",
@@ -22,7 +22,7 @@ Maintainer: Aritz Adin <aritz.adin@unavarra.es>
 Description: Implements several spatial and spatio-temporal scalable disease mapping models for high-dimensional count data using the INLA technique for approximate Bayesian inference in latent Gaussian models (Orozco-Acosta et al., 2021 <doi:10.1016/j.spasta.2021.100496>; Orozco-Acosta et al., 2023 <doi:10.1016/j.cmpb.2023.107403> and Vicente et al., 2023 <doi:10.1007/s11222-023-10263-x>). The creation and develpment of this package has been supported by Project MTM2017-82553-R (AEI/FEDER, UE) and Project PID2020-113125RB-I00/MCIN/AEI/10.13039/501100011033. It has also been partially funded by the Public University of Navarra (project PJUPNA2001).
 URL: https://github.com/spatialstatisticsupna/bigDM
 BugReports: https://github.com/spatialstatisticsupna/bigDM/issues
-Depends: R (>= 4.0.0)
+Depends: R (>= 4.1.0)
 Additional_repositories: https://inla.r-inla-download.org/R/stable
 Imports: crayon, doParallel, fastDummies, foreach, future, future.apply, geos, MASS, Matrix, methods, parallel, parallelly, RColorBrewer, Rdpack, sf, spatialreg, spdep, stats, utils, rlist
 Suggests: bookdown, INLA (>= 22.12.16), knitr, rmarkdown, testthat (>= 3.0.0), tmap

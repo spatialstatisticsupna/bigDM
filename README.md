@@ -33,6 +33,7 @@ Below, there is a list with a brief overview of all package functions:
 * ```MCAR_INLA``` Fits several spatial multivariate CAR models for high-dimensional count data.
 * ```mergeINLA``` Merges inla objects for partition models.
 * ```Mmodel_compute_cor``` Computes between-disease correlation coefficients for M-models.
+* ```Mmodel_bym2``` Implements the BYM2 multivariate latent effect.
 * ```Mmodel_idd``` Implements the spatially non-structured multivariate latent effect.
 * ```Mmodel_icar``` Implements the intrinsic multivariate latent effect.
 * ```Mmodel_lcar``` Implements the Leroux et al. (1999) multivariate latent effect.
@@ -93,7 +94,8 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.9__ (2026 Sep 02)
+__Changes in version 0.5.9__ (2026 Oct 05)
+* BYM2 included as spatial prior for the `MCAR_INLA()` function
 * new `kmeans_partition()` function 
 * `random_partition()` has been renamed to `grid_partition()`
 

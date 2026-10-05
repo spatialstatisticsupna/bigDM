@@ -6,6 +6,8 @@
 #' Putting the spatial latent effects for each disease in a matrix, the between disease dependence is introduced through the M matrix as \eqn{\Theta=\Phi M}, where the columns of \eqn{\Phi} follow a pCAR prior distribution (within-disease correlation).
 #' A Wishart prior for the between covariance matrix \eqn{M'M} is considered using the Bartlett decomposition.
 #' Uniform prior distributions on the interval [\code{alpha.min}, \code{alpha.max}] are considered for all the spatial autocorrelation parameters.
+#' The joint precision matrix of the spatial latent effects is given by \deqn{Q=(M^{-1} \otimes I_n)\operatorname{bdiag}(Q_1,\ldots,Q_J)(M^{-1}\otimes I_n)^\top,}
+#' where \eqn{Q_j} denotes the proper CAR precision matrix for disease \eqn{j} and \eqn{n} is the number of spatial areas.
 #' \cr\cr
 #' The following arguments are required to be defined before calling the functions:
 #' \itemize{
@@ -28,6 +30,8 @@
 #'
 #' @import Matrix
 #'
+#' @seealso
+#' \code{\link{Mmodel_bym2}}, \code{\link{Mmodel_icar}} and \code{\link{Mmodel_lcar}} for alternative multivariate CAR prior distributions.
 #'
 #' @export
 ########################################################################

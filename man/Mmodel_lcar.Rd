@@ -21,10 +21,12 @@ This is used internally by the \code{INLA::inla.rgeneric.define()} function.
 M-model implementation of the Leroux et al. (1999) multivariate CAR latent effect with different spatial smoothing parameters using the \code{rgeneric} model of INLA.
 }
 \details{
-This function considers a Leroux et al. (1999) CAR prior (denoted as LCAR) for the spatial latent effects of the different diseases and introduces correlation between them using the M-model proposal of \insertCite{botella2015unifying;textual}{bigDM}.
+This function considers a \insertCite{leroux1999estimation;textual}{bigDM} CAR prior (denoted as LCAR) for the spatial latent effects of the different diseases and introduces correlation between them using the M-model proposal of \insertCite{botella2015unifying;textual}{bigDM}.
 Putting the spatial latent effects for each disease in a matrix, the between disease dependence is introduced through the M matrix as \eqn{\Theta=\Phi M}, where the columns of \eqn{\Phi} follow a LCAR prior distribution (within-disease correlation).
 A Wishart prior for the between covariance matrix \eqn{M'M} is considered using the Bartlett decomposition.
 Uniform prior distributions on the interval [\code{alpha.min}, \code{alpha.max}] are considered for all the spatial smoothing parameters.
+The joint precision matrix of the spatial latent effects is given by \deqn{Q=(M^{-1} \otimes I_n)\operatorname{bdiag}(Q_1,\ldots,Q_J)(M^{-1}\otimes I_n)^\top,}
+where \eqn{Q_j} denotes the LCAR precision matrix for disease \eqn{j} and \eqn{n} is the number of spatial areas.
 \cr\cr
 The following arguments are required to be defined before calling the functions:
 \itemize{
@@ -42,4 +44,7 @@ The M-model implementation of this model using R-INLA requires the use of \eqn{J
 \insertRef{botella2015unifying}{bigDM}
 
 \insertRef{leroux1999estimation}{bigDM}
+}
+\seealso{
+\code{\link{Mmodel_bym2}}, \code{\link{Mmodel_icar}} and \code{\link{Mmodel_pcar}} for alternative multivariate CAR prior distributions.
 }

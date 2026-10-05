@@ -46,7 +46,7 @@ MCAR_INLA(
 
 \item{W}{optional argument with the binary adjacency matrix of the spatial areal units. If \code{NULL} (default), this object is computed from the \code{carto} argument (two areas are considered as neighbours if they share a common border).}
 
-\item{prior}{one of either \code{"intrinsic"} (default), \code{"Leroux"}, \code{"proper"}, or \code{"iid"} which specifies the prior distribution considered for the spatial random effect.}
+\item{prior}{one of either \code{"intrinsic"} (default), \code{"Leroux"}, \code{"BYM2"}, \code{"proper"}, or \code{"iid"} which specifies the prior distribution considered for the spatial random effect.}
 
 \item{model}{one of either \code{"global"} or \code{"partition"} (default), which specifies the \emph{Global model} or one of the scalable model proposal's (\emph{Disjoint model} and \emph{k-order neighbourhood model}, respectively).}
 
@@ -82,7 +82,7 @@ This function returns an object of class \code{inla}. See the \code{\link{mergeI
 Fit a spatial multivariate Poisson mixed model to areal count data. The linear predictor is modelled as \deqn{\log{r_{ij}}=\alpha_j + \theta_{ij}, \quad \mbox{for} \quad i=1,\ldots,n; \quad j=1,\ldots,J}
 where \eqn{\alpha_j} is a disease-specific intercept and \eqn{\theta_{ij}} is the spatial main effect of area \eqn{i} for the \eqn{j}-th disease.
 Following \insertCite{botella2015unifying;textual}{bigDM}, we rearrange the spatial effects into the matrix \eqn{\mathbf{\Theta} = \{ \theta_{ij}: i=1, \ldots, I; j=1, \ldots, J \}} whose columns are spatial random effects and its joint distribution specifies how dependence within-diseases and between-diseases is defined.
-Several conditional autoregressive (CAR) prior distributions can be specified to deal with spatial dependence within-diseases, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, and the proper CAR prior distribution.
+Several conditional autoregressive (CAR) prior distributions can be specified to deal with spatial dependence within-diseases, such as the intrinsic CAR prior \insertCite{besag1991}{bigDM}, the CAR prior proposed by \insertCite{leroux1999estimation;textual}{bigDM}, the reparameterization of the BYM model given by \insertCite{dean2001detecting;textual}{bigDM} named BYM2 \insertCite{riebler2016intuitive}{bigDM}, and the proper CAR prior distribution.
 \cr\cr
 As in the \code{\link{CAR_INLA}} function, three main modelling approaches can be considered:
 \itemize{
