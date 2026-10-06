@@ -94,7 +94,7 @@ When using this package, please cite the following papers:
 ```
 news(package="bigDM")
 ```
-__Changes in version 0.5.9__ (2026 Oct 05)
+__Changes in version 0.5.9__ (2026 Oct 06)
 * BYM2 included as spatial prior for the `MCAR_INLA()` function
 * new `kmeans_partition()` function 
 * `random_partition()` has been renamed to `grid_partition()`
